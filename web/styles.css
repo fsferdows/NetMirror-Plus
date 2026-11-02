@@ -839,7 +839,7 @@ body {
   gap: 16px;
   overflow-x: auto;
   scroll-behavior: smooth;
-  padding: 8px 4px 18px;
+  padding: 8px 12px 20px;
   scrollbar-width: none;
 }
 .rail-carousel::-webkit-scrollbar {
@@ -848,37 +848,52 @@ body {
 
 .rail-nav-btn {
   position: absolute;
-  top: calc(50% - 10px);
-  transform: translateY(-50%);
-  width: 42px;
-  height: 80px;
-  background: rgba(10, 14, 26, 0.85);
-  border: 1px solid var(--border-subtle);
+  top: 0;
+  bottom: 20px;
+  width: 52px;
+  background: transparent;
+  border: none;
   color: #fff;
-  font-size: 26px;
+  font-size: 32px;
+  font-weight: 300;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 10;
-  border-radius: var(--radius-sm);
-  backdrop-filter: blur(12px);
   opacity: 0;
-  transition: opacity var(--transition-fast), background var(--transition-fast);
+  transition: opacity var(--transition-fast), background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
 }
 
 .rail-carousel-wrapper:hover .rail-nav-btn {
-  opacity: 1;
-}
-.rail-nav-btn:hover {
-  background: rgba(229, 9, 20, 0.85);
+  opacity: 0.9;
 }
 
 .rail-prev {
   left: 0;
+  background: linear-gradient(90deg, rgba(6, 9, 20, 0.96) 0%, rgba(6, 9, 20, 0.65) 65%, transparent 100%);
+  border-top-left-radius: var(--radius-md);
+  border-bottom-left-radius: var(--radius-md);
 }
+
 .rail-next {
   right: 0;
+  background: linear-gradient(270deg, rgba(6, 9, 20, 0.96) 0%, rgba(6, 9, 20, 0.65) 65%, transparent 100%);
+  border-top-right-radius: var(--radius-md);
+  border-bottom-right-radius: var(--radius-md);
+}
+
+.rail-nav-btn:hover {
+  opacity: 1 !important;
+  color: var(--red);
+  transform: scale(1.08);
+}
+
+.rail-prev:hover {
+  background: linear-gradient(90deg, rgba(229, 9, 20, 0.4) 0%, rgba(6, 9, 20, 0.8) 60%, transparent 100%);
+}
+.rail-next:hover {
+  background: linear-gradient(270deg, rgba(229, 9, 20, 0.4) 0%, rgba(6, 9, 20, 0.8) 60%, transparent 100%);
 }
 
 /* Movie Card */
@@ -1003,9 +1018,12 @@ body {
   font-size: 13px;
   font-weight: 600;
   color: #fff;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.35;
+  min-height: 2.7em;
 }
 
 .card-meta {
@@ -1013,6 +1031,7 @@ body {
   align-items: center;
   justify-content: space-between;
   font-size: 11px;
+  font-weight: 500;
   color: var(--text-muted);
 }
 

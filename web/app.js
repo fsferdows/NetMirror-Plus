@@ -232,6 +232,40 @@
   }
 
   // ==========================================================================
+  // TITLE CLEANING & DEDUPLICATION HELPERS
+  // ==========================================================================
+  function cleanDisplayTitle(title) {
+    if (!title) return '';
+    return title
+      .replace(/&amp;/g, '&')
+      .replace(/&#039;/g, "'")
+      .replace(/&quot;/g, '"')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/\[.*?\]/g, '')
+      .replace(/\(.*?\)/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function getCanonicalKey(item) {
+    if (!item) return '';
+    const title = item.title || '';
+    return title
+      .replace(/&amp;/g, '&')
+      .replace(/&#039;/g, "'")
+      .replace(/&quot;/g, '"')
+      .replace(/\[.*?\]/g, '')
+      .replace(/\(.*?\)/g, '')
+      .replace(/\bS\d+(-S\d+)?\b/gi, '')
+      .replace(/\bSeason\s*\d+\b/gi, '')
+      .replace(/\b(Hindi|English|Tamil|Telugu|Kannada|Malayalam|Bengali|Dubbed|Multi|Dual\s*Audio)\b/gi, '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '');
+  }
+
+  // ==========================================================================
   // INITIALIZATION & DATA FETCHING
   // ==========================================================================
   async function init() {
@@ -242,13 +276,28 @@
 
   async function fetchBrowseData() {
     try {
-      const res = await fetch('/api/browse');
+      const res = await fetch('/api/browse?_t=' + Date.now());
       if (!res.ok) throw new Error('Failed to load browse data');
       const data = await res.json();
 
+      const globalSeen = new Set();
+      function filterUnique(list, max = 14) {
+        const out = [];
+        for (const item of (list || [])) {
+          if (!item || !item.id) continue;
+          const k = getCanonicalKey(item);
+          if (k && globalSeen.has(k)) continue;
+          if (k) globalSeen.add(k);
+          out.push(item);
+          if (out.length >= max) break;
+        }
+        return out;
+      }
+
       // Multi-slide Hero Setup
-      if (data.hero_slides && data.hero_slides.length) {
-        state.heroSlides = data.hero_slides;
+      const heroSlides = filterUnique(data.hero_slides || [], 5);
+      if (heroSlides.length) {
+        state.heroSlides = heroSlides;
         state.heroCurrentIndex = 0;
         setHero(state.heroSlides[0]);
         renderHeroIndicators();
@@ -257,25 +306,20 @@
         setHero(data.hero);
       }
 
-      // Rails
-      if (data.trending && data.trending.length) {
-        renderCarousel(el.trendingCarousel, data.trending);
-      }
-      if (data.netflix && data.netflix.length && el.netflixCarousel) {
-        renderCarousel(el.netflixCarousel, data.netflix);
-      }
-      if (data.prime && data.prime.length && el.primeCarousel) {
-        renderCarousel(el.primeCarousel, data.prime);
-      }
-      if (data.disney && data.disney.length && el.disneyCarousel) {
-        renderCarousel(el.disneyCarousel, data.disney);
-      }
-      if (data.movies && data.movies.length) {
-        renderCarousel(el.moviesCarousel, data.movies);
-      }
-      if (data.series && data.series.length) {
-        renderCarousel(el.seriesCarousel, data.series);
-      }
+      // Rails with global deduplication across sections
+      const trending = filterUnique(data.trending || [], 14);
+      const netflix = filterUnique(data.netflix || [], 14);
+      const prime = filterUnique(data.prime || [], 14);
+      const disney = filterUnique(data.disney || [], 14);
+      const movies = filterUnique(data.movies || [], 14);
+      const series = filterUnique(data.series || [], 14);
+
+      if (trending.length && el.trendingCarousel) renderCarousel(el.trendingCarousel, trending);
+      if (netflix.length && el.netflixCarousel) renderCarousel(el.netflixCarousel, netflix);
+      if (prime.length && el.primeCarousel) renderCarousel(el.primeCarousel, prime);
+      if (disney.length && el.disneyCarousel) renderCarousel(el.disneyCarousel, disney);
+      if (movies.length && el.moviesCarousel) renderCarousel(el.moviesCarousel, movies);
+      if (series.length && el.seriesCarousel) renderCarousel(el.seriesCarousel, series);
     } catch (err) {
       console.error(err);
       showToast('Error connecting to MovieBox service. Retrying...');
@@ -285,7 +329,8 @@
   function setHero(item) {
     if (!item) return;
     state.heroItem = item;
-    const poster = item.poster_url || fallbackPoster(item.title);
+    const title = cleanDisplayTitle(item.title);
+    const poster = item.poster_url || fallbackPoster(title);
     
     // Smooth transition
     el.heroBackdrop.style.opacity = '0.3';
@@ -294,12 +339,12 @@
       el.heroBackdrop.style.opacity = '1';
     }, 150);
 
-    el.heroTitle.textContent = item.title;
+    el.heroTitle.textContent = title;
     el.heroYear.textContent = item.year || '2026';
     el.heroMediaType.textContent = item.media_type === 'series' ? 'TV SERIES' : 'MOVIE';
     el.heroRating.textContent = '⭐ 8.7';
     el.heroSynopsis.textContent =
-      `Stream ${item.title} directly in your browser in high definition with multi-audio and subtitles.`;
+      `Stream ${title} directly in your browser in high definition with multi-audio and subtitles.`;
 
     updateHeroFavBtn();
   }
@@ -366,18 +411,26 @@
   // CAROUSEL & CARDS RENDERING
   // ==========================================================================
   function renderCarousel(container, items) {
+    if (!container) return;
     container.innerHTML = '';
-    items.forEach((item, index) => {
-      const card = createMovieCard(item, index);
+    const seen = new Set();
+    let index = 0;
+    (items || []).forEach((item) => {
+      if (!item || !item.id) return;
+      const key = getCanonicalKey(item);
+      if (key && seen.has(key)) return;
+      if (key) seen.add(key);
+      const card = createMovieCard(item, index++);
       container.appendChild(card);
     });
   }
 
-  function createMovieCard(item, index) {
+  function createMovieCard(item, index = 0) {
     const card = document.createElement('div');
     card.className = 'movie-card';
 
-    const poster = item.poster_url || fallbackPoster(item.title);
+    const displayTitle = cleanDisplayTitle(item.title);
+    const poster = item.poster_url || fallbackPoster(displayTitle);
     const mediaTypeLabel = item.media_type === 'series' ? 'SERIES' : 'MOVIE';
     const year = item.year || '';
 
@@ -389,7 +442,7 @@
 
     card.innerHTML = `
       <div class="poster-wrap">
-        <img class="poster-img" src="${poster}" alt="${item.title}" loading="lazy" onerror="this.src='${fallbackPoster(item.title)}'" />
+        <img class="poster-img" src="${poster}" alt="${displayTitle}" loading="lazy" onerror="this.src='${fallbackPoster(displayTitle)}'" />
         <span class="card-badge-type">${mediaTypeLabel}</span>
         <span class="card-badge-rating">⭐ 8.${(index % 4) + 5}</span>
         <div class="card-play-overlay">
@@ -400,7 +453,7 @@
         ${progressPercent > 0 ? `<div class="card-progress-bar"><div class="card-progress-fill" style="width: ${progressPercent}%;"></div></div>` : ''}
       </div>
       <div class="card-info">
-        <span class="card-title" title="${item.title}">${item.title}</span>
+        <span class="card-title" title="${displayTitle}">${displayTitle}</span>
         <div class="card-meta">
           <span>${year}</span>
           <span>${mediaTypeLabel}</span>
@@ -458,10 +511,11 @@
       const details = await res.json();
       state.currentDetails = details;
 
-      const poster = details.poster_url || fallbackPoster(details.title);
+      const displayTitle = cleanDisplayTitle(details.title);
+      const poster = details.poster_url || fallbackPoster(displayTitle);
       el.modalPoster.src = poster;
       el.modalHeroBg.style.backgroundImage = `url('${poster}')`;
-      el.modalTitle.textContent = details.title;
+      el.modalTitle.textContent = displayTitle;
       el.modalTagline.textContent = details.tagline || '';
       el.modalYear.textContent = details.year || '2025';
       el.modalDuration.textContent = details.duration || 'Full Feature';
@@ -1089,7 +1143,16 @@
 
   function renderSuggestions(query, suggestions, searchResults) {
     el.suggestionsPopover.innerHTML = '';
-    const items = searchResults.slice(0, 5);
+    const seen = new Set();
+    const items = [];
+    for (const item of (searchResults || [])) {
+      if (!item || !item.id) continue;
+      const k = getCanonicalKey(item);
+      if (k && seen.has(k)) continue;
+      if (k) seen.add(k);
+      items.push(item);
+      if (items.length >= 6) break;
+    }
 
     if (items.length === 0 && (!suggestions || suggestions.length === 0)) {
       el.suggestionsPopover.classList.add('hidden');
@@ -1099,11 +1162,12 @@
     items.forEach((item) => {
       const div = document.createElement('div');
       div.className = 'suggestion-item';
-      const poster = item.poster_url || fallbackPoster(item.title);
+      const title = cleanDisplayTitle(item.title);
+      const poster = item.poster_url || fallbackPoster(title);
       div.innerHTML = `
-        <img class="suggestion-poster" src="${poster}" alt="" onerror="this.src='${fallbackPoster(item.title)}'"/>
+        <img class="suggestion-poster" src="${poster}" alt="" onerror="this.src='${fallbackPoster(title)}'"/>
         <div style="flex:1;min-width:0;">
-          <div class="suggestion-title">${item.title}</div>
+          <div class="suggestion-title">${title}</div>
           <div class="suggestion-meta">${item.year || ''} • ${item.media_type === 'series' ? 'Series' : 'Movie'}</div>
         </div>
       `;
@@ -1271,10 +1335,21 @@
         el.platformTitle.textContent = data.display_name;
       }
 
+      const rawIncoming = (data.items || []);
+      const seen = new Set((append ? state.platformItems : []).map(getCanonicalKey));
+      const uniqueIncoming = [];
+      for (const item of rawIncoming) {
+        if (!item || !item.id) continue;
+        const k = getCanonicalKey(item);
+        if (k && seen.has(k)) continue;
+        if (k) seen.add(k);
+        uniqueIncoming.push(item);
+      }
+
       if (append) {
-        state.platformItems.push(...data.items);
+        state.platformItems.push(...uniqueIncoming);
       } else {
-        state.platformItems = data.items;
+        state.platformItems = uniqueIncoming;
         if (el.platformGrid) el.platformGrid.innerHTML = '';
       }
 
@@ -1285,8 +1360,8 @@
         if (el.platformLoadMoreBtn) el.platformLoadMoreBtn.classList.add('hidden');
       } else {
         if (!append && el.platformGrid) el.platformGrid.innerHTML = '';
-        data.items.forEach((item, index) => {
-          const card = createMovieCard(item, index);
+        uniqueIncoming.forEach((item, index) => {
+          const card = createMovieCard(item, (append ? state.platformItems.length - uniqueIncoming.length : 0) + index);
           if (el.platformGrid) el.platformGrid.appendChild(card);
         });
 
@@ -1354,7 +1429,12 @@
 
   function renderGridItems(items) {
     el.mediaGrid.innerHTML = '';
-    const filtered = items.filter((item) => {
+    const seen = new Set();
+    const filtered = (items || []).filter((item) => {
+      if (!item || !item.id) return false;
+      const k = getCanonicalKey(item);
+      if (k && seen.has(k)) return false;
+      if (k) seen.add(k);
       if (state.activeFilter === 'movie') return item.media_type === 'movie';
       if (state.activeFilter === 'series') return item.media_type === 'series';
       return true;

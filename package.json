@@ -6,7 +6,10 @@
   "scripts": {
     "start": "cargo run --release --bin moviebox_web",
     "dev": "cargo run --bin moviebox_web",
-    "build": "cargo build --release --bin moviebox_web"
+    "build": "cargo build --release --bin moviebox_web",
+    "netlify:build": "netlify build",
+    "netlify:deploy": "netlify deploy",
+    "netlify:prod": "netlify deploy --prod"
   },
   "keywords": [
     "moviebox",

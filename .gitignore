@@ -22,3 +22,5 @@ dist/
 book/
 docs/changelog.md
 docs/contributing.md
+# Local Netlify folder
+.netlify

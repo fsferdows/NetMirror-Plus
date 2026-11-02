@@ -7,10 +7,16 @@
 [![Rust](https://img.shields.io/badge/rust-2024%20edition-orange.svg?logo=rust)](https://www.rust-lang.org/)
 [![Axum](https://img.shields.io/badge/axum-0.8-blue.svg)](https://github.com/tokio-rs/axum)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/f13b6aec-1061-4d39-bf41-f5f9c871096c/deploy-status)](https://app.netlify.com/projects/netmirror-plus/deploys)
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/new)
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/fsferdows/NetMirror-Plus)
 
 </div>
+
+---
+
+> 🚀 **Live Demo on Netlify**: [https://netmirror-plus.netlify.app](https://netmirror-plus.netlify.app)
 
 ---
 

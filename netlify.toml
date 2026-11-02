@@ -1,0 +1,39 @@
+# ==============================================================================
+# NetMirror Plus - Netlify Configuration
+# ==============================================================================
+
+[build]
+  publish = "web"
+  command = "echo 'NetMirror Plus static build ready'"
+
+# Cache headers for static assets
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Access-Control-Allow-Origin = "*"
+
+[[headers]]
+  for = "/styles.css"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/app.js"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+# Transparent API proxy to backend
+# Configure BACKEND_URL in Netlify environment or fallback to production backend
+[[redirects]]
+  from = "/api/*"
+  to = "https://netmirror-plus.onrender.com/api/:splat"
+  status = 200
+  force = false
+
+# Single Page Application router fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

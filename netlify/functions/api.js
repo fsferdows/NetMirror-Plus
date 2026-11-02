@@ -180,6 +180,54 @@ async function resolveImdbId(title, yearHint) {
 let sportsCache = null;
 let sportsCacheTime = 0;
 
+async function handleSportsStream(params) {
+  const channelName = params.name || params.channel || "Sky Sports Cricket FHD UK";
+  const targetUrl = `https://cdnlivetv.tv/api/v1/channels/player/?name=${encodeURIComponent(channelName)}&code=&user=cdnlivetv&plan=free`;
+
+  try {
+    const res = await fetch(targetUrl, {
+      headers: {
+        "User-Agent": USER_AGENT,
+        "Referer": "https://cdnlivetv.tv/"
+      }
+    });
+
+    if (!res.ok) {
+      return {
+        statusCode: 200,
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Access-Control-Allow-Origin": "*"
+        },
+        body: `<html><body style="background:#0a0e17;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;text-align:center;"><div><h2>📡 Live Broadcast Connecting...</h2><p style="color:#8899a6;margin-top:8px;">Stream ${channelName} is initializing. Please refresh in a few moments.</p></div></body></html>`
+      };
+    }
+
+    let html = await res.text();
+    // Bypass sandbox iframe blocking
+    html = html.replace(/\/\/ Sandbox iframe detection[\s\S]*?\}\)\(\);/, '/* sandbox bypassed */');
+
+    return {
+      statusCode: 200,
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache, no-store, must-revalidate"
+      },
+      body: html
+    };
+  } catch (err) {
+    return {
+      statusCode: 200,
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Access-Control-Allow-Origin": "*"
+      },
+      body: `<html><body style="background:#0a0e17;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;text-align:center;"><div><h2>⚠️ Stream Connection Error</h2><p style="color:#8899a6;margin-top:8px;">${err.message}</p></div></body></html>`
+    };
+  }
+}
+
 async function handleSports(params) {
   const now = Date.now();
   if (sportsCache && (now - sportsCacheTime < 60000)) {
@@ -229,11 +277,14 @@ async function handleSports(params) {
           time: ev.time || "",
           status: ev.status === "LIVE" ? "live" : (ev.status === "FT" ? "ended" : "upcoming"),
           has_stream: hasChannels,
-          channels: (ev.channels || []).map((ch, idx) => ({
-            id: ch.id || String(idx),
-            name: ch.channel_name || `Server ${idx + 1}`,
-            url: ch.url
-          }))
+          channels: (ev.channels || []).map((ch, idx) => {
+            const chName = ch.channel_name || `Server ${idx + 1}`;
+            return {
+              id: ch.id || String(idx),
+              name: chName,
+              url: `/api/sports-stream?name=${encodeURIComponent(chName)}`
+            };
+          })
         });
       }
     }
@@ -249,13 +300,32 @@ async function handleSports(params) {
 
     const rawChannels = channelsRes?.channels || [];
     const sportsTvChannels = rawChannels
-      .filter(c => /sport|espn|tnt|bein|sky|fox|dazn|nba|nfl|mlb|nhl|cricket|tennis|golf|wwe/i.test(c.name))
-      .slice(0, 60)
+      .filter(c => /sport|espn|tnt|bein|sky|fox|dazn|nba|nfl|mlb|nhl|cricket|tennis|golf|wwe|willow|astro|football|soccer|premier|laliga|serie|bundesliga/i.test(c.name))
       .map(c => ({
         name: c.name,
-        url: c.url,
+        url: `/api/sports-stream?name=${encodeURIComponent(c.name)}`,
         status: c.status || "online"
       }));
+
+    // Prioritize Cricket and Football channels to the very front
+    sportsTvChannels.sort((a, b) => {
+      const isCricketA = /cricket|willow/i.test(a.name);
+      const isCricketB = /cricket|willow/i.test(b.name);
+      if (isCricketA && !isCricketB) return -1;
+      if (isCricketB && !isCricketA) return 1;
+
+      const isFootballA = /premier league|football|soccer|bundesliga|golazo/i.test(a.name);
+      const isFootballB = /premier league|football|soccer|bundesliga|golazo/i.test(b.name);
+      if (isFootballA && !isFootballB) return -1;
+      if (isFootballB && !isFootballA) return 1;
+
+      const isMajorA = /tnt|bein|sky|espn/i.test(a.name);
+      const isMajorB = /tnt|bein|sky|espn/i.test(b.name);
+      if (isMajorA && !isMajorB) return -1;
+      if (isMajorB && !isMajorA) return 1;
+
+      return 0;
+    });
 
     const result = {
       total_matches: matches.length,
@@ -833,6 +903,9 @@ exports.handler = async (event) => {
   }
   if (cleanPath === "/sports" || cleanPath === "/live-sports") {
     return handleSports(params);
+  }
+  if (cleanPath === "/sports-stream" || cleanPath === "/sports-player") {
+    return handleSportsStream(params);
   }
   if (cleanPath === "/browse" || cleanPath === "/homepage") {
     return handleBrowse();

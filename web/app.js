@@ -1512,20 +1512,49 @@
 
   function renderSportsSpotlight() {
     if (!el.sportsSpotlightCarousel || !el.sportsSpotlightSection) return;
-    const matchesWithStreams = state.sportsMatches.filter((m) => m.has_stream && m.channels && m.channels.length > 0);
-    const spotlightItems = matchesWithStreams.length > 0
-      ? matchesWithStreams.slice(0, 10)
-      : state.sportsMatches.slice(0, 10);
-
-    if (spotlightItems.length === 0) {
-      el.sportsSpotlightSection.classList.add('hidden');
-      return;
-    }
-
     el.sportsSpotlightSection.classList.remove('hidden');
     el.sportsSpotlightCarousel.innerHTML = '';
 
-    spotlightItems.forEach((match) => {
+    // 1. Featured Premier 24/7 Live Broadcast Channels (Cricket, Football, F1)
+    const featuredNetworks = (state.sportsChannels || []).filter((c) =>
+      /cricket|willow|premier league|sky sports football|tnt sports 1|f1/i.test(c.name)
+    ).slice(0, 4);
+
+    featuredNetworks.forEach((ch) => {
+      const isCricket = /cricket|willow/i.test(ch.name);
+      const isFootball = /premier|football/i.test(ch.name);
+      const isF1 = /f1/i.test(ch.name);
+      const sportName = isCricket ? 'Cricket' : isFootball ? 'Football' : isF1 ? 'Formula 1' : 'Live Sports';
+      const emoji = isCricket ? '🏏' : isFootball ? '⚽' : isF1 ? '🏎️' : '📺';
+
+      const card = document.createElement('div');
+      card.className = 'sports-spotlight-card featured-network-spotlight';
+      card.innerHTML = `
+        <div class="spotlight-card-top">
+          <span class="spotlight-sport-tag">${emoji} ${sportName}</span>
+          <span class="spotlight-live-badge"><span class="live-dot-pulse"></span> LIVE NOW</span>
+        </div>
+        <div class="spotlight-tournament">${isCricket ? 'International Cricket HD' : isFootball ? 'Premier League / European Football' : 'Formula 1 World Championship'}</div>
+        <div class="spotlight-event-name" title="${ch.name}">${ch.name}</div>
+        <div style="font-size:12px;color:var(--text-muted);margin:8px 0;line-height:1.4;">24/7 non-stop live match coverage, tournaments, and studio analysis in Full HD.</div>
+        <button class="spotlight-watch-btn">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <span>Watch Live Stream</span>
+        </button>
+      `;
+
+      card.addEventListener('click', () => {
+        openSportsPlayer(ch.name, `🔴 24/7 Live Broadcast • ${sportName}`, [{ name: ch.name, url: ch.url }], 0);
+      });
+
+      el.sportsSpotlightCarousel.appendChild(card);
+    });
+
+    // 2. Active Match Fixtures with live streams
+    const matchesWithStreams = state.sportsMatches.filter((m) => m.has_stream && m.channels && m.channels.length > 0);
+    const spotlightMatches = matchesWithStreams.length > 0 ? matchesWithStreams.slice(0, 8) : state.sportsMatches.slice(0, 6);
+
+    spotlightMatches.forEach((match) => {
       const card = document.createElement('div');
       card.className = 'sports-spotlight-card';
       const emoji = getSportEmoji(match.sport);
@@ -1536,7 +1565,6 @@
 
       const homeLogo = match.home_logo || 'https://cdnlivetv.tv/api/v1/team/logo.png';
       const awayLogo = match.away_logo || 'https://cdnlivetv.tv/api/v1/team/logo.png';
-
       const hasTeams = Boolean(match.home_team && match.away_team);
 
       card.innerHTML = `
@@ -1592,6 +1620,77 @@
     const status = state.sportsActiveStatus;
     const query = (state.sportsSearchQuery || '').toLowerCase().trim();
 
+    // Dedicated Live Cricket Hub when user selects Cricket
+    if (cat === 'Cricket') {
+      const cricketChannels = (state.sportsChannels || []).filter((c) => /cricket|willow/i.test(c.name));
+      const hubCard = document.createElement('div');
+      hubCard.className = 'cricket-hub-banner';
+      hubCard.innerHTML = `
+        <div class="cricket-hub-header">
+          <div>
+            <span class="cricket-badge"><span class="live-dot-pulse"></span> 24/7 LIVE CRICKET BROADCAST HUB</span>
+            <h2 class="cricket-hub-title">Stream Every Cricket Match Live in HD</h2>
+            <p class="cricket-hub-desc">Watch international Test series, ODIs, T20 World Cups, IPL, BBL, and bilateral tours live across all major cricket broadcast networks with zero subscription.</p>
+          </div>
+        </div>
+        <div class="cricket-hub-cards-grid">
+          <div class="cricket-channel-action-card" data-channel="Sky Sports Cricket FHD UK">
+            <div class="c-card-top">
+              <span class="c-card-badge">LIVE 24/7</span>
+              <span class="c-card-sport">🏏 ICC & International</span>
+            </div>
+            <div class="c-card-title">Sky Sports Cricket HD</div>
+            <div class="c-card-sub">International Tests, T20s, The Ashes, County Cricket & Series</div>
+            <button class="c-card-watch-btn">🔴 Stream Sky Cricket ›</button>
+          </div>
+
+          <div class="cricket-channel-action-card" data-channel="Willow Cricket HD US">
+            <div class="c-card-top">
+              <span class="c-card-badge">LIVE 24/7</span>
+              <span class="c-card-sport">🏏 IPL & Global Leagues</span>
+            </div>
+            <div class="c-card-title">Willow Cricket HD</div>
+            <div class="c-card-sub">Indian Premier League, Asia Cup, Major League Cricket & Tours</div>
+            <button class="c-card-watch-btn">🔴 Stream Willow Cricket ›</button>
+          </div>
+
+          <div class="cricket-channel-action-card" data-channel="FOX Sports 501 Cricket HD AU">
+            <div class="c-card-top">
+              <span class="c-card-badge">LIVE 24/7</span>
+              <span class="c-card-sport">🏏 Australia & BBL</span>
+            </div>
+            <div class="c-card-title">Fox Cricket 501 HD</div>
+            <div class="c-card-sub">Big Bash League (BBL), Australia Home Internationals & Shield</div>
+            <button class="c-card-watch-btn">🔴 Stream Fox Cricket ›</button>
+          </div>
+
+          <div class="cricket-channel-action-card" data-channel="ASTRO CRICKET HD">
+            <div class="c-card-top">
+              <span class="c-card-badge">LIVE 24/7</span>
+              <span class="c-card-sport">🏏 World Cricket</span>
+            </div>
+            <div class="c-card-title">Astro Cricket HD</div>
+            <div class="c-card-sub">Global T20 tournaments, ICC Trophy qualifiers & bilateral cups</div>
+            <button class="c-card-watch-btn">🔴 Stream Astro Cricket ›</button>
+          </div>
+        </div>
+      `;
+
+      hubCard.querySelectorAll('.cricket-channel-action-card').forEach((card) => {
+        card.addEventListener('click', () => {
+          const chName = card.dataset.channel;
+          const found = cricketChannels.find((c) => c.name === chName) || { name: chName, url: `/api/sports-stream?name=${encodeURIComponent(chName)}` };
+          openSportsPlayer(found.name, '🔴 LIVE 24/7 Cricket Network', [found], 0);
+        });
+      });
+
+      el.sportsMatchesGrid.appendChild(hubCard);
+      if (el.sportsMatchesCount) {
+        el.sportsMatchesCount.textContent = '4 Cricket Networks Live';
+      }
+      return;
+    }
+
     let filtered = state.sportsMatches.filter((m) => {
       // Category filter
       if (cat !== 'all') {
@@ -1601,11 +1700,10 @@
         else if (cat === 'NFL' && !sp.includes('nfl') && !sp.includes('american football')) return false;
         else if (cat === 'Motorsport' && !sp.includes('motor') && !sp.includes('f1') && !sp.includes('formula')) return false;
         else if (cat === 'combat' && !sp.includes('ufc') && !sp.includes('mma') && !sp.includes('boxing') && !sp.includes('wwe')) return false;
-        else if (cat === 'Cricket' && !sp.includes('cricket')) return false;
         else if (cat === 'Tennis' && !sp.includes('tennis')) return false;
         else if (cat === 'Golf' && !sp.includes('golf')) return false;
         else if (cat === 'channels') return false;
-        else if (cat !== 'Soccer' && cat !== 'NBA' && cat !== 'NFL' && cat !== 'Motorsport' && cat !== 'combat' && cat !== 'Cricket' && cat !== 'Tennis' && cat !== 'Golf') {
+        else if (cat !== 'Soccer' && cat !== 'NBA' && cat !== 'NFL' && cat !== 'Motorsport' && cat !== 'combat' && cat !== 'Tennis' && cat !== 'Golf') {
           if (!sp.includes(cat.toLowerCase())) return false;
         }
       }
@@ -1764,12 +1862,38 @@
       return;
     }
 
-    state.sportsChannels.forEach((ch) => {
+    const cat = state.sportsActiveCat;
+    let list = state.sportsChannels;
+    if (cat === 'Cricket') {
+      list = state.sportsChannels.filter((c) => /cricket|willow/i.test(c.name));
+    } else if (cat === 'Soccer') {
+      list = state.sportsChannels.filter((c) => /football|soccer|premier|bundesliga|golazo|laliga|serie|bein|tnt/i.test(c.name));
+    } else if (cat === 'Motorsport') {
+      list = state.sportsChannels.filter((c) => /motor|f1|formula|racing/i.test(c.name));
+    } else if (cat === 'combat') {
+      list = state.sportsChannels.filter((c) => /action|arena|wwe|ufc|boxing|fight/i.test(c.name));
+    } else if (cat === 'Tennis') {
+      list = state.sportsChannels.filter((c) => /tennis/i.test(c.name));
+    } else if (cat === 'Golf') {
+      list = state.sportsChannels.filter((c) => /golf/i.test(c.name));
+    } else if (cat === 'NBA') {
+      list = state.sportsChannels.filter((c) => /nba|basketball|espn/i.test(c.name));
+    }
+
+    if (list.length === 0) {
+      list = state.sportsChannels;
+    }
+
+    list.forEach((ch) => {
       const card = document.createElement('div');
       card.className = 'sports-channel-card';
+      const isCricket = /cricket|willow/i.test(ch.name);
+      const isFoot = /football|soccer|premier|bundesliga/i.test(ch.name);
+      const icon = isCricket ? '🏏' : isFoot ? '⚽' : '📺';
+
       card.innerHTML = `
         <div class="channel-info-left">
-          <div class="channel-icon-badge">📺</div>
+          <div class="channel-icon-badge">${icon}</div>
           <div style="min-width:0;">
             <div class="channel-title-text" title="${ch.name}">${ch.name}</div>
             <div class="channel-status-sub">
@@ -1810,8 +1934,15 @@
     el.nextEpisodeControlBtn.classList.add('hidden');
 
     const activeChannel = channels[initialIndex] || channels[0];
+    let streamUrl = activeChannel.url || '';
+    if (!streamUrl.startsWith('/api/sports-stream')) {
+      streamUrl = `/api/sports-stream?name=${encodeURIComponent(activeChannel.name || title)}`;
+    }
+
     if (el.embedPlayerIframe) {
-      el.embedPlayerIframe.src = activeChannel.url;
+      el.embedPlayerIframe.removeAttribute('sandbox');
+      el.embedPlayerIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
+      el.embedPlayerIframe.src = streamUrl;
       el.embedPlayerIframe.classList.remove('hidden');
     }
     if (el.currentServerLabel) {

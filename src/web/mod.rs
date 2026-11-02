@@ -30,6 +30,7 @@ pub fn create_router(service: Arc<MovieBoxService>) -> Router {
         .route("/platforms", get(api::get_platforms))
         .route("/platform", get(api::get_platform_content))
         .route("/sports", get(api::get_sports))
+        .route("/sports-stream", get(api::get_sports_stream))
         .route("/search", get(api::get_search))
         .route("/suggest", get(api::get_suggest))
         .route("/details/{id}", get(api::get_details))

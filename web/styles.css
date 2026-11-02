@@ -3000,4 +3000,141 @@ kbd {
   color: #040914;
 }
 
+/* Live Cricket Broadcast Hub */
+.cricket-hub-banner {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, rgba(22, 33, 62, 0.95) 0%, rgba(13, 19, 33, 0.98) 100%);
+  border: 1px solid rgba(0, 210, 255, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.cricket-hub-banner::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 210, 255, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.cricket-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(229, 9, 20, 0.2);
+  border: 1px solid rgba(229, 9, 20, 0.4);
+  color: #ff3b30;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 12px;
+}
+
+.cricket-hub-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+
+.cricket-hub-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  max-width: 780px;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.cricket-hub-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.cricket-channel-action-card {
+  background: rgba(14, 20, 36, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  padding: 20px 18px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+}
+
+.cricket-channel-action-card:hover {
+  transform: translateY(-4px);
+  border-color: #00d2ff;
+  background: rgba(20, 30, 56, 0.98);
+  box-shadow: 0 10px 30px rgba(0, 210, 255, 0.25);
+}
+
+.c-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.c-card-badge {
+  background: rgba(229, 9, 20, 0.25);
+  color: #ff4d4d;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.c-card-sport {
+  font-size: 11px;
+  color: #00d2ff;
+  font-weight: 700;
+}
+
+.c-card-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.c-card-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin-bottom: 16px;
+  flex: 1;
+}
+
+.c-card-watch-btn {
+  background: linear-gradient(135deg, #e50914 0%, #b8050e 100%);
+  color: #fff;
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(229, 9, 20, 0.35);
+}
+
+.cricket-channel-action-card:hover .c-card-watch-btn {
+  transform: scale(1.02);
+  box-shadow: 0 4px 16px rgba(229, 9, 20, 0.6);
+}
+
 

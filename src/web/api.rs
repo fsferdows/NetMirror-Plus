@@ -3,7 +3,7 @@ use std::sync::Arc;
 use axum::{
     extract::{Path, Query, State},
     http::{header, StatusCode},
-    response::Response,
+    response::{IntoResponse, Response},
     Json,
 };
 use serde::{Deserialize, Serialize};
@@ -1171,11 +1171,11 @@ pub async fn get_sports() -> Result<Json<serde_json::Value>, (StatusCode, String
                         for (idx, ch) in channels.iter().enumerate() {
                             let name = ch.get("channel_name").and_then(|n| n.as_str()).map(|s| s.to_string()).unwrap_or_else(|| format!("Server {}", idx + 1));
                             let id_str = ch.get("id").and_then(|i| i.as_str()).map(|s| s.to_string()).unwrap_or_else(|| idx.to_string());
-                            let url = ch.get("url").and_then(|u| u.as_str()).unwrap_or("");
+                            let proxy_url = format!("/api/sports-stream?name={}", percent_encoding::utf8_percent_encode(&name, percent_encoding::NON_ALPHANUMERIC));
                             mapped_channels.push(serde_json::json!({
                                 "id": id_str,
                                 "name": name,
-                                "url": url
+                                "url": proxy_url
                             }));
                         }
 
@@ -1214,18 +1214,39 @@ pub async fn get_sports() -> Result<Json<serde_json::Value>, (StatusCode, String
         for c in ch_arr {
             let name = c.get("name").and_then(|n| n.as_str()).unwrap_or("");
             let lower = name.to_lowercase();
-            if lower.contains("sport") || lower.contains("espn") || lower.contains("tnt") || lower.contains("bein") || lower.contains("sky") || lower.contains("fox") || lower.contains("dazn") || lower.contains("cricket") {
+            if lower.contains("sport") || lower.contains("espn") || lower.contains("tnt")
+                || lower.contains("bein") || lower.contains("sky") || lower.contains("fox")
+                || lower.contains("dazn") || lower.contains("cricket") || lower.contains("willow")
+                || lower.contains("astro") || lower.contains("football") || lower.contains("soccer")
+                || lower.contains("premier") || lower.contains("bundesliga") || lower.contains("golazo")
+            {
+                let proxy_url = format!("/api/sports-stream?name={}", percent_encoding::utf8_percent_encode(name, percent_encoding::NON_ALPHANUMERIC));
                 sports_tv.push(serde_json::json!({
                     "name": name,
-                    "url": c.get("url").and_then(|u| u.as_str()).unwrap_or(""),
+                    "url": proxy_url,
                     "status": c.get("status").and_then(|s| s.as_str()).unwrap_or("online")
                 }));
-                if sports_tv.len() >= 60 {
-                    break;
-                }
             }
         }
     }
+
+    // Sort Cricket & Football channels to the very top
+    sports_tv.sort_by(|a, b| {
+        let name_a = a.get("name").and_then(|n| n.as_str()).unwrap_or("").to_lowercase();
+        let name_b = b.get("name").and_then(|n| n.as_str()).unwrap_or("").to_lowercase();
+
+        let is_cric_a = name_a.contains("cricket") || name_a.contains("willow");
+        let is_cric_b = name_b.contains("cricket") || name_b.contains("willow");
+        if is_cric_a && !is_cric_b { return std::cmp::Ordering::Less; }
+        if is_cric_b && !is_cric_a { return std::cmp::Ordering::Greater; }
+
+        let is_foot_a = name_a.contains("premier league") || name_a.contains("football") || name_a.contains("soccer") || name_a.contains("bundesliga");
+        let is_foot_b = name_b.contains("premier league") || name_b.contains("football") || name_b.contains("soccer") || name_b.contains("bundesliga");
+        if is_foot_a && !is_foot_b { return std::cmp::Ordering::Less; }
+        if is_foot_b && !is_foot_a { return std::cmp::Ordering::Greater; }
+
+        std::cmp::Ordering::Equal
+    });
 
     let live_count = matches.iter().filter(|m| m.get("has_stream").and_then(|v| v.as_bool()).unwrap_or(false)).count();
     let total_matches = matches.len();
@@ -1237,4 +1258,63 @@ pub async fn get_sports() -> Result<Json<serde_json::Value>, (StatusCode, String
         "matches": matches,
         "channels": sports_tv
     })))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SportsStreamQuery {
+    pub name: Option<String>,
+}
+
+pub async fn get_sports_stream(
+    Query(query): Query<SportsStreamQuery>,
+) -> Result<impl IntoResponse, (StatusCode, String)> {
+    let channel_name = query.name.unwrap_or_else(|| "Sky Sports Cricket FHD UK".to_string());
+    let target = format!(
+        "https://cdnlivetv.tv/api/v1/channels/player/?name={}&code=&user=cdnlivetv&plan=free",
+        percent_encoding::utf8_percent_encode(&channel_name, percent_encoding::NON_ALPHANUMERIC)
+    );
+
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(8))
+        .build()
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+
+    let res = client
+        .get(&target)
+        .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        .header("Referer", "https://cdnlivetv.tv/")
+        .send()
+        .await
+        .map_err(|e| (StatusCode::BAD_GATEWAY, e.to_string()))?;
+
+    if !res.status().is_success() {
+        let fallback = format!(
+            "<html><body style=\"background:#0a0e17;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;text-align:center;\"><div><h2>📡 Live Broadcast Connecting...</h2><p style=\"color:#8899a6;margin-top:8px;\">Stream {} is initializing. Please refresh in a few moments.</p></div></body></html>",
+            channel_name
+        );
+        return Ok((
+            StatusCode::OK,
+            [
+                ("Content-Type", "text/html; charset=utf-8"),
+                ("Access-Control-Allow-Origin", "*"),
+            ],
+            fallback,
+        ));
+    }
+
+    let mut html = res.text().await.unwrap_or_default();
+    if let Some(start) = html.find("// Sandbox iframe detection") {
+        if let Some(end) = html[start..].find("})();") {
+            html.replace_range(start..=start + end + 4, "/* sandbox bypassed */");
+        }
+    }
+
+    Ok((
+        StatusCode::OK,
+        [
+            ("Content-Type", "text/html; charset=utf-8"),
+            ("Access-Control-Allow-Origin", "*"),
+        ],
+        html,
+    ))
 }

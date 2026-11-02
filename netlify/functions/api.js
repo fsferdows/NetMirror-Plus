@@ -180,6 +180,192 @@ async function resolveImdbId(title, yearHint) {
 let sportsCache = null;
 let sportsCacheTime = 0;
 
+function extractStreamUrl(html) {
+  const line = html.split("\n").find(l => l.includes(";var ") && l.includes("(") && l.includes("+"));
+  if (!line) return null;
+  const quotes = line.match(/'([^']+)'/g);
+  if (!quotes || quotes.length < 5) return null;
+  let decoded = "";
+  for (const q of quotes) {
+    let s = q.slice(1, -1).replace(/-/g, "+").replace(/_/g, "/");
+    while (s.length % 4) s += "=";
+    try {
+      decoded += Buffer.from(s, "base64").toString("utf8");
+    } catch {}
+  }
+  return (decoded.startsWith("https://") && decoded.includes(".m3u8")) ? decoded : null;
+}
+
+function generateCleanPlayerHtml(channelName, streamUrl) {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>${channelName}</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%; background: #000;
+      overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    #playerContainer {
+      position: relative; width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center; background: #000;
+    }
+    video {
+      width: 100%; height: 100%; object-fit: contain; background: #000;
+    }
+    .live-top-bar {
+      position: absolute; top: 12px; left: 14px; right: 14px;
+      display: flex; align-items: center; justify-content: space-between;
+      pointer-events: none; z-index: 20;
+    }
+    .live-pill {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(14, 20, 36, 0.88); backdrop-filter: blur(10px);
+      padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.18);
+      font-size: 12px; font-weight: 700; color: #fff;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    }
+    .live-dot {
+      width: 7px; height: 7px; background: #ff2a2a; border-radius: 50%;
+      box-shadow: 0 0 8px #ff2a2a; animation: pulse 1.4s infinite;
+    }
+    @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+    .status-overlay {
+      position: absolute; inset: 0;
+      background: rgba(6, 10, 18, 0.95);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: #fff; z-index: 10; text-align: center; padding: 20px;
+      transition: opacity 0.3s ease;
+    }
+    .status-overlay.hidden { opacity: 0; pointer-events: none; }
+    .spinner {
+      width: 44px; height: 44px; border: 3.5px solid rgba(229, 9, 20, 0.2);
+      border-top-color: #e50914; border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin-bottom: 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .status-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+    .status-desc { font-size: 13px; color: #8899a6; max-width: 360px; line-height: 1.4; }
+    .reload-btn {
+      margin-top: 16px; background: #e50914; color: #fff; border: none;
+      font-size: 13px; font-weight: 700; padding: 9px 22px; border-radius: 20px;
+      cursor: pointer; box-shadow: 0 4px 14px rgba(229, 9, 20, 0.4);
+      pointer-events: auto;
+    }
+    @media (max-width: 600px) {
+      .live-top-bar { top: 8px; left: 8px; right: 8px; }
+      .live-pill { font-size: 11px; padding: 4px 10px; }
+      .status-title { font-size: 15px; }
+      .status-desc { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="playerContainer">
+    <div class="live-top-bar">
+      <div class="live-pill">
+        <span class="live-dot"></span>
+        <span>LIVE • ${channelName}</span>
+      </div>
+    </div>
+
+    <div class="status-overlay" id="statusOverlay">
+      <div class="spinner" id="spinner"></div>
+      <div class="status-title" id="statusTitle">Connecting Live Broadcast...</div>
+      <div class="status-desc" id="statusDesc">Establishing direct HD sports feed</div>
+      <button class="reload-btn" id="reloadBtn" style="display:none;" onclick="location.reload()">Retry Stream</button>
+    </div>
+
+    <video id="videoPlayer" controls autoplay playsinline preload="auto"></video>
+  </div>
+
+  <script>
+    const streamUrl = "${streamUrl || ''}";
+    const video = document.getElementById('videoPlayer');
+    const overlay = document.getElementById('statusOverlay');
+    const spinner = document.getElementById('spinner');
+    const statusTitle = document.getElementById('statusTitle');
+    const statusDesc = document.getElementById('statusDesc');
+    const reloadBtn = document.getElementById('reloadBtn');
+
+    function showError(msg, sub) {
+      if (overlay) {
+        overlay.classList.remove('hidden');
+        if (spinner) spinner.style.display = 'none';
+        if (statusTitle) statusTitle.textContent = msg || 'Broadcast Unavailable';
+        if (statusDesc) statusDesc.textContent = sub || 'Stream is offline or reconnecting.';
+        if (reloadBtn) reloadBtn.style.display = 'inline-block';
+      }
+    }
+
+    function hideOverlay() {
+      if (overlay) overlay.classList.add('hidden');
+    }
+
+    if (!streamUrl || streamUrl === 'null' || streamUrl.length < 10) {
+      showError('Stream Currently Offline', 'This match/channel is preparing its feed. Please check back shortly.');
+    } else if (Hls.isSupported()) {
+      const hls = new Hls({
+        enableWorker: true,
+        lowLatencyMode: true,
+        backBufferLength: 30,
+        maxBufferLength: 30,
+        manifestLoadingMaxRetry: 6,
+        manifestLoadingRetryDelay: 1000,
+        levelLoadingMaxRetry: 5,
+        fragLoadingMaxRetry: 6
+      });
+      hls.loadSource(streamUrl);
+      hls.attachMedia(video);
+
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        video.play().catch(function() {
+          video.muted = true;
+          video.play();
+        });
+        setTimeout(hideOverlay, 400);
+      });
+
+      hls.on(Hls.Events.ERROR, function(event, data) {
+        if (data.fatal) {
+          switch (data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              hls.startLoad();
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              hls.recoverMediaError();
+              break;
+            default:
+              showError('Reconnecting Stream...', 'Attempting to resume broadcast.');
+              setTimeout(function() { hls.startLoad(); }, 2000);
+              break;
+          }
+        }
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = streamUrl;
+      video.addEventListener('loadedmetadata', function() {
+        video.play().catch(function() {
+          video.muted = true;
+          video.play();
+        });
+        hideOverlay();
+      });
+      video.onerror = function() {
+        showError('Stream Offline', 'Could not play stream on this device.');
+      };
+    }
+
+    video.addEventListener('playing', hideOverlay);
+  </script>
+</body>
+</html>`;
+}
+
 async function handleSportsStream(params) {
   const channelName = params.name || params.channel || "Sky Sports Cricket FHD UK";
   const targetUrl = `https://cdnlivetv.tv/api/v1/channels/player/?name=${encodeURIComponent(channelName)}&code=&user=cdnlivetv&plan=free`;
@@ -195,17 +381,30 @@ async function handleSportsStream(params) {
     if (!res.ok) {
       return {
         statusCode: 200,
-        headers: {
-          "Content-Type": "text/html; charset=utf-8",
-          "Access-Control-Allow-Origin": "*"
-        },
-        body: `<html><body style="background:#0a0e17;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;text-align:center;"><div><h2>📡 Live Broadcast Connecting...</h2><p style="color:#8899a6;margin-top:8px;">Stream ${channelName} is initializing. Please refresh in a few moments.</p></div></body></html>`
+        headers: { "Content-Type": "text/html; charset=utf-8", "Access-Control-Allow-Origin": "*" },
+        body: generateCleanPlayerHtml(channelName, null)
       };
     }
 
-    let html = await res.text();
-    // Bypass sandbox iframe blocking
-    html = html.replace(/\/\/ Sandbox iframe detection[\s\S]*?\}\)\(\);/, '/* sandbox bypassed */');
+    const html = await res.text();
+    const streamUrl = extractStreamUrl(html);
+
+    if (streamUrl) {
+      return {
+        statusCode: 200,
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Access-Control-Allow-Origin": "*",
+          "Cache-Control": "no-cache, no-store, must-revalidate"
+        },
+        body: generateCleanPlayerHtml(channelName, streamUrl)
+      };
+    }
+
+    // Fallback: bypass sandbox and _head check in original player
+    let safeHtml = html
+      .replace(/\/\/ Sandbox iframe detection[\s\S]*?\}\)\(\);/, '/* sandbox bypassed */')
+      .replace(/function _head\(u\)\{[\s\S]*?return fetch\(u[\s\S]*?\}\)/, 'function _head(u){return Promise.resolve(200);}');
 
     return {
       statusCode: 200,
@@ -214,16 +413,13 @@ async function handleSportsStream(params) {
         "Access-Control-Allow-Origin": "*",
         "Cache-Control": "no-cache, no-store, must-revalidate"
       },
-      body: html
+      body: safeHtml
     };
   } catch (err) {
     return {
       statusCode: 200,
-      headers: {
-        "Content-Type": "text/html; charset=utf-8",
-        "Access-Control-Allow-Origin": "*"
-      },
-      body: `<html><body style="background:#0a0e17;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;text-align:center;"><div><h2>⚠️ Stream Connection Error</h2><p style="color:#8899a6;margin-top:8px;">${err.message}</p></div></body></html>`
+      headers: { "Content-Type": "text/html; charset=utf-8", "Access-Control-Allow-Origin": "*" },
+      body: generateCleanPlayerHtml(channelName, null)
     };
   }
 }

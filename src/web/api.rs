@@ -212,11 +212,37 @@ fn clean_display_title(title: &str) -> String {
 }
 
 fn get_canonical_title(title: &str) -> String {
-    clean_display_title(title)
-        .to_lowercase()
-        .chars()
-        .filter(|c| c.is_ascii_alphanumeric())
-        .collect()
+    let clean = clean_display_title(title).to_lowercase();
+    let words: Vec<&str> = clean
+        .split(|c: char| !c.is_alphanumeric() && c != '-')
+        .filter(|w| !w.is_empty())
+        .filter(|w| {
+            !matches!(
+                *w,
+                "hindi"
+                    | "english"
+                    | "tamil"
+                    | "telugu"
+                    | "kannada"
+                    | "malayalam"
+                    | "bengali"
+                    | "dubbed"
+                    | "dual"
+                    | "audio"
+                    | "multi"
+                    | "season"
+                    | "seasons"
+                    | "s1"
+                    | "s2"
+                    | "s3"
+                    | "s4"
+                    | "s1-s2"
+                    | "s1-s3"
+                    | "s1-s4"
+            )
+        })
+        .collect();
+    words.concat()
 }
 
 fn map_netmirror_item_to_catalog(item: &serde_json::Value) -> Option<CatalogItem> {
@@ -458,32 +484,41 @@ pub async fn get_browse(
     let mut raw_disney = Vec::new();
 
     if let Some(c) = client {
-        let (nf_res, pv_res, dis_res) = tokio::join!(
+        let (nf0, nf1, pv0, pv1, dis0, dis1) = tokio::join!(
             c.get("https://api2.imdb3.shop/api/movies/list/filter?page=0&platform=netflix&items_per_page=30").header("User-Agent", "Mozilla/5.0").send(),
+            c.get("https://api2.imdb3.shop/api/movies/list/filter?page=1&platform=netflix&items_per_page=30").header("User-Agent", "Mozilla/5.0").send(),
             c.get("https://api2.imdb3.shop/api/movies/list/filter?page=0&platform=primeVideo&items_per_page=30").header("User-Agent", "Mozilla/5.0").send(),
+            c.get("https://api2.imdb3.shop/api/movies/list/filter?page=1&platform=primeVideo&items_per_page=30").header("User-Agent", "Mozilla/5.0").send(),
             c.get("https://api2.imdb3.shop/api/movies/list/filter?page=0&platform=disney&items_per_page=30").header("User-Agent", "Mozilla/5.0").send(),
+            c.get("https://api2.imdb3.shop/api/movies/list/filter?page=1&platform=disney&items_per_page=30").header("User-Agent", "Mozilla/5.0").send(),
         );
 
-        if let Ok(res) = nf_res {
-            if let Ok(json) = res.json::<serde_json::Value>().await {
-                if let Some(arr) = json.get("results").and_then(|r| r.as_array()) {
-                    raw_netflix = arr.iter().filter_map(map_netmirror_item_to_catalog).collect();
+        for res in [nf0, nf1] {
+            if let Ok(r) = res {
+                if let Ok(json) = r.json::<serde_json::Value>().await {
+                    if let Some(arr) = json.get("results").and_then(|r| r.as_array()) {
+                        raw_netflix.extend(arr.iter().filter_map(map_netmirror_item_to_catalog));
+                    }
                 }
             }
         }
 
-        if let Ok(res) = pv_res {
-            if let Ok(json) = res.json::<serde_json::Value>().await {
-                if let Some(arr) = json.get("results").and_then(|r| r.as_array()) {
-                    raw_prime = arr.iter().filter_map(map_netmirror_item_to_catalog).collect();
+        for res in [pv0, pv1] {
+            if let Ok(r) = res {
+                if let Ok(json) = r.json::<serde_json::Value>().await {
+                    if let Some(arr) = json.get("results").and_then(|r| r.as_array()) {
+                        raw_prime.extend(arr.iter().filter_map(map_netmirror_item_to_catalog));
+                    }
                 }
             }
         }
 
-        if let Ok(res) = dis_res {
-            if let Ok(json) = res.json::<serde_json::Value>().await {
-                if let Some(arr) = json.get("results").and_then(|r| r.as_array()) {
-                    raw_disney = arr.iter().filter_map(map_netmirror_item_to_catalog).collect();
+        for res in [dis0, dis1] {
+            if let Ok(r) = res {
+                if let Ok(json) = r.json::<serde_json::Value>().await {
+                    if let Some(arr) = json.get("results").and_then(|r| r.as_array()) {
+                        raw_disney.extend(arr.iter().filter_map(map_netmirror_item_to_catalog));
+                    }
                 }
             }
         }
@@ -1265,6 +1300,215 @@ pub struct SportsStreamQuery {
     pub name: Option<String>,
 }
 
+fn extract_stream_url(html: &str) -> Option<String> {
+    use base64::Engine;
+    let line = html.lines().find(|l| l.contains(";var ") && l.contains('(') && l.contains('+'))?;
+    let mut chunks = Vec::new();
+    let mut rest = line;
+    while let Some(start) = rest.find('\'') {
+        let after_start = &rest[start + 1..];
+        if let Some(end) = after_start.find('\'') {
+            chunks.push(&after_start[..end]);
+            rest = &after_start[end + 1..];
+        } else {
+            break;
+        }
+    }
+    if chunks.len() < 5 {
+        return None;
+    }
+    let mut decoded = String::new();
+    for chunk in chunks {
+        let mut s = chunk.replace('-', "+").replace('_', "/");
+        while s.len() % 4 != 0 {
+            s.push('=');
+        }
+        if let Ok(bytes) = base64::engine::general_purpose::STANDARD.decode(&s) {
+            if let Ok(text) = String::from_utf8(bytes) {
+                decoded.push_str(&text);
+            }
+        }
+    }
+    if decoded.starts_with("https://") && decoded.contains(".m3u8") {
+        Some(decoded)
+    } else {
+        None
+    }
+}
+
+fn generate_clean_player_html(channel_name: &str, stream_url: Option<&str>) -> String {
+    let url_str = stream_url.unwrap_or("");
+    format!(
+r#"<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>{channel_name}</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
+  <style>
+    * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+    html, body {{
+      width: 100%; height: 100%; background: #000;
+      overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }}
+    #playerContainer {{
+      position: relative; width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center; background: #000;
+    }}
+    video {{
+      width: 100%; height: 100%; object-fit: contain; background: #000;
+    }}
+    .live-top-bar {{
+      position: absolute; top: 12px; left: 14px; right: 14px;
+      display: flex; align-items: center; justify-content: space-between;
+      pointer-events: none; z-index: 20;
+    }}
+    .live-pill {{
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(14, 20, 36, 0.88); backdrop-filter: blur(10px);
+      padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.18);
+      font-size: 12px; font-weight: 700; color: #fff;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    }}
+    .live-dot {{
+      width: 7px; height: 7px; background: #ff2a2a; border-radius: 50%;
+      box-shadow: 0 0 8px #ff2a2a; animation: pulse 1.4s infinite;
+    }}
+    @keyframes pulse {{ 0% {{ opacity: 1; transform: scale(1); }} 50% {{ opacity: 0.3; transform: scale(0.8); }} 100% {{ opacity: 1; transform: scale(1); }} }}
+    .status-overlay {{
+      position: absolute; inset: 0;
+      background: rgba(6, 10, 18, 0.95);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: #fff; z-index: 10; text-align: center; padding: 20px;
+      transition: opacity 0.3s ease;
+    }}
+    .status-overlay.hidden {{ opacity: 0; pointer-events: none; }}
+    .spinner {{
+      width: 44px; height: 44px; border: 3.5px solid rgba(229, 9, 20, 0.2);
+      border-top-color: #e50914; border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin-bottom: 16px;
+    }}
+    @keyframes spin {{ to {{ transform: rotate(360deg); }} }}
+    .status-title {{ font-size: 17px; font-weight: 700; margin-bottom: 6px; }}
+    .status-desc {{ font-size: 13px; color: #8899a6; max-width: 360px; line-height: 1.4; }}
+    .reload-btn {{
+      margin-top: 16px; background: #e50914; color: #fff; border: none;
+      font-size: 13px; font-weight: 700; padding: 9px 22px; border-radius: 20px;
+      cursor: pointer; box-shadow: 0 4px 14px rgba(229, 9, 20, 0.4);
+      pointer-events: auto;
+    }}
+    @media (max-width: 600px) {{
+      .live-top-bar {{ top: 8px; left: 8px; right: 8px; }}
+      .live-pill {{ font-size: 11px; padding: 4px 10px; }}
+      .status-title {{ font-size: 15px; }}
+      .status-desc {{ font-size: 12px; }}
+    }}
+  </style>
+</head>
+<body>
+  <div id="playerContainer">
+    <div class="live-top-bar">
+      <div class="live-pill">
+        <span class="live-dot"></span>
+        <span>LIVE • {channel_name}</span>
+      </div>
+    </div>
+
+    <div class="status-overlay" id="statusOverlay">
+      <div class="spinner" id="spinner"></div>
+      <div class="status-title" id="statusTitle">Connecting Live Broadcast...</div>
+      <div class="status-desc" id="statusDesc">Establishing direct HD sports feed</div>
+      <button class="reload-btn" id="reloadBtn" style="display:none;" onclick="location.reload()">Retry Stream</button>
+    </div>
+
+    <video id="videoPlayer" controls autoplay playsinline preload="auto"></video>
+  </div>
+
+  <script>
+    const streamUrl = "{url_str}";
+    const video = document.getElementById('videoPlayer');
+    const overlay = document.getElementById('statusOverlay');
+    const spinner = document.getElementById('spinner');
+    const statusTitle = document.getElementById('statusTitle');
+    const statusDesc = document.getElementById('statusDesc');
+    const reloadBtn = document.getElementById('reloadBtn');
+
+    function showError(msg, sub) {{
+      if (overlay) {{
+        overlay.classList.remove('hidden');
+        if (spinner) spinner.style.display = 'none';
+        if (statusTitle) statusTitle.textContent = msg || 'Broadcast Unavailable';
+        if (statusDesc) statusDesc.textContent = sub || 'Stream is offline or reconnecting.';
+        if (reloadBtn) reloadBtn.style.display = 'inline-block';
+      }}
+    }}
+
+    function hideOverlay() {{
+      if (overlay) overlay.classList.add('hidden');
+    }}
+
+    if (!streamUrl || streamUrl === 'null' || streamUrl.length < 10) {{
+      showError('Stream Currently Offline', 'This match/channel is preparing its feed. Please check back shortly.');
+    }} else if (Hls.isSupported()) {{
+      const hls = new Hls({{
+        enableWorker: true,
+        lowLatencyMode: true,
+        backBufferLength: 30,
+        maxBufferLength: 30,
+        manifestLoadingMaxRetry: 6,
+        manifestLoadingRetryDelay: 1000,
+        levelLoadingMaxRetry: 5,
+        fragLoadingMaxRetry: 6
+      }});
+      hls.loadSource(streamUrl);
+      hls.attachMedia(video);
+
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {{
+        video.play().catch(function() {{
+          video.muted = true;
+          video.play();
+        }});
+        setTimeout(hideOverlay, 400);
+      }});
+
+      hls.on(Hls.Events.ERROR, function(event, data) {{
+        if (data.fatal) {{
+          switch (data.type) {{
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              hls.startLoad();
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              hls.recoverMediaError();
+              break;
+            default:
+              showError('Reconnecting Stream...', 'Attempting to resume broadcast.');
+              setTimeout(function() {{ hls.startLoad(); }}, 2000);
+              break;
+          }}
+        }}
+      }});
+    }} else if (video.canPlayType('application/vnd.apple.mpegurl')) {{
+      video.src = streamUrl;
+      video.addEventListener('loadedmetadata', function() {{
+        video.play().catch(function() {{
+          video.muted = true;
+          video.play();
+        }});
+        hideOverlay();
+      }});
+      video.onerror = function() {{
+        showError('Stream Offline', 'Could not play stream on this device.');
+      }};
+    }}
+
+    video.addEventListener('playing', hideOverlay);
+  </script>
+</body>
+</html>"#
+    )
+}
+
 pub async fn get_sports_stream(
     Query(query): Query<SportsStreamQuery>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
@@ -1288,33 +1532,46 @@ pub async fn get_sports_stream(
         .map_err(|e| (StatusCode::BAD_GATEWAY, e.to_string()))?;
 
     if !res.status().is_success() {
-        let fallback = format!(
-            "<html><body style=\"background:#0a0e17;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;text-align:center;\"><div><h2>📡 Live Broadcast Connecting...</h2><p style=\"color:#8899a6;margin-top:8px;\">Stream {} is initializing. Please refresh in a few moments.</p></div></body></html>",
-            channel_name
-        );
+        let fallback = generate_clean_player_html(&channel_name, None);
         return Ok((
             StatusCode::OK,
             [
                 ("Content-Type", "text/html; charset=utf-8"),
                 ("Access-Control-Allow-Origin", "*"),
+                ("Cache-Control", "no-cache, no-store, must-revalidate"),
             ],
             fallback,
         ));
     }
 
-    let mut html = res.text().await.unwrap_or_default();
-    if let Some(start) = html.find("// Sandbox iframe detection") {
-        if let Some(end) = html[start..].find("})();") {
-            html.replace_range(start..=start + end + 4, "/* sandbox bypassed */");
+    let html = res.text().await.unwrap_or_default();
+    let stream_url = extract_stream_url(&html);
+
+    let output_html = if let Some(ref url) = stream_url {
+        generate_clean_player_html(&channel_name, Some(url))
+    } else {
+        // Fallback: bypass sandbox and _head check in original player if stream extraction didn't find chunks
+        let mut safe_html = html;
+        if let Some(start) = safe_html.find("// Sandbox iframe detection") {
+            if let Some(end) = safe_html[start..].find("})();") {
+                safe_html.replace_range(start..=start + end + 4, "/* sandbox bypassed */");
+            }
         }
-    }
+        if let Some(start) = safe_html.find("function _head(u){") {
+            if let Some(end) = safe_html[start..].find("}") {
+                safe_html.replace_range(start..=start + end, "function _head(u){return Promise.resolve(200);}");
+            }
+        }
+        safe_html
+    };
 
     Ok((
         StatusCode::OK,
         [
             ("Content-Type", "text/html; charset=utf-8"),
             ("Access-Control-Allow-Origin", "*"),
+            ("Cache-Control", "no-cache, no-store, must-revalidate"),
         ],
-        html,
+        output_html,
     ))
 }

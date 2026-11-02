@@ -3137,4 +3137,420 @@ kbd {
   box-shadow: 0 4px 16px rgba(229, 9, 20, 0.6);
 }
 
+/* ==========================================================================
+   MOBILE BOTTOM NAVIGATION & DRAWER STYLES
+   ========================================================================== */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 62px;
+  background: rgba(10, 14, 23, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 1000;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 4px calc(env(safe-area-inset-bottom, 0px) + 2px);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.6);
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 600;
+  gap: 3px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  min-width: 56px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.mobile-nav-item svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform var(--transition-fast);
+}
+
+.mobile-nav-item.active {
+  color: #fff;
+}
+.mobile-nav-item.active svg {
+  stroke: var(--red);
+  transform: scale(1.1);
+}
+
+.sports-nav-icon-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.sports-live-pip {
+  position: absolute;
+  top: -2px;
+  right: -3px;
+  width: 7px;
+  height: 7px;
+  background: #ff2a2a;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #ff2a2a;
+  animation: livePulse 1.6s infinite;
+}
+
+.mobile-nav-sports.active svg {
+  stroke: #00d2ff !important;
+}
+
+/* Mobile Platforms Sheet */
+.mobile-platforms-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  transition: opacity 0.3s ease;
+}
+
+.mobile-platforms-sheet.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mobile-sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+}
+
+.mobile-sheet-content {
+  position: relative;
+  background: #0f172a;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px 20px 0 0;
+  padding: 16px 20px calc(env(safe-area-inset-bottom, 0px) + 24px);
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8);
+  transform: translateY(0);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mobile-platforms-sheet.hidden .mobile-sheet-content {
+  transform: translateY(100%);
+}
+
+.sheet-indicator {
+  width: 40px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  margin: 0 auto 12px;
+}
+
+.sheet-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.sheet-title-row h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.sheet-close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.mobile-platforms-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.mobile-plat-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 12px 8px;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  border-left: 3px solid var(--c, #e50914);
+}
+.mobile-plat-btn:active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ==========================================================================
+   COMPREHENSIVE RESPONSIVE MEDIA QUERIES (TABLETS & PHONES)
+   ========================================================================== */
+@media (max-width: 900px) {
+  body {
+    padding-bottom: 70px;
+  }
+  .mobile-bottom-nav {
+    display: flex;
+  }
+  .nav-links {
+    display: none !important;
+  }
+  .nav-container {
+    padding: 0 16px;
+    height: 56px;
+  }
+  .logo-text {
+    font-size: 17px;
+  }
+  .logo-tag {
+    font-size: 9px;
+    padding: 2px 4px;
+  }
+  .search-wrapper {
+    width: 170px;
+  }
+  .search-wrapper:focus-within {
+    width: 210px;
+  }
+  
+  /* Sports View on Tablets & Mobile */
+  .sports-view {
+    padding-bottom: 80px;
+  }
+  .sports-hero-header {
+    padding: 28px 16px 20px;
+  }
+  .sports-hero-title {
+    font-size: 26px;
+  }
+  .sports-hero-desc {
+    font-size: 13px;
+  }
+  .sports-matches-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .sports-channels-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .cricket-hub-banner {
+    padding: 20px 16px;
+  }
+  .cricket-hub-title {
+    font-size: 20px;
+  }
+  .cricket-hub-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .nav-right {
+    gap: 8px;
+  }
+  .keyboard-btn {
+    display: none;
+  }
+  .search-wrapper {
+    width: 140px;
+    height: 34px;
+  }
+  .search-wrapper:focus-within {
+    width: 180px;
+  }
+  .search-input {
+    font-size: 12px;
+    padding: 6px 6px 6px 30px;
+  }
+  .search-icon {
+    left: 8px;
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Sports View on Mobile Phones */
+  .sports-hero-header {
+    padding: 20px 14px 16px;
+  }
+  .sports-hero-title {
+    font-size: 22px;
+    letter-spacing: -0.3px;
+  }
+  .sports-hero-desc {
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .sports-search-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .sports-matches-count {
+    text-align: right;
+    font-size: 11px;
+  }
+
+  /* Horizontal swipeable categories bar on mobile */
+  .sports-categories-bar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 6px;
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+  .sports-categories-bar::-webkit-scrollbar {
+    display: none;
+  }
+  .sports-cat-btn {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  /* Status Bar Stacking on Mobile */
+  .sports-status-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 10px 12px;
+    margin-bottom: 20px;
+  }
+  .sports-status-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    width: 100%;
+  }
+  .sports-tab {
+    text-align: center;
+    padding: 6px 4px;
+    font-size: 11px;
+  }
+  .sports-auto-refresh {
+    justify-content: flex-end;
+    font-size: 11px;
+  }
+
+  /* Match cards: single column on small phones */
+  .sports-matches-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .sports-match-card {
+    padding: 14px;
+  }
+  .team-logo {
+    width: 36px;
+    height: 36px;
+  }
+  .team-name {
+    font-size: 12px;
+  }
+  .vs-badge {
+    font-size: 11px;
+  }
+  .match-time {
+    font-size: 12px;
+  }
+
+  /* Cricket Hub Banner on Mobile */
+  .cricket-hub-banner {
+    padding: 16px 14px;
+  }
+  .cricket-hub-title {
+    font-size: 18px;
+  }
+  .cricket-hub-desc {
+    font-size: 12px;
+    margin-bottom: 16px;
+  }
+  .cricket-hub-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .cricket-channel-action-card {
+    padding: 14px;
+  }
+  .c-card-title {
+    font-size: 14px;
+  }
+  .c-card-sub {
+    font-size: 11px;
+    margin-bottom: 12px;
+  }
+
+  /* Channels grid: single column on mobile */
+  .sports-channels-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  /* Full Screen Player Modal Header on Mobile */
+  .player-header {
+    padding: 10px 14px;
+    height: 52px;
+  }
+  .player-title {
+    font-size: 13px;
+    max-width: 160px;
+  }
+  .player-close-btn {
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 18px;
+  }
+
+  /* Platform View Grid on Mobile */
+  .platform-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+  }
+  .platform-hero-header {
+    padding: 24px 14px 16px;
+  }
+  .platform-title {
+    font-size: 22px;
+  }
+  .platform-desc {
+    font-size: 12px;
+  }
+}
+
+
 

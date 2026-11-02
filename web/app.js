@@ -1977,6 +1977,9 @@
     el.navLinks.forEach((link) => {
       link.classList.toggle('active', link.dataset.nav === target);
     });
+    document.querySelectorAll('.mobile-nav-item[data-nav]').forEach((item) => {
+      item.classList.toggle('active', item.dataset.nav === target);
+    });
 
     if (target === 'home') {
       switchView('rails');
@@ -2074,6 +2077,45 @@
       link.addEventListener('click', (e) => {
         e.preventDefault();
         navigate(link.dataset.nav);
+      });
+    });
+
+    // Mobile Bottom Nav items click
+    document.querySelectorAll('.mobile-nav-item[data-nav]').forEach((item) => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        navigate(item.dataset.nav);
+        closeMobilePlatformsSheet();
+      });
+    });
+
+    // Mobile Platforms Sheet Open/Close
+    const mobilePlatformsBtn = document.getElementById('mobilePlatformsBtn');
+    const mobilePlatformsSheet = document.getElementById('mobilePlatformsSheet');
+    const mobileSheetBackdrop = document.getElementById('mobileSheetBackdrop');
+    const mobileSheetCloseBtn = document.getElementById('mobileSheetCloseBtn');
+
+    function openMobilePlatformsSheet() {
+      if (mobilePlatformsSheet) mobilePlatformsSheet.classList.remove('hidden');
+    }
+    function closeMobilePlatformsSheet() {
+      if (mobilePlatformsSheet) mobilePlatformsSheet.classList.add('hidden');
+    }
+
+    if (mobilePlatformsBtn) {
+      mobilePlatformsBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openMobilePlatformsSheet();
+      });
+    }
+    if (mobileSheetBackdrop) mobileSheetBackdrop.addEventListener('click', closeMobilePlatformsSheet);
+    if (mobileSheetCloseBtn) mobileSheetCloseBtn.addEventListener('click', closeMobilePlatformsSheet);
+
+    document.querySelectorAll('.mobile-plat-btn[data-ott]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const ott = btn.dataset.ott;
+        closeMobilePlatformsSheet();
+        openPlatformView(ott, btn.textContent.trim());
       });
     });
 

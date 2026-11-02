@@ -1,0 +1,21 @@
+{
+  "name": "moviebox-web",
+  "version": "1.0.0",
+  "description": "NetMirror-style Cinema Web Streaming & In-Browser Player for MovieBox",
+  "main": "web/index.html",
+  "scripts": {
+    "start": "cargo run --release --bin moviebox_web",
+    "dev": "cargo run --bin moviebox_web",
+    "build": "cargo build --release --bin moviebox_web"
+  },
+  "keywords": [
+    "moviebox",
+    "netmirror",
+    "streaming",
+    "video-player",
+    "movies",
+    "cinema"
+  ],
+  "license": "MIT"
+}
+

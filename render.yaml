@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: netmirror-plus
+    env: docker
+    plan: free
+    region: oregon
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: PORT
+        value: 3000

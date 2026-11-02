@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>NetMirror – Watch Movies & TV Series Online</title>
+  <meta name="description" content="NetMirror lets you explore and stream movies and TV series directly in your browser with high quality video, multi-language subtitles, and audio tracks." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e50914'><path d='M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm2 2v14h12V5H6zm4 3.5l6 3.5-6 3.5v-7z'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body class="bg-dark text-light">
+  <!-- Top Navigation Bar -->
+  <header class="navbar" id="navbar">
+    <div class="nav-container">
+      <div class="nav-left">
+        <a href="#" class="logo" id="logoBtn">
+          <span class="logo-badge">N</span>
+          <span class="logo-text">NETMIRROR</span>
+          <span class="logo-tag">PLUS</span>
+        </a>
+        <nav class="nav-links" id="navLinks">
+          <a href="#" class="nav-link active" data-nav="home">Home</a>
+          <a href="#" class="nav-link" data-nav="movies">Movies</a>
+          <a href="#" class="nav-link" data-nav="series">TV Shows</a>
+          <a href="#" class="nav-link" data-nav="trending">Trending</a>
+          <div class="nav-dropdown">
+            <button class="nav-link dropdown-toggle" id="ottDropdownBtn">
+              Platforms <svg class="chevron-icon" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="dropdown-menu" id="ottDropdownMenu">
+              <button class="dropdown-item" data-ott="netflix"><span class="dropdown-dot" style="background:#e50914"></span> Netflix Originals</button>
+              <button class="dropdown-item" data-ott="primeVideo"><span class="dropdown-dot" style="background:#00a8e1"></span> Prime Video</button>
+              <button class="dropdown-item" data-ott="disney"><span class="dropdown-dot" style="background:#3b82f6"></span> Disney+ Hotstar</button>
+              <button class="dropdown-item" data-ott="appleTV"><span class="dropdown-dot" style="background:#a3a3a3"></span> Apple TV+</button>
+              <button class="dropdown-item" data-ott="hulu"><span class="dropdown-dot" style="background:#1ce783"></span> Hulu</button>
+              <button class="dropdown-item" data-ott="zee5"><span class="dropdown-dot" style="background:#a855f7"></span> Zee5</button>
+              <button class="dropdown-item" data-ott="viu"><span class="dropdown-dot" style="background:#f59e0b"></span> Viu Asian Dramas</button>
+              <button class="dropdown-item" data-ott="vivamax"><span class="dropdown-dot" style="background:#f97316"></span> Vivamax Filipino</button>
+              <button class="dropdown-item" data-ott="hoichoi"><span class="dropdown-dot" style="background:#ef4444"></span> Hoichoi Bengali</button>
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item" data-ott="marvel"><span class="dropdown-dot" style="background:#ed1d24"></span> Marvel Universe</button>
+              <button class="dropdown-item" data-ott="dc"><span class="dropdown-dot" style="background:#0476f2"></span> DC Studios</button>
+              <button class="dropdown-item" data-ott="anime"><span class="dropdown-dot" style="background:#ec4899"></span> Anime [Dubbed]</button>
+              <button class="dropdown-item" data-ott="kdrama"><span class="dropdown-dot" style="background:#f43f5e"></span> Korean K-Drama</button>
+              <button class="dropdown-item" data-ott="bollywood"><span class="dropdown-dot" style="background:#eab308"></span> Bollywood Hits</button>
+              <button class="dropdown-item" data-ott="hollywood"><span class="dropdown-dot" style="background:#06b6d4"></span> Hollywood Hits</button>
+              <button class="dropdown-item" data-ott="boxoffice"><span class="dropdown-dot" style="background:#10b981"></span> Top Box Office</button>
+            </div>
+          </div>
+          <a href="#" class="nav-link" data-nav="mylist">My List</a>
+          <a href="#" class="nav-link" data-nav="history">History</a>
+        </nav>
+      </div>
+
+      <div class="nav-right">
+        <!-- Live Search Bar -->
+        <div class="search-wrapper" id="searchWrapper">
+          <svg class="search-icon" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            type="text"
+            id="searchInput"
+            class="search-input"
+            placeholder="Search titles, genres... (Press /)"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button class="clear-search-btn hidden" id="clearSearchBtn">&times;</button>
+          <div class="search-shortcut">/</div>
+
+          <!-- Autocomplete Dropdown -->
+          <div class="suggestions-popover hidden" id="suggestionsPopover"></div>
+        </div>
+
+        <button class="icon-btn" id="shortcutsBtn" title="Keyboard Shortcuts (?)">
+          <svg viewBox="0 0 24 24" class="header-icon"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Feature Showcase -->
+  <section class="hero-section" id="heroSection">
+    <div class="hero-backdrop" id="heroBackdrop"></div>
+    <div class="hero-vignette"></div>
+    <div class="hero-content">
+      <div class="hero-meta-badges">
+        <span class="badge badge-red" id="heroMediaType">MOVIE</span>
+        <span class="badge badge-gold" id="heroRating">⭐ 8.7</span>
+        <span class="badge badge-outline" id="heroYear">2026</span>
+        <span class="badge badge-outline">4K UHD</span>
+        <span class="badge badge-accent">ATMOS</span>
+      </div>
+      <h1 class="hero-title" id="heroTitle">Featured Title</h1>
+      <p class="hero-synopsis" id="heroSynopsis">Explore popular movies, trending series, and international hits with high-definition in-browser playback.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary btn-lg" id="heroPlayBtn">
+          <svg viewBox="0 0 24 24" class="btn-icon"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          Play Now
+        </button>
+        <button class="btn btn-secondary btn-lg" id="heroDetailsBtn">
+          <svg viewBox="0 0 24 24" class="btn-icon"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          More Info
+        </button>
+        <button class="btn btn-icon-round" id="heroFavBtn" title="Add to My List">
+          <svg viewBox="0 0 24 24" class="fav-icon"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </button>
+      </div>
+
+      <!-- Hero Slider Navigation Arrows & Indicators -->
+      <div class="hero-slider-nav">
+        <button class="hero-nav-arrow hero-prev" id="heroPrevBtn" aria-label="Previous Featured Title">‹</button>
+        <div class="hero-indicators" id="heroIndicators"></div>
+        <button class="hero-nav-arrow hero-next" id="heroNextBtn" aria-label="Next Featured Title">›</button>
+      </div>
+
+      <!-- Quick Search Bar in Hero -->
+      <div class="hero-quick-search">
+        <div class="quick-search-box">
+          <input type="text" id="heroSearchInput" placeholder="Quick search any movie, series, or anime..." />
+          <button id="heroSearchSubmitBtn" class="btn btn-primary">Search</button>
+        </div>
+        <div class="quick-tags" id="quickTags">
+          <span class="quick-tag-label">Trending:</span>
+          <button class="tag-chip" data-search="Avatar">Avatar</button>
+          <button class="tag-chip" data-search="Mirzapur">Mirzapur</button>
+          <button class="tag-chip" data-search="Stranger Things">Stranger Things</button>
+          <button class="tag-chip" data-search="Breaking Bad">Breaking Bad</button>
+          <button class="tag-chip" data-search="Inception">Inception</button>
+          <button class="tag-chip" data-search="Dune">Dune</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Body Content -->
+  <main class="main-container" id="mainContainer">
+    <!-- Carousel Rails View (Home) -->
+    <div id="railsView" class="view-active">
+
+      <!-- Top OTT Platforms & Studios Showcase (High Visibility Header) -->
+      <section class="rail-section platforms-rail-section" id="platformsSection">
+        <div class="rail-header">
+          <div>
+            <h2 class="rail-title"><span class="rail-indicator"></span> Streaming Networks & Platforms</h2>
+            <p class="rail-subtitle">Stream 4,500+ curated movies & exclusive TV shows by network</p>
+          </div>
+          <span class="platform-count-tag">9 Platforms Live</span>
+        </div>
+        <div class="ott-brand-cards" id="ottBrandCards">
+          <div class="ott-card ott-netflix" data-ott="netflix" data-title="Netflix Originals" data-color="#e50914">
+            <div class="ott-badge">2,270+</div>
+            <span class="ott-logo">NETFLIX</span>
+            <span class="ott-sub">Originals & Exclusives</span>
+          </div>
+          <div class="ott-card ott-prime" data-ott="primeVideo" data-title="Prime Video Exclusives" data-color="#00a8e1">
+            <div class="ott-badge">900+</div>
+            <span class="ott-logo">prime video</span>
+            <span class="ott-sub">Amazon Exclusives</span>
+          </div>
+          <div class="ott-card ott-disney" data-ott="disney" data-title="Disney+ Hotstar" data-color="#3b82f6">
+            <div class="ott-badge">210+</div>
+            <span class="ott-logo">Disney+</span>
+            <span class="ott-sub">Marvel & Star Wars</span>
+          </div>
+          <div class="ott-card ott-apple" data-ott="appleTV" data-title="Apple TV+ Originals" data-color="#a3a3a3">
+            <div class="ott-badge">260+</div>
+            <span class="ott-logo">tv+</span>
+            <span class="ott-sub">Apple Original Films</span>
+          </div>
+          <div class="ott-card ott-hulu" data-ott="hulu" data-title="Hulu Exclusives" data-color="#1ce783">
+            <div class="ott-badge">250+</div>
+            <span class="ott-logo">hulu</span>
+            <span class="ott-sub">Series & Docs</span>
+          </div>
+          <div class="ott-card ott-zee5" data-ott="zee5" data-title="Zee5 Exclusives" data-color="#a855f7">
+            <div class="ott-badge">240+</div>
+            <span class="ott-logo">ZEE5</span>
+            <span class="ott-sub">Blockbusters & Originals</span>
+          </div>
+          <div class="ott-card ott-viu" data-ott="viu" data-title="Viu Asian Dramas" data-color="#f59e0b">
+            <div class="ott-badge">220+</div>
+            <span class="ott-logo">viu</span>
+            <span class="ott-sub">Asian Dramas & Shows</span>
+          </div>
+          <div class="ott-card ott-vivamax" data-ott="vivamax" data-title="Vivamax Filipino" data-color="#f97316">
+            <div class="ott-badge">100+</div>
+            <span class="ott-logo">VIVAMAX</span>
+            <span class="ott-sub">Filipino Cinema</span>
+          </div>
+          <div class="ott-card ott-hoichoi" data-ott="hoichoi" data-title="Hoichoi Bengali" data-color="#ef4444">
+            <div class="ott-badge">New</div>
+            <span class="ott-logo">hoichoi</span>
+            <span class="ott-sub">Bengali Originals</span>
+          </div>
+        </div>
+
+        <!-- Universe & Studio Chips Bar -->
+        <div class="universe-chips-bar">
+          <span class="universe-label">Studio Universes:</span>
+          <div class="universe-chips" id="universeChips">
+            <button class="universe-chip chip-marvel" data-ott="marvel" data-title="Marvel Cinematic Universe">
+              <span class="chip-dot"></span>Marvel Universe
+            </button>
+            <button class="universe-chip chip-dc" data-ott="dc" data-title="DC Studios Universe">
+              <span class="chip-dot"></span>DC Studios
+            </button>
+            <button class="universe-chip chip-anime" data-ott="anime" data-title="Anime [English Dubbed]">
+              <span class="chip-dot"></span>Anime (Dubbed)
+            </button>
+            <button class="universe-chip chip-kdrama" data-ott="kdrama" data-title="Korean K-Drama">
+              <span class="chip-dot"></span>K-Drama
+            </button>
+            <button class="universe-chip chip-bollywood" data-ott="bollywood" data-title="Bollywood Blockbusters">
+              <span class="chip-dot"></span>Bollywood
+            </button>
+            <button class="universe-chip chip-hollywood" data-ott="hollywood" data-title="Hollywood Hits">
+              <span class="chip-dot"></span>Hollywood Hits
+            </button>
+            <button class="universe-chip chip-boxoffice" data-ott="boxoffice" data-title="Top All-Time Box Office">
+              <span class="chip-dot"></span>Top Box Office
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Continue Watching Rail (if history exists) -->
+      <section class="rail-section hidden" id="continueWatchingSection">
+        <div class="rail-header">
+          <h2 class="rail-title"><span class="rail-indicator"></span> Continue Watching</h2>
+          <button class="rail-clear-btn" id="clearHistoryBtn">Clear History</button>
+        </div>
+        <div class="rail-carousel-wrapper">
+          <button class="rail-nav-btn rail-prev" data-target="continueWatchingList">‹</button>
+          <div class="rail-carousel" id="continueWatchingList"></div>
+          <button class="rail-nav-btn rail-next" data-target="continueWatchingList">›</button>
+        </div>
+      </section>
+
+      <!-- Trending Rail -->
+      <section class="rail-section">
+        <div class="rail-header">
+          <div>
+            <h2 class="rail-title"><span class="rail-indicator"></span> Trending Now</h2>
+            <p class="rail-subtitle">Hottest releases trending across all networks</p>
+          </div>
+          <button class="rail-view-all-btn" data-tab="2">View All ›</button>
+        </div>
+        <div class="rail-carousel-wrapper">
+          <button class="rail-nav-btn rail-prev" data-target="trendingCarousel">‹</button>
+          <div class="rail-carousel" id="trendingCarousel"></div>
+          <button class="rail-nav-btn rail-next" data-target="trendingCarousel">›</button>
+        </div>
+      </section>
+
+      <!-- Netflix Originals Preview Rail -->
+      <section class="rail-section" id="netflixRailSection">
+        <div class="rail-header">
+          <div>
+            <h2 class="rail-title"><span class="rail-indicator" style="background:#e50914;"></span> Netflix Originals & Exclusives</h2>
+            <p class="rail-subtitle">Popular Netflix movies and series streaming now</p>
+          </div>
+          <button class="rail-view-all-btn platform-link-btn" data-ott="netflix" data-title="Netflix Originals">View All Netflix (2,270+) ›</button>
+        </div>
+        <div class="rail-carousel-wrapper">
+          <button class="rail-nav-btn rail-prev" data-target="netflixCarousel">‹</button>
+          <div class="rail-carousel" id="netflixCarousel"></div>
+          <button class="rail-nav-btn rail-next" data-target="netflixCarousel">›</button>
+        </div>
+      </section>
+
+      <!-- Prime Video Exclusives Preview Rail -->
+      <section class="rail-section" id="primeRailSection">
+        <div class="rail-header">
+          <div>
+            <h2 class="rail-title"><span class="rail-indicator" style="background:#00a8e1;"></span> Prime Video Exclusives</h2>
+            <p class="rail-subtitle">Amazon Prime Video top rated originals</p>
+          </div>
+          <button class="rail-view-all-btn platform-link-btn" data-ott="primeVideo" data-title="Prime Video Exclusives">View All Prime (900+) ›</button>
+        </div>
+        <div class="rail-carousel-wrapper">
+          <button class="rail-nav-btn rail-prev" data-target="primeCarousel">‹</button>
+          <div class="rail-carousel" id="primeCarousel"></div>
+          <button class="rail-nav-btn rail-next" data-target="primeCarousel">›</button>
+        </div>
+      </section>
+
+      <!-- Disney+ & Marvel Universe Preview Rail -->
+      <section class="rail-section" id="disneyRailSection">
+        <div class="rail-header">
+          <div>
+            <h2 class="rail-title"><span class="rail-indicator" style="background:#3b82f6;"></span> Disney+ & Marvel Showcase</h2>
+            <p class="rail-subtitle">Disney+ Hotstar, Star Wars, Pixar & Marvel titles</p>
+          </div>
+          <button class="rail-view-all-btn platform-link-btn" data-ott="disney" data-title="Disney+ Hotstar">View All Disney+ (210+) ›</button>
+        </div>
+        <div class="rail-carousel-wrapper">
+          <button class="rail-nav-btn rail-prev" data-target="disneyCarousel">‹</button>
+          <div class="rail-carousel" id="disneyCarousel"></div>
+          <button class="rail-nav-btn rail-next" data-target="disneyCarousel">›</button>
+        </div>
+      </section>
+
+      <!-- Popular Movies Rail -->
+      <section class="rail-section">
+        <div class="rail-header">
+          <div>
+            <h2 class="rail-title"><span class="rail-indicator"></span> Popular Movies</h2>
+            <p class="rail-subtitle">Top rated movies in cinema and on demand</p>
+          </div>
+          <button class="rail-view-all-btn" data-tab="1">View All ›</button>
+        </div>
+        <div class="rail-carousel-wrapper">
+          <button class="rail-nav-btn rail-prev" data-target="moviesCarousel">‹</button>
+          <div class="rail-carousel" id="moviesCarousel"></div>
+          <button class="rail-nav-btn rail-next" data-target="moviesCarousel">›</button>
+        </div>
+      </section>
+
+      <!-- TV Series Rail -->
+      <section class="rail-section">
+        <div class="rail-header">
+          <div>
+            <h2 class="rail-title"><span class="rail-indicator"></span> Bingeworthy TV Series</h2>
+            <p class="rail-subtitle">Multi-season drama, sci-fi, comedy and anime</p>
+          </div>
+          <button class="rail-view-all-btn" data-tab="3">View All ›</button>
+        </div>
+        <div class="rail-carousel-wrapper">
+          <button class="rail-nav-btn rail-prev" data-target="seriesCarousel">‹</button>
+          <div class="rail-carousel" id="seriesCarousel"></div>
+          <button class="rail-nav-btn rail-next" data-target="seriesCarousel">›</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Dedicated Platform Showcase View -->
+    <div id="platformView" class="hidden">
+      <!-- Branded Platform Hero Header -->
+      <div class="platform-hero-header" id="platformHeroHeader">
+        <div class="platform-hero-glow" id="platformHeroGlow"></div>
+        <div class="platform-hero-content">
+          <button class="btn btn-secondary btn-sm platform-back-btn" id="platformBackBtn">
+            <svg viewBox="0 0 24 24" class="btn-icon"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <span>Back to Browse</span>
+          </button>
+          <div class="platform-brand-badge" id="platformBrandBadge">NETFLIX</div>
+          <h1 class="platform-title" id="platformTitle">Netflix Originals</h1>
+          <p class="platform-description" id="platformDescription">Explore the complete catalog of award-winning series, blockbuster movies, and international originals.</p>
+          <div class="platform-stats">
+            <span class="platform-stat-pill" id="platformTotalCount">2,271 Titles</span>
+            <span class="platform-stat-pill">4K UHD / HD</span>
+            <span class="platform-stat-pill">Multi-Audio & Dubs</span>
+            <span class="platform-stat-pill">Instant In-Browser Play</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls & Filter Toolbar -->
+      <div class="platform-controls-bar">
+        <div class="platform-filters" id="platformTypeFilters">
+          <button class="filter-chip active" data-type="all">All Content</button>
+          <button class="filter-chip" data-type="movie">Movies</button>
+          <button class="filter-chip" data-type="tv">TV Shows</button>
+        </div>
+        <div class="platform-sorting">
+          <label for="platformSortSelect" class="sort-label">Sort By:</label>
+          <select id="platformSortSelect" class="sort-select">
+            <option value="date" selected>Latest Releases</option>
+            <option value="rating">Top Rated (IMDb)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Platform Media Grid -->
+      <div class="media-grid" id="platformGrid"></div>
+
+      <!-- Platform Pagination / Load More -->
+      <div class="grid-pagination" id="platformPagination">
+        <button class="btn btn-secondary btn-lg" id="platformLoadMoreBtn">Load More Titles</button>
+      </div>
+    </div>
+
+    <!-- Grid View (Search Results, Movies, TV Shows, My List, History) -->
+    <div id="gridView" class="hidden">
+      <div class="grid-header">
+        <div>
+          <h2 class="grid-title" id="gridTitle">Search Results</h2>
+          <p class="grid-subtitle" id="gridSubtitle">Showing titles</p>
+        </div>
+        <div class="grid-filters" id="gridFilters">
+          <button class="filter-chip active" data-filter="all">All</button>
+          <button class="filter-chip" data-filter="movie">Movies</button>
+          <button class="filter-chip" data-filter="series">TV Shows</button>
+        </div>
+      </div>
+      <div class="media-grid" id="mediaGrid"></div>
+      <div class="grid-pagination" id="gridPagination">
+        <button class="btn btn-secondary" id="loadMoreBtn">Load More</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Media Details Modal -->
+  <div class="modal-backdrop hidden" id="detailsModal">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="modalCloseBtn">&times;</button>
+      <div class="modal-hero">
+        <div class="modal-hero-bg" id="modalHeroBg"></div>
+        <div class="modal-hero-overlay"></div>
+        <div class="modal-hero-content">
+          <div class="modal-poster-wrap">
+            <img id="modalPoster" src="" alt="Poster" class="modal-poster" />
+          </div>
+          <div class="modal-info">
+            <div class="modal-badges">
+              <span class="badge badge-red" id="modalMediaType">MOVIE</span>
+              <span class="badge badge-gold" id="modalRating">⭐ 8.5</span>
+              <span class="badge badge-outline" id="modalYear">2024</span>
+              <span class="badge badge-outline" id="modalDuration">128 min</span>
+            </div>
+            <h2 class="modal-title" id="modalTitle">Title</h2>
+            <p class="modal-tagline" id="modalTagline"></p>
+            <div class="modal-genres" id="modalGenres"></div>
+
+            <div class="modal-actions">
+              <button class="btn btn-primary btn-lg" id="modalPlayBtn">
+                <svg viewBox="0 0 24 24" class="btn-icon"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                Watch Now
+              </button>
+              <button class="btn btn-secondary btn-lg" id="modalFavBtn">
+                <svg viewBox="0 0 24 24" class="btn-icon"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                Add to List
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        <!-- Synopsis & Meta details -->
+        <div class="modal-synopsis-section">
+          <h3 class="section-heading">Overview</h3>
+          <p class="modal-overview" id="modalOverview">Storyline description...</p>
+
+          <div class="modal-credits" id="modalCredits">
+            <div class="credit-row" id="directorRow"><span class="credit-label">Director:</span> <span id="modalDirector" class="credit-val"></span></div>
+            <div class="credit-row" id="starsRow"><span class="credit-label">Starring:</span> <span id="modalStars" class="credit-val"></span></div>
+          </div>
+        </div>
+
+        <!-- Audio Dubs / Languages selector -->
+        <div class="modal-dubs-section hidden" id="modalDubsSection">
+          <h3 class="section-heading">Audio Track / Dub</h3>
+          <div class="dubs-list" id="modalDubsList"></div>
+        </div>
+
+        <!-- TV Series Seasons & Episodes -->
+        <div class="modal-series-section hidden" id="modalSeriesSection">
+          <div class="series-nav-bar">
+            <div class="season-selector-wrapper">
+              <label for="seasonSelect" class="season-label">Season:</label>
+              <select id="seasonSelect" class="season-select"></select>
+            </div>
+            <div class="episode-search-wrapper">
+              <input type="text" id="episodeSearchInput" placeholder="Filter episodes..." />
+            </div>
+          </div>
+          <div class="episodes-grid" id="episodesGrid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- In-Browser Video Player Overlay -->
+  <div class="player-overlay hidden" id="playerOverlay">
+    <div class="player-container" id="playerContainer">
+      <!-- Player Header Bar -->
+      <div class="player-header" id="playerHeader">
+        <button class="player-back-btn" id="playerBackBtn">
+          <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <span>Back to Browse</span>
+        </button>
+        <div class="player-title-info">
+          <span class="player-title" id="playerMediaTitle">Movie Title</span>
+          <span class="player-subtitle" id="playerMediaSubtitle"></span>
+        </div>
+        <div class="player-header-actions">
+          <!-- Server / Source Picker -->
+          <div class="player-menu-wrapper" id="serverMenuWrapper">
+            <button class="player-btn player-text-btn" id="serverMenuBtn" title="Streaming Server">
+              <svg viewBox="0 0 24 24" class="server-icon"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+              <span id="currentServerLabel">Server</span>
+              <svg viewBox="0 0 24 24" style="width:12px;height:12px;margin-left:4px;stroke:currentColor;fill:none;stroke-width:2;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="player-menu hidden" id="serverMenu"></div>
+          </div>
+          <button class="player-icon-btn" id="playerInfoBtn" title="Shortcuts (?)">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading / Buffering Spinner -->
+      <div class="player-spinner" id="playerSpinner">
+        <div class="spinner-ring"></div>
+        <span class="spinner-text" id="spinnerText">Loading stream...</span>
+      </div>
+
+      <!-- Native HTML5 Video Element -->
+      <video id="videoElement" class="video-element" playsinline crossorigin="anonymous"></video>
+
+      <!-- Universal Fallback Web Embed Player -->
+      <iframe id="embedPlayerIframe" class="embed-player-iframe hidden" allowfullscreen allow="autoplay; fullscreen; picture-in-picture; encrypted-media"></iframe>
+
+      <!-- Center Big Splash Icon (on play/pause) -->
+      <div class="player-center-icon hidden" id="playerCenterIcon">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+      </div>
+
+      <!-- Next Episode Countdown Prompt Card (appears at 92% of episode) -->
+      <div class="next-ep-prompt hidden" id="nextEpPrompt">
+        <div class="next-ep-card">
+          <span class="next-badge">UP NEXT</span>
+          <h4 id="nextEpTitle">Episode 2</h4>
+          <p id="nextEpCountdown">Playing in 10s...</p>
+          <div class="next-ep-actions">
+            <button class="btn btn-primary btn-sm" id="playNextNowBtn">Play Now</button>
+            <button class="btn btn-secondary btn-sm" id="cancelNextBtn">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Player Controls Bar -->
+      <div class="player-controls" id="playerControls">
+        <!-- Scrubber Progress Bar -->
+        <div class="progress-bar-container" id="progressBarContainer">
+          <div class="progress-hover-time" id="progressHoverTime">00:00</div>
+          <div class="progress-track">
+            <div class="progress-buffer" id="progressBuffer"></div>
+            <div class="progress-played" id="progressPlayed"></div>
+            <div class="progress-handle" id="progressHandle"></div>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <!-- Left Controls -->
+          <div class="controls-left">
+            <button class="player-btn" id="playPauseBtn" title="Play/Pause (Space / K)">
+              <svg viewBox="0 0 24 24" id="playIcon"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              <svg viewBox="0 0 24 24" id="pauseIcon" class="hidden"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+            </button>
+            <button class="player-btn" id="rewindBtn" title="Rewind 10s (← / J)">
+              <svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
+            </button>
+            <button class="player-btn" id="forwardBtn" title="Forward 10s (→ / L)">
+              <svg viewBox="0 0 24 24"><path d="M13 6v12l8.5-6L13 6zM4 6v12l8.5-6L4 6z"/></svg>
+            </button>
+
+            <!-- Volume Control -->
+            <div class="volume-container">
+              <button class="player-btn" id="volumeBtn" title="Mute/Unmute (M)">
+                <svg viewBox="0 0 24 24" id="volumeHighIcon"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                <svg viewBox="0 0 24 24" id="volumeMutedIcon" class="hidden"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+              </button>
+              <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.05" value="1" />
+            </div>
+
+            <!-- Time Display -->
+            <div class="time-display">
+              <span id="currentTime">00:00:00</span> / <span id="durationTime">00:00:00</span>
+            </div>
+          </div>
+
+          <!-- Right Controls -->
+          <div class="controls-right">
+            <!-- Next Episode Quick Button -->
+            <button class="player-btn hidden" id="nextEpisodeControlBtn" title="Next Episode (N)">
+              <svg viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+            </button>
+
+            <!-- Resolution Quality Picker -->
+            <div class="player-menu-wrapper">
+              <button class="player-btn player-text-btn" id="qualityMenuBtn" title="Resolution">
+                <span id="currentQualityLabel">1080p</span>
+              </button>
+              <div class="player-menu hidden" id="qualityMenu"></div>
+            </div>
+
+            <!-- Audio Dub Picker -->
+            <div class="player-menu-wrapper" id="audioDubMenuWrapper">
+              <button class="player-btn" id="audioDubMenuBtn" title="Audio Track">
+                <svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+              </button>
+              <div class="player-menu hidden" id="audioDubMenu"></div>
+            </div>
+
+            <!-- Subtitles Picker -->
+            <div class="player-menu-wrapper">
+              <button class="player-btn" id="subtitlesMenuBtn" title="Subtitles">
+                <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 15h3M14 15h3M7 11h10"/></svg>
+              </button>
+              <div class="player-menu hidden" id="subtitlesMenu"></div>
+            </div>
+
+            <!-- Playback Speed Picker -->
+            <div class="player-menu-wrapper">
+              <button class="player-btn player-text-btn" id="speedMenuBtn" title="Playback Speed">
+                <span id="currentSpeedLabel">1x</span>
+              </button>
+              <div class="player-menu hidden" id="speedMenu">
+                <button class="menu-item" data-speed="0.5">0.5x</button>
+                <button class="menu-item" data-speed="0.75">0.75x</button>
+                <button class="menu-item active" data-speed="1">1.0x (Normal)</button>
+                <button class="menu-item" data-speed="1.25">1.25x</button>
+                <button class="menu-item" data-speed="1.5">1.5x</button>
+                <button class="menu-item" data-speed="2">2.0x</button>
+              </div>
+            </div>
+
+            <!-- Picture in Picture -->
+            <button class="player-btn" id="pipBtn" title="Picture in Picture (P)">
+              <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><rect x="12" y="11" width="8" height="7" rx="1"/></svg>
+            </button>
+
+            <!-- Fullscreen -->
+            <button class="player-btn" id="fullscreenBtn" title="Fullscreen (F)">
+              <svg viewBox="0 0 24 24" id="fullscreenOpenIcon"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+              <svg viewBox="0 0 24 24" id="fullscreenExitIcon" class="hidden"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Keyboard Shortcuts Modal -->
+  <div class="modal-backdrop hidden" id="shortcutsModal">
+    <div class="shortcuts-card">
+      <div class="shortcuts-header">
+        <h3>Keyboard Shortcuts</h3>
+        <button class="modal-close-btn" id="shortcutsCloseBtn">&times;</button>
+      </div>
+      <div class="shortcuts-grid">
+        <div class="shortcut-item"><kbd>Space</kbd> / <kbd>K</kbd> <span>Play / Pause</span></div>
+        <div class="shortcut-item"><kbd>F</kbd> <span>Toggle Fullscreen</span></div>
+        <div class="shortcut-item"><kbd>M</kbd> <span>Mute / Unmute</span></div>
+        <div class="shortcut-item"><kbd>←</kbd> / <kbd>J</kbd> <span>Seek Backward 10s</span></div>
+        <div class="shortcut-item"><kbd>→</kbd> / <kbd>L</kbd> <span>Seek Forward 10s</span></div>
+        <div class="shortcut-item"><kbd>↑</kbd> / <kbd>↓</kbd> <span>Volume Up / Down</span></div>
+        <div class="shortcut-item"><kbd>/</kbd> <span>Focus Search Bar</span></div>
+        <div class="shortcut-item"><kbd>Esc</kbd> <span>Close Player / Modals</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <span class="logo-text">NETMIRROR</span>
+        <p class="footer-desc">Powered by MovieBox backend. Stream movies, TV series, and anime directly in your browser.</p>
+      </div>
+      <div class="footer-links">
+        <a href="#" data-nav="home">Home</a>
+        <a href="#" data-nav="movies">Movies</a>
+        <a href="#" data-nav="series">TV Shows</a>
+        <a href="#" data-nav="trending">Trending</a>
+        <a href="https://github.com/mesamirh/MovieBox-Tui" target="_blank" rel="noreferrer">GitHub Project</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 NetMirror / MovieBox Web. Clean UI/UX & Native In-Browser Streaming.</p>
+    </div>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
+

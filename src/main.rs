@@ -83,12 +83,28 @@ async fn main() -> std::io::Result<()> {
         moviebox_tui::proxy::run_sidecar(target_url, headers, sub_url, max_height).await;
         return Ok(());
     }
+    if args.iter().any(|arg| arg == "--web" || arg == "--serve") {
+        let port = if let Some(pos) = args.iter().position(|a| a == "--port" || a == "-p") {
+            args.get(pos + 1)
+                .and_then(|s| s.parse::<u16>().ok())
+                .unwrap_or(3000)
+        } else if let Ok(env_port) = std::env::var("PORT") {
+            env_port.parse::<u16>().unwrap_or(3000)
+        } else {
+            3000
+        };
+        return moviebox_tui::web::run_server(port)
+            .await
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()));
+    }
     if args.iter().any(|arg| arg == "--help" || arg == "-h") {
         println!("moviebox-tui {}", env!("CARGO_PKG_VERSION"));
         println!("A terminal client for finding and streaming movies, TV shows, and anime.\n");
         println!("USAGE:");
         println!("    moviebox-tui [OPTIONS]\n");
         println!("OPTIONS:");
+        println!("    --web, --serve       Start the browser web streaming interface");
+        println!("    -p, --port <PORT>    Port for the web server (default: 3000)");
         println!("    -h, --help           Print help information");
         println!("    -v, -V, --version    Print version information\n");
         println!("ENVIRONMENT VARIABLES:");

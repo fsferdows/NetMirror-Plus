@@ -1,165 +1,132 @@
 <div align="center">
 
-# MovieBox-TUI
+# 🍿 NetMirror Plus (MovieBox Web)
 
-**Terminal interface to find, download, and stream movies, TV shows, and live TV using local media players.**
+**High-Performance In-Browser Cinema Streaming Platform & OTT Network Aggregator**
 
-[ English ](README.md) • [ বাংলা ](README_BN.md) • [ हिन्दी ](README_HI.md) • [ Español ](README_ES.md)
+[![Rust](https://img.shields.io/badge/rust-2024%20edition-orange.svg?logo=rust)](https://www.rust-lang.org/)
+[![Axum](https://img.shields.io/badge/axum-0.8-blue.svg)](https://github.com/tokio-rs/axum)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/new)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
 
-[![CI](https://img.shields.io/github/actions/workflow/status/mesamirh/MovieBox-Tui/ci.yml?branch=main&label=CI&logo=github&style=flat)](https://github.com/mesamirh/MovieBox-Tui/actions/workflows/ci.yml)
-[![crates.io](https://img.shields.io/crates/v/moviebox-tui.svg?logo=rust&style=flat)](https://crates.io/crates/moviebox-tui)
-[![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg?style=flat)](#license)
-[![Telegram](https://img.shields.io/badge/Telegram-Channel-2CA5E0?style=flat&logo=telegram&logoColor=white)](https://t.me/getfromme)
-[![Support](https://img.shields.io/badge/Support-Crypto-F7931A?style=flat&logo=bitcoin&logoColor=white)](#optional-support)
 </div>
 
-[moviebox-tui-walkthrough.webm](https://github.com/user-attachments/assets/7554a7e5-6ff5-49ec-9d87-f821ea99950e)
+---
 
-## Features
+## 🌟 Key Features
 
-- **Streaming:** Movies, TV series, anime, Asian dramas, and community Stremio addons across multiple native providers.
-- **Live TV:** M3U playlist import with channel categories, EPG support, and search.
-- **Resolution Picker:** Direct stream quality selection (`4K`, `1080p`, `720p`, `480p`, `Auto`) before playback.
-- **Hardware Players:** Direct launch in `mpv`, `VLC`, or `IINA` with custom auth header and cookie forwarding.
-- **Batch Downloader:** Multi-segment concurrent downloader with HTTP range pause and resume for episodes and full seasons.
-- **Subtitle Picker:** Multi-language subtitle tracks extracted and selectable via an interactive picker before playback or download.
-- **Terminal UI:** Vim navigation, mouse interaction, slash command palette (`/help`, `/settings`), and 9 built-in themes.
-- **Cover Art:** Native Kitty, Sixel, and iTerm2 poster rendering with automatic text fallback.
-- **Resume & Library:** Home deck with continue-watching timestamps, watch history, and favorites stored strictly on local disk. Zero telemetry.
+- **🎬 In-Browser Cinema Player**: Native HTML5 streaming video player with instant playback, resolution quality selection (`1080p`, `720p`, `480p`, `360p`), speed controls (`0.5x` - `2.0x`), Picture-in-Picture, full seeking scrub bar, and TV series auto-next episode prompt.
+- **🌐 Top 9 OTT Streaming Platforms**:
+  - **Netflix Originals** (2,270+ titles)
+  - **Prime Video Exclusives** (900+ titles)
+  - **Disney+ Hotstar** (210+ titles)
+  - **Apple TV+ Originals** (260+ titles)
+  - **Hulu Exclusives** (250+ titles)
+  - **Zee5 Originals & Blockbusters** (240+ titles)
+  - **Viu Asian Dramas** (220+ titles)
+  - **Vivamax Filipino Cinema** (100+ titles)
+  - **Hoichoi Bengali Originals**
+- **🦸 Studio Universes & Curated Collections**:
+  - **Marvel Cinematic Universe (MCU)**
+  - **DC Studios Universe**
+  - **Anime [English Dubbed]** (One Piece, Jujutsu Kaisen, Demon Slayer, etc.)
+  - **Korean K-Drama**
+  - **Bollywood Blockbusters**
+  - **Hollywood Hits**
+  - **Top All-Time Box Office**
+- **🎧 Multi-Audio & Dubs**: Real-time extraction of Hindi, Tamil, Telugu, English, and regional sibling audio tracks.
+- **💬 Live Subtitles**: Real-time extraction and conversion to standard WebVTT subtitle tracks.
+- **🛡️ Universal Cloud Mirrors**: Automatic fallback to verified fast cloud stream mirrors (VidSrc, MultiEmbed, 2Embed, VidLink) with zero broken dead links.
+- **💾 Local Privacy Storage**: Continue Watching progress timestamps and My List favorites stored locally in browser localStorage with zero telemetry.
 
-## Prerequisites
+---
 
-- **Media Player:** `mpv`, `VLC`, or `IINA` (macOS) / any external video player (Android).
-- **Posters:** Terminal with Sixel, Kitty, or iTerm2 support (Ghostty, Kitty, WezTerm, iTerm2, foot, Windows Terminal v1.22+).
-- **DASH Downloads:** `yt-dlp` and `ffmpeg` (required only for MovieBox DASH downloads).
+## 🚀 Quick Start (Local)
 
-## Installation
+### Prerequisites
+- [Rust](https://rustup.rs/) (1.85+)
 
-### macOS & Linux
-
-If you have [Homebrew](https://brew.sh/) on macOS:
+### Clone & Run
 ```bash
-brew tap mesamirh/moviebox-tui https://github.com/mesamirh/MovieBox-Tui
-brew install moviebox-tui
+# Clone the repository
+git clone https://github.com/fsferdows/NetMirror-Plus.git
+cd NetMirror-Plus
+
+# Start the web server
+./start.sh
 ```
-
-> **Note:** If Homebrew prompts for tap verification on initial install, run `brew trust mesamirh/moviebox-tui`.
-
-Direct install via Terminal (macOS & Linux, no package manager needed):
+Or directly with cargo:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/mesamirh/MovieBox-Tui/main/install.sh | bash
+cargo run --release --bin moviebox_web
 ```
+Open **`http://localhost:3000`** in any web browser.
 
-### Windows
+---
 
-If you have [Scoop](https://scoop.sh/) (recommended):
-```powershell
-scoop bucket add moviebox https://github.com/mesamirh/MovieBox-Tui
-scoop install moviebox-tui
-```
+## 🐳 Docker Deployment
 
-Direct install via PowerShell (no package manager needed):
-```powershell
-irm https://raw.githubusercontent.com/mesamirh/MovieBox-Tui/main/install.ps1 | iex
-```
-
-> **SmartScreen prompt:** If Windows displays *"Windows protected your PC"*, click **More info** → **Run anyway**.
-
-### Android (Termux)
+### Run with Docker
 ```bash
-pkg update && pkg install -y curl tar termux-tools termux-am
-curl -fsSL https://raw.githubusercontent.com/mesamirh/MovieBox-Tui/main/install.sh | bash
-termux-setup-storage
+# Build the Docker image
+docker build -t netmirror-plus .
+
+# Run container on port 3000
+docker run -d -p 3000:3000 --name netmirror netmirror-plus
 ```
+Access at `http://localhost:3000`.
 
-<details>
-<summary><b>Cargo & Source Build</b></summary>
+---
 
+## ☁️ 1-Click Cloud Deployment from GitHub
+
+### Option A: Render
+1. Push this repository to your GitHub account (`fsferdows/NetMirror-Plus`).
+2. Log in to [Render.com](https://render.com/).
+3. Click **New +** > **Web Service**.
+4. Select your **`NetMirror-Plus`** repository.
+5. Render detects the `Dockerfile` automatically (or uses `render.yaml`).
+6. Click **Deploy Web Service**!
+
+### Option B: Railway
+1. Log in to [Railway.app](https://railway.app/).
+2. Click **New Project** > **Deploy from GitHub repo**.
+3. Select **`NetMirror-Plus`**.
+4. Railway builds the Docker image and gives you a live public HTTPS URL with automatic SSL.
+
+### Option C: Fly.io / Koyeb / VPS
+Run anywhere using the standard Docker image:
 ```bash
-cargo install moviebox-tui --locked
+fly launch
 ```
 
-From source:
-```bash
-git clone https://github.com/mesamirh/MovieBox-Tui.git
-cd MovieBox-Tui
-cargo build --release --locked
+---
+
+## 🏗️ Architecture
+
+```
+NetMirror-Plus/
+├── Cargo.toml                  # Rust dependencies (Axum, Tokio, Reqwest, Tower)
+├── Dockerfile                  # Multi-stage production container build
+├── render.yaml                 # Render Blueprint configuration
+├── railway.json                # Railway deployment configuration
+├── .github/workflows/deploy.yml # GitHub Actions CI & Docker registry pipeline
+├── src/
+│   ├── bin/
+│   │   └── moviebox_web.rs     # Web server entrypoint with $PORT support
+│   ├── web/
+│   │   ├── mod.rs              # Axum server routes & middleware
+│   │   ├── api.rs              # Platform, browse, search, details & streams endpoints
+│   │   ├── proxy.rs            # Video stream streaming proxy
+│   │   └── subtitles.rs        # Subtitle parser & VTT converter
+│   └── ...
+└── web/                        # High-End Cinema UI (Vanilla JS & Modern CSS)
+    ├── index.html              # Main single-page web app
+    ├── styles.css              # Dark cinema glassmorphism styling
+    └── app.js                  # Player controls, platform showcase, auto-rotation
 ```
 
-</details>
+---
 
-<details>
-<summary><b>Verify Release Integrity</b></summary>
-
-```bash
-sha256sum -c SHA256SUMS --ignore-missing
-gh attestation verify <archive-file> -R mesamirh/MovieBox-Tui
-```
-
-</details>
-
-<details>
-<summary><b>Uninstall</b></summary>
-
-Re-run install command (`curl ... | bash` or `irm ... | iex`) and select `2) Uninstall`.
-
-Or via package manager:
-```bash
-brew uninstall moviebox-tui     # Homebrew
-scoop uninstall moviebox-tui    # Scoop
-cargo uninstall moviebox-tui    # Cargo
-```
-
-</details>
-
-## Quick Start
-
-```bash
-moviebox-tui
-```
-
-- Type to search, press `Enter` to play.
-- Press `?` for shortcuts, or type `/settings` for preferences.
-
-## Documentation
-
-Full documentation at [**mesamirh.github.io/MovieBox-Tui**](https://mesamirh.github.io/MovieBox-Tui/) or [`docs/`](docs/):
-
-| Guide | Description |
-| :--- | :--- |
-| [Keyboard & Controls](docs/controls.md) | Keybindings, vim navigation, and shortcuts |
-| [Configuration](docs/config.md) | Settings, themes, and environment variables |
-| [Content Providers](docs/providers.md) | Native scrapers (MovieBox, 4KHDHub, Dramachi, BDIX) |
-| [Stremio Addons](docs/addons-mode.md) | Community addon configuration and streaming |
-| [Hardware Players](docs/players.md) | Player detection, launch options, and flags |
-| [Live TV & IPTV](docs/tv-mode.md) | M3U playlist import and channel streaming |
-| [Batch Downloads](docs/downloads.md) | HTTP range engine, pause, and resume |
-
-## Contributing
-
-Review [CONTRIBUTING.md](CONTRIBUTING.md) before submitting pull requests. Report bugs via [GitHub Issues](https://github.com/mesamirh/MovieBox-Tui/issues).
-
-<details>
-<summary><b>Support</b></summary>
-<div id="optional-support" tabindex="-1"></div>
-
-| Asset | Address |
-| :--- | :--- |
-| **USDT (TRC20)** | `TL4yW73qmbKZpBWwbEFgjBpwVkPDFTkJgV` |
-| **Bitcoin (BTC)** | `3MEAtqtRWrQBhnaMi3Zuf5nt2efNUS2LUQ` |
-| **Ethereum (EVM)** | `0x7ea20d5fa29d87f33195f5a3b211ff94038d794c` |
-| **Solana (SOL)** | `6ctm5WFv73MNywoCKAz3xK72yizSspHa72rFNygooU6` |
-
-</details>
-
-## Privacy
-
-Zero telemetry, analytics, or user tracking. History, favorites, and config remain local.
-
-## License
-
-Dual-licensed under [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE).
-
-## Disclaimer
-
-MovieBox-TUI does not host or store media. It plays publicly available streams. Users must comply with local laws.
+## 📜 License
+Licensed under the [MIT License](LICENSE).

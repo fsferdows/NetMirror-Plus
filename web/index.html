@@ -26,6 +26,7 @@
           <a href="#" class="nav-link" data-nav="movies">Movies</a>
           <a href="#" class="nav-link" data-nav="series">TV Shows</a>
           <a href="#" class="nav-link" data-nav="trending">Trending</a>
+          <a href="#" class="nav-link nav-live-sports" data-nav="sports"><span class="live-dot-pulse"></span>Live Sports</a>
           <div class="nav-dropdown">
             <button class="nav-link dropdown-toggle" id="ottDropdownBtn">
               Platforms <svg class="chevron-icon" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
@@ -242,6 +243,24 @@
         </div>
       </section>
 
+      <!-- Live Sports Spotlight Rail -->
+      <section class="rail-section sports-spotlight-rail" id="sportsSpotlightSection">
+        <div class="rail-header">
+          <div>
+            <h2 class="rail-title"><span class="live-dot-pulse"></span> Live Sports Broadcasts</h2>
+            <p class="rail-subtitle">Live matches & tournaments streaming right now in HD</p>
+          </div>
+          <button class="rail-view-all-btn platform-link-btn" id="homeViewAllSportsBtn" style="background:rgba(229,9,20,0.18);border-color:rgba(229,9,20,0.4);">
+            <span class="live-dot-pulse"></span> Watch All Live Sports & Channels ›
+          </button>
+        </div>
+        <div class="rail-carousel-wrapper">
+          <button class="rail-nav-btn rail-prev" data-target="sportsSpotlightCarousel">‹</button>
+          <div class="rail-carousel sports-spotlight-carousel" id="sportsSpotlightCarousel"></div>
+          <button class="rail-nav-btn rail-next" data-target="sportsSpotlightCarousel">›</button>
+        </div>
+      </section>
+
       <!-- Trending Rail -->
       <section class="rail-section">
         <div class="rail-header">
@@ -384,6 +403,75 @@
       <div class="grid-pagination" id="platformPagination">
         <button class="btn btn-secondary btn-lg" id="platformLoadMoreBtn">Load More Titles</button>
       </div>
+    </div>
+
+    <!-- Dedicated Live Sports Streaming View -->
+    <div id="sportsView" class="hidden">
+      <!-- Sports Hero Header -->
+      <div class="sports-hero-header">
+        <div class="sports-hero-glow"></div>
+        <div class="sports-hero-content">
+          <button class="btn btn-secondary btn-sm sports-back-btn" id="sportsBackBtn">
+            <svg viewBox="0 0 24 24" class="btn-icon"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <span>Back to Browse</span>
+          </button>
+          <div class="sports-live-badge"><span class="live-dot-pulse"></span> LIVE BROADCASTS ACTIVE</div>
+          <h1 class="sports-hero-title">Live Sports & Match Broadcasts</h1>
+          <p class="sports-hero-desc">Watch every live sports match worldwide in full HD — Football, Basketball, Formula 1, NFL, UFC, Cricket, Tennis, and 24/7 Live Sports TV Networks with zero subscription.</p>
+          
+          <div class="sports-search-bar">
+            <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="sportsSearchInput" placeholder="Filter by team, club or tournament (e.g. Real Madrid, Arsenal, Lakers, UFC, F1)..." />
+            <span class="sports-matches-count" id="sportsLiveCount">Loading matches...</span>
+          </div>
+
+          <!-- Sport Category Chips -->
+          <div class="sports-categories-bar" id="sportsCategoryFilters">
+            <button class="sports-cat-btn active" data-cat="all">⚡ All Sports</button>
+            <button class="sports-cat-btn" data-cat="Soccer">⚽ Football</button>
+            <button class="sports-cat-btn" data-cat="NBA">🏀 Basketball</button>
+            <button class="sports-cat-btn" data-cat="NFL">🏈 American Football</button>
+            <button class="sports-cat-btn" data-cat="Motorsport">🏎️ F1 & Motorsport</button>
+            <button class="sports-cat-btn" data-cat="combat">🥊 UFC & Boxing</button>
+            <button class="sports-cat-btn" data-cat="Cricket">🏏 Cricket</button>
+            <button class="sports-cat-btn" data-cat="Tennis">🎾 Tennis</button>
+            <button class="sports-cat-btn" data-cat="Golf">⛳ Golf</button>
+            <button class="sports-cat-btn" data-cat="channels">📺 24/7 TV Channels</button>
+          </div>
+
+          <!-- Status Filters -->
+          <div class="sports-status-bar">
+            <div class="sports-status-tabs" id="sportsStatusTabs">
+              <button class="sports-tab active" data-status="all">All Fixtures</button>
+              <button class="sports-tab" data-status="live">🔴 Live Now</button>
+              <button class="sports-tab" data-status="upcoming">⏳ Upcoming / Today</button>
+            </div>
+            <button class="btn btn-secondary btn-sm" id="sportsRefreshBtn">
+              <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              <span>Refresh Fixtures</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Matches Section -->
+      <section class="sports-section" id="sportsMatchesSection">
+        <div class="sports-section-header">
+          <h2 class="sports-section-title"><span class="sports-indicator"></span> Live & Upcoming Matches</h2>
+          <span class="sports-counter-tag" id="sportsMatchesCount">Loading...</span>
+        </div>
+        <div class="sports-matches-grid" id="sportsMatchesGrid"></div>
+      </section>
+
+      <!-- 24/7 Live Sports TV Channels Section -->
+      <section class="sports-section" id="sportsChannelsSection">
+        <div class="sports-section-header">
+          <h2 class="sports-section-title"><span class="sports-indicator" style="background:#00d2ff"></span> 24/7 Live Sports TV Networks</h2>
+          <span class="sports-counter-tag" id="sportsChannelsCount">280+ Networks Live</span>
+        </div>
+        <p class="sports-section-subtitle">Stream major sports broadcasters live with zero subscription: Sky Sports, TNT Sports, beIN, TV2 Sport, ESPN, and regional channels.</p>
+        <div class="sports-channels-grid" id="sportsChannelsGrid"></div>
+      </section>
     </div>
 
     <!-- Grid View (Search Results, Movies, TV Shows, My List, History) -->

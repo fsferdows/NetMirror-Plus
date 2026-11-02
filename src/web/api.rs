@@ -1129,3 +1129,112 @@ pub async fn get_vtt_subtitle(
         )),
     }
 }
+
+pub async fn get_sports() -> Result<Json<serde_json::Value>, (StatusCode, String)> {
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_millis(5000))
+        .build()
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+
+    let (events_res, channels_res) = tokio::join!(
+        client.get("https://api.cdnlivetv.tv/api/v1/events/sports/?user=cdnlivetv&plan=free").header("User-Agent", "Mozilla/5.0").send(),
+        client.get("https://api.cdnlivetv.tv/api/v1/channels/?user=cdnlivetv&plan=free").header("User-Agent", "Mozilla/5.0").send(),
+    );
+
+    let events_json: Option<serde_json::Value> = match events_res {
+        Ok(res) => res.json().await.ok(),
+        Err(_) => None,
+    };
+
+    let channels_json: Option<serde_json::Value> = match channels_res {
+        Ok(res) => res.json().await.ok(),
+        Err(_) => None,
+    };
+
+    let mut matches = Vec::new();
+    let mut categories = Vec::new();
+
+    if let Some(root) = events_json.and_then(|j| j.get("cdn-live-tv").cloned()) {
+        if let Some(obj) = root.as_object() {
+            for (sport, val) in obj {
+                if sport.starts_with("total_") {
+                    continue;
+                }
+                if let Some(arr) = val.as_array() {
+                    categories.push(sport.clone());
+                    for ev in arr {
+                        let event_title = ev.get("event").and_then(|v| v.as_str()).unwrap_or("Live Match");
+                        let channels = ev.get("channels").and_then(|c| c.as_array()).cloned().unwrap_or_default();
+                        let has_stream = !channels.is_empty();
+
+                        let mut mapped_channels = Vec::new();
+                        for (idx, ch) in channels.iter().enumerate() {
+                            let name = ch.get("channel_name").and_then(|n| n.as_str()).map(|s| s.to_string()).unwrap_or_else(|| format!("Server {}", idx + 1));
+                            let id_str = ch.get("id").and_then(|i| i.as_str()).map(|s| s.to_string()).unwrap_or_else(|| idx.to_string());
+                            let url = ch.get("url").and_then(|u| u.as_str()).unwrap_or("");
+                            mapped_channels.push(serde_json::json!({
+                                "id": id_str,
+                                "name": name,
+                                "url": url
+                            }));
+                        }
+
+                        matches.push(serde_json::json!({
+                            "id": ev.get("gameID").and_then(|g| g.as_str()).unwrap_or(""),
+                            "sport": sport,
+                            "event": event_title,
+                            "home_team": ev.get("homeTeam").and_then(|h| h.as_str()).unwrap_or(""),
+                            "away_team": ev.get("awayTeam").and_then(|a| a.as_str()).unwrap_or(""),
+                            "home_logo": ev.get("homeTeamIMG").and_then(|l| l.as_str()).unwrap_or(""),
+                            "away_logo": ev.get("awayTeamIMG").and_then(|l| l.as_str()).unwrap_or(""),
+                            "tournament": ev.get("tournament").and_then(|t| t.as_str()).unwrap_or(sport),
+                            "country": ev.get("country").and_then(|c| c.as_str()).unwrap_or(""),
+                            "country_flag": ev.get("countryIMG").and_then(|f| f.as_str()).unwrap_or(""),
+                            "start": ev.get("start").and_then(|s| s.as_str()).unwrap_or(""),
+                            "time": ev.get("time").and_then(|t| t.as_str()).unwrap_or(""),
+                            "status": ev.get("status").and_then(|s| s.as_str()).unwrap_or("upcoming"),
+                            "has_stream": has_stream,
+                            "channels": mapped_channels
+                        }));
+                    }
+                }
+            }
+        }
+    }
+
+    // Sort: items with streams first
+    matches.sort_by(|a, b| {
+        let a_has = a.get("has_stream").and_then(|v| v.as_bool()).unwrap_or(false);
+        let b_has = b.get("has_stream").and_then(|v| v.as_bool()).unwrap_or(false);
+        b_has.cmp(&a_has)
+    });
+
+    let mut sports_tv = Vec::new();
+    if let Some(ch_arr) = channels_json.and_then(|j| j.get("channels").and_then(|c| c.as_array()).cloned()) {
+        for c in ch_arr {
+            let name = c.get("name").and_then(|n| n.as_str()).unwrap_or("");
+            let lower = name.to_lowercase();
+            if lower.contains("sport") || lower.contains("espn") || lower.contains("tnt") || lower.contains("bein") || lower.contains("sky") || lower.contains("fox") || lower.contains("dazn") || lower.contains("cricket") {
+                sports_tv.push(serde_json::json!({
+                    "name": name,
+                    "url": c.get("url").and_then(|u| u.as_str()).unwrap_or(""),
+                    "status": c.get("status").and_then(|s| s.as_str()).unwrap_or("online")
+                }));
+                if sports_tv.len() >= 60 {
+                    break;
+                }
+            }
+        }
+    }
+
+    let live_count = matches.iter().filter(|m| m.get("has_stream").and_then(|v| v.as_bool()).unwrap_or(false)).count();
+    let total_matches = matches.len();
+
+    Ok(Json(serde_json::json!({
+        "total_matches": total_matches,
+        "live_count": live_count,
+        "categories": categories,
+        "matches": matches,
+        "channels": sports_tv
+    })))
+}

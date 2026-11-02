@@ -38,6 +38,14 @@
     platformSort: 'date',
     platformItems: [],
     isPlatformLoading: false,
+    // Sports Streaming State
+    sportsMatches: [],
+    sportsChannels: [],
+    sportsCategories: [],
+    sportsActiveCat: 'all',
+    sportsActiveStatus: 'all',
+    sportsSearchQuery: '',
+    isSportsLoading: false,
     history: JSON.parse(localStorage.getItem('netmirror_history') || '[]'),
     favorites: JSON.parse(localStorage.getItem('netmirror_favorites') || '[]'),
     isPlaying: false,
@@ -98,6 +106,23 @@
     platformSortSelect: document.getElementById('platformSortSelect'),
     platformGrid: document.getElementById('platformGrid'),
     platformLoadMoreBtn: document.getElementById('platformLoadMoreBtn'),
+
+    // Dedicated Live Sports View & Components
+    sportsView: document.getElementById('sportsView'),
+    sportsHeroHeader: document.querySelector('.sports-hero-header'),
+    sportsBackBtn: document.getElementById('sportsBackBtn'),
+    sportsSearchInput: document.getElementById('sportsSearchInput'),
+    sportsLiveCount: document.getElementById('sportsLiveCount'),
+    sportsCategoryFilters: document.getElementById('sportsCategoryFilters'),
+    sportsStatusTabs: document.getElementById('sportsStatusTabs'),
+    sportsRefreshBtn: document.getElementById('sportsRefreshBtn'),
+    sportsMatchesGrid: document.getElementById('sportsMatchesGrid'),
+    sportsChannelsGrid: document.getElementById('sportsChannelsGrid'),
+    sportsMatchesCount: document.getElementById('sportsMatchesCount'),
+    sportsChannelsCount: document.getElementById('sportsChannelsCount'),
+    sportsSpotlightSection: document.getElementById('sportsSpotlightSection'),
+    sportsSpotlightCarousel: document.getElementById('sportsSpotlightCarousel'),
+    homeViewAllSportsBtn: document.getElementById('homeViewAllSportsBtn'),
 
     // Carousels
     continueWatchingSection: document.getElementById('continueWatchingSection'),
@@ -272,6 +297,7 @@
     setupEventListeners();
     renderContinueWatching();
     await fetchBrowseData();
+    fetchSportsData().catch(() => {});
   }
 
   async function fetchBrowseData() {
@@ -1224,16 +1250,25 @@
       el.heroSection.classList.remove('hidden');
       el.gridView.classList.add('hidden');
       if (el.platformView) el.platformView.classList.add('hidden');
+      if (el.sportsView) el.sportsView.classList.add('hidden');
     } else if (viewName === 'platform') {
       el.railsView.classList.add('hidden');
       el.heroSection.classList.add('hidden');
       el.gridView.classList.add('hidden');
       if (el.platformView) el.platformView.classList.remove('hidden');
+      if (el.sportsView) el.sportsView.classList.add('hidden');
+    } else if (viewName === 'sports') {
+      el.railsView.classList.add('hidden');
+      el.heroSection.classList.add('hidden');
+      el.gridView.classList.add('hidden');
+      if (el.platformView) el.platformView.classList.add('hidden');
+      if (el.sportsView) el.sportsView.classList.remove('hidden');
     } else {
       el.railsView.classList.add('hidden');
       el.heroSection.classList.add('hidden');
       el.gridView.classList.remove('hidden');
       if (el.platformView) el.platformView.classList.add('hidden');
+      if (el.sportsView) el.sportsView.classList.add('hidden');
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -1387,6 +1422,425 @@
     }
   }
 
+  // ==========================================================================
+  // LIVE SPORTS STREAMING LOGIC
+  // ==========================================================================
+  function getSportEmoji(sport) {
+    if (!sport) return '🏆';
+    const s = sport.toLowerCase();
+    if (s.includes('soccer') || s.includes('football')) return '⚽';
+    if (s.includes('nba') || s.includes('basketball')) return '🏀';
+    if (s.includes('nfl') || s.includes('american football')) return '🏈';
+    if (s.includes('motorsport') || s.includes('f1') || s.includes('formula')) return '🏎️';
+    if (s.includes('combat') || s.includes('ufc') || s.includes('mma') || s.includes('boxing') || s.includes('wwe')) return '🥊';
+    if (s.includes('cricket')) return '🏏';
+    if (s.includes('tennis')) return '🎾';
+    if (s.includes('golf')) return '⛳';
+    if (s.includes('hockey') || s.includes('nhl')) return '🏒';
+    if (s.includes('baseball') || s.includes('mlb')) return '⚾';
+    if (s.includes('darts')) return '🎯';
+    if (s.includes('rugby')) return '🏉';
+    if (s.includes('cycling')) return '🚴';
+    if (s.includes('volleyball')) return '🏐';
+    return '🏆';
+  }
+
+  function openSportsView() {
+    state.currentNav = 'sports';
+    el.navLinks.forEach((link) => {
+      link.classList.toggle('active', link.dataset.nav === 'sports');
+    });
+    switchView('sports');
+    if (!state.sportsMatches || state.sportsMatches.length === 0) {
+      fetchSportsData(true);
+    } else {
+      renderSportsMatches();
+      renderSportsChannels();
+    }
+  }
+
+  async function fetchSportsData(showSpinner = false) {
+    if (state.isSportsLoading) return;
+    state.isSportsLoading = true;
+    if (showSpinner && el.sportsMatchesGrid) {
+      el.sportsMatchesGrid.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--text-muted);">
+          <div class="spinner" style="width: 36px; height: 36px; border-width: 3px; margin: 0 auto 16px;"></div>
+          <div style="font-size: 15px; font-weight: 600; color: #fff;">Connecting to Live Sports Radar...</div>
+          <div style="font-size: 13px; margin-top: 6px;">Fetching 900+ real-time fixtures and live channels</div>
+        </div>
+      `;
+    }
+
+    try {
+      const res = await fetch(`/api/sports?_t=${Date.now()}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      state.sportsMatches = data.matches || [];
+      state.sportsChannels = data.channels || [];
+      state.sportsCategories = data.categories || [];
+
+      // Update counters
+      const liveMatches = state.sportsMatches.filter((m) => m.has_stream || m.status === 'LIVE').length;
+      if (el.sportsLiveCount) {
+        el.sportsLiveCount.textContent = `${liveMatches || state.sportsMatches.length} Live/Streaming • ${state.sportsChannels.length} Channels`;
+      }
+      if (el.sportsChannelsCount) {
+        el.sportsChannelsCount.textContent = `${state.sportsChannels.length} Networks Live`;
+      }
+
+      renderSportsSpotlight();
+      renderSportsMatches();
+      renderSportsChannels();
+    } catch (err) {
+      console.error('Sports data fetch error:', err);
+      if (el.sportsMatchesGrid && (!state.sportsMatches || state.sportsMatches.length === 0)) {
+        el.sportsMatchesGrid.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--red);">
+            Failed to load live sports data: ${err.message}.
+            <div style="margin-top: 12px;">
+              <button class="btn btn-secondary btn-sm" onclick="fetchSportsData(true)">Retry</button>
+            </div>
+          </div>
+        `;
+      }
+      showToast('Error updating sports fixtures');
+    } finally {
+      state.isSportsLoading = false;
+    }
+  }
+
+  function renderSportsSpotlight() {
+    if (!el.sportsSpotlightCarousel || !el.sportsSpotlightSection) return;
+    const matchesWithStreams = state.sportsMatches.filter((m) => m.has_stream && m.channels && m.channels.length > 0);
+    const spotlightItems = matchesWithStreams.length > 0
+      ? matchesWithStreams.slice(0, 10)
+      : state.sportsMatches.slice(0, 10);
+
+    if (spotlightItems.length === 0) {
+      el.sportsSpotlightSection.classList.add('hidden');
+      return;
+    }
+
+    el.sportsSpotlightSection.classList.remove('hidden');
+    el.sportsSpotlightCarousel.innerHTML = '';
+
+    spotlightItems.forEach((match) => {
+      const card = document.createElement('div');
+      card.className = 'sports-spotlight-card';
+      const emoji = getSportEmoji(match.sport);
+      const isLive = match.has_stream || match.status === 'LIVE';
+      const statusBadge = isLive
+        ? `<span class="spotlight-live-badge"><span class="live-dot-pulse"></span> LIVE NOW</span>`
+        : `<span class="spotlight-upcoming-badge">⏳ ${match.time || 'Today'}</span>`;
+
+      const homeLogo = match.home_logo || 'https://cdnlivetv.tv/api/v1/team/logo.png';
+      const awayLogo = match.away_logo || 'https://cdnlivetv.tv/api/v1/team/logo.png';
+
+      const hasTeams = Boolean(match.home_team && match.away_team);
+
+      card.innerHTML = `
+        <div class="spotlight-card-top">
+          <span class="spotlight-sport-tag">${emoji} ${match.sport || 'Sports'}</span>
+          ${statusBadge}
+        </div>
+        <div class="spotlight-tournament">${match.tournament || match.country || 'Live Match'}</div>
+        <div class="spotlight-event-name" title="${match.event}">${match.event}</div>
+        ${
+          hasTeams
+            ? `
+          <div class="spotlight-teams-row">
+            <div class="spotlight-team">
+              <img src="${homeLogo}" alt="" onerror="this.src='https://cdnlivetv.tv/api/v1/team/logo.png'"/>
+              <span>${match.home_team}</span>
+            </div>
+            <span class="spotlight-vs">VS</span>
+            <div class="spotlight-team">
+              <img src="${awayLogo}" alt="" onerror="this.src='https://cdnlivetv.tv/api/v1/team/logo.png'"/>
+              <span>${match.away_team}</span>
+            </div>
+          </div>
+          `
+            : ''
+        }
+        <button class="spotlight-watch-btn">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <span>${isLive ? 'Watch Live Stream' : 'Tune In'}</span>
+        </button>
+      `;
+
+      card.addEventListener('click', () => {
+        if (match.channels && match.channels.length > 0) {
+          openSportsPlayer(match.event, `🔴 LIVE • ${match.tournament || match.sport}`, match.channels, 0);
+        } else if (state.sportsChannels && state.sportsChannels.length > 0) {
+          const ch = state.sportsChannels[0];
+          openSportsPlayer(ch.name, `24/7 Live Broadcast • ${match.event}`, [{ name: ch.name, url: ch.url }], 0);
+        } else {
+          showToast('Live stream server will connect when match kicks off');
+        }
+      });
+
+      el.sportsSpotlightCarousel.appendChild(card);
+    });
+  }
+
+  function renderSportsMatches() {
+    if (!el.sportsMatchesGrid) return;
+    el.sportsMatchesGrid.innerHTML = '';
+
+    const cat = state.sportsActiveCat;
+    const status = state.sportsActiveStatus;
+    const query = (state.sportsSearchQuery || '').toLowerCase().trim();
+
+    let filtered = state.sportsMatches.filter((m) => {
+      // Category filter
+      if (cat !== 'all') {
+        const sp = (m.sport || '').toLowerCase();
+        if (cat === 'Soccer' && !sp.includes('soccer') && !sp.includes('football')) return false;
+        else if (cat === 'NBA' && !sp.includes('nba') && !sp.includes('basketball') && !sp.includes('ncaa')) return false;
+        else if (cat === 'NFL' && !sp.includes('nfl') && !sp.includes('american football')) return false;
+        else if (cat === 'Motorsport' && !sp.includes('motor') && !sp.includes('f1') && !sp.includes('formula')) return false;
+        else if (cat === 'combat' && !sp.includes('ufc') && !sp.includes('mma') && !sp.includes('boxing') && !sp.includes('wwe')) return false;
+        else if (cat === 'Cricket' && !sp.includes('cricket')) return false;
+        else if (cat === 'Tennis' && !sp.includes('tennis')) return false;
+        else if (cat === 'Golf' && !sp.includes('golf')) return false;
+        else if (cat === 'channels') return false;
+        else if (cat !== 'Soccer' && cat !== 'NBA' && cat !== 'NFL' && cat !== 'Motorsport' && cat !== 'combat' && cat !== 'Cricket' && cat !== 'Tennis' && cat !== 'Golf') {
+          if (!sp.includes(cat.toLowerCase())) return false;
+        }
+      }
+
+      // Status filter
+      if (status === 'live') {
+        if (!m.has_stream && m.status !== 'LIVE') return false;
+      } else if (status === 'upcoming') {
+        if (m.status === 'LIVE') return false;
+      }
+
+      // Search query filter
+      if (query) {
+        const text = `${m.event || ''} ${m.home_team || ''} ${m.away_team || ''} ${m.tournament || ''} ${m.sport || ''} ${m.country || ''}`.toLowerCase();
+        if (!text.includes(query)) return false;
+      }
+
+      return true;
+    });
+
+    // Sort matches with active streams to the front
+    filtered.sort((a, b) => {
+      const aStreams = a.channels && a.channels.length > 0 ? 1 : 0;
+      const bStreams = b.channels && b.channels.length > 0 ? 1 : 0;
+      if (bStreams !== aStreams) return bStreams - aStreams;
+      return (a.time || '').localeCompare(b.time || '');
+    });
+
+    if (el.sportsMatchesCount) {
+      el.sportsMatchesCount.textContent = `${filtered.length} Fixtures`;
+    }
+
+    if (filtered.length === 0) {
+      el.sportsMatchesGrid.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--text-muted);">
+          <div style="font-size: 32px; margin-bottom: 12px;">🏟️</div>
+          <div style="font-size: 16px; font-weight: 600; color: #fff;">No fixtures matching your filter</div>
+          <div style="font-size: 13px; margin-top: 6px;">Try switching to "All Sports" or tuning into 24/7 TV channels below.</div>
+        </div>
+      `;
+      return;
+    }
+
+    // Limit rendered matches for optimal DOM performance
+    const renderLimit = 120;
+    const toRender = filtered.slice(0, renderLimit);
+
+    toRender.forEach((m) => {
+      const card = document.createElement('div');
+      card.className = 'sports-match-card';
+      const emoji = getSportEmoji(m.sport);
+      const isLive = m.has_stream || m.status === 'LIVE';
+      const hasTeams = Boolean(m.home_team && m.away_team);
+
+      const flagHtml = m.country_flag
+        ? `<img src="${m.country_flag}" class="match-country-flag" alt="" onerror="this.style.display='none'"/>`
+        : '';
+
+      const serverCount = m.channels ? m.channels.length : 0;
+
+      card.innerHTML = `
+        <div class="match-card-header">
+          <div class="match-tournament-info">
+            ${flagHtml}
+            <span class="match-sport-badge">${emoji} ${m.sport || 'Sport'}</span>
+            <span class="match-tournament-name" title="${m.tournament || m.country}">${m.tournament || m.country || ''}</span>
+          </div>
+          <span class="match-status-badge ${isLive ? 'status-live' : 'status-upcoming'}">
+            ${isLive ? '<span class="live-dot-pulse"></span> LIVE' : `⏳ ${m.time || 'Upcoming'}`}
+          </span>
+        </div>
+
+        <div class="match-card-body">
+          ${
+            hasTeams
+              ? `
+            <div class="match-teams-layout">
+              <div class="match-team match-home-team">
+                <img src="${m.home_logo || 'https://cdnlivetv.tv/api/v1/team/logo.png'}" class="match-team-logo" alt="${m.home_team}" onerror="this.src='https://cdnlivetv.tv/api/v1/team/logo.png'"/>
+                <span class="match-team-name">${m.home_team}</span>
+              </div>
+              <div class="match-vs-divider">
+                <span class="match-vs-text">VS</span>
+                <span class="match-time-text">${m.time || ''}</span>
+              </div>
+              <div class="match-team match-away-team">
+                <img src="${m.away_logo || 'https://cdnlivetv.tv/api/v1/team/logo.png'}" class="match-team-logo" alt="${m.away_team}" onerror="this.src='https://cdnlivetv.tv/api/v1/team/logo.png'"/>
+                <span class="match-team-name">${m.away_team}</span>
+              </div>
+            </div>
+            `
+              : `
+            <div class="match-single-event">
+              <div class="match-single-title">${m.event}</div>
+              <div class="match-single-meta">${m.start || m.time || ''} • ${m.country || m.tournament || ''}</div>
+            </div>
+            `
+          }
+        </div>
+
+        <div class="match-card-footer">
+          <div class="match-servers-list">
+            ${
+              serverCount > 0
+                ? m.channels
+                    .slice(0, 3)
+                    .map((ch, idx) => `<button class="server-stream-btn" data-sidx="${idx}">⚡ Server ${idx + 1}</button>`)
+                    .join('')
+                : `<span style="font-size:11px;color:var(--text-muted);">Broadcast feed ready</span>`
+            }
+          </div>
+          <button class="match-play-btn">
+            <svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:currentColor;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span>${serverCount > 0 ? `Watch (${serverCount})` : 'Watch Live'}</span>
+          </button>
+        </div>
+      `;
+
+      // Click on Server stream button
+      card.querySelectorAll('.server-stream-btn').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const sidx = parseInt(btn.dataset.sidx || '0', 10);
+          if (m.channels && m.channels[sidx]) {
+            openSportsPlayer(m.event, `🔴 LIVE • ${m.tournament || m.sport}`, m.channels, sidx);
+          }
+        });
+      });
+
+      // Click on Card or Watch button
+      card.addEventListener('click', () => {
+        if (m.channels && m.channels.length > 0) {
+          openSportsPlayer(m.event, `🔴 LIVE • ${m.tournament || m.sport}`, m.channels, 0);
+        } else if (state.sportsChannels && state.sportsChannels.length > 0) {
+          const ch = state.sportsChannels[0];
+          openSportsPlayer(ch.name, `24/7 Live Sports Broadcast • ${m.event}`, [{ name: ch.name, url: ch.url }], 0);
+        } else {
+          showToast('Stream will go live when match starts');
+        }
+      });
+
+      el.sportsMatchesGrid.appendChild(card);
+    });
+  }
+
+  function renderSportsChannels() {
+    if (!el.sportsChannelsGrid) return;
+    el.sportsChannelsGrid.innerHTML = '';
+
+    if (!state.sportsChannels || state.sportsChannels.length === 0) {
+      el.sportsChannelsGrid.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 30px; color: var(--text-muted);">
+          Loading 24/7 live sports channels...
+        </div>
+      `;
+      return;
+    }
+
+    state.sportsChannels.forEach((ch) => {
+      const card = document.createElement('div');
+      card.className = 'sports-channel-card';
+      card.innerHTML = `
+        <div class="channel-info-left">
+          <div class="channel-icon-badge">📺</div>
+          <div style="min-width:0;">
+            <div class="channel-title-text" title="${ch.name}">${ch.name}</div>
+            <div class="channel-status-sub">
+              <span class="live-dot-pulse" style="width:6px;height:6px;"></span> 24/7 HD Live
+            </div>
+          </div>
+        </div>
+        <button class="channel-tune-btn">Tune In ›</button>
+      `;
+
+      card.addEventListener('click', () => {
+        openSportsPlayer(ch.name, '24/7 Live Sports Network', [{ name: ch.name, url: ch.url }], 0);
+      });
+
+      el.sportsChannelsGrid.appendChild(card);
+    });
+  }
+
+  function openSportsPlayer(title, subtitle, channels, initialIndex = 0) {
+    if (!channels || channels.length === 0) {
+      showToast('No active stream feeds available');
+      return;
+    }
+
+    // Stop native video player if running
+    el.videoElement.pause();
+    el.videoElement.src = '';
+    el.videoElement.classList.add('hidden');
+    if (el.playerControls) el.playerControls.classList.add('hidden');
+    el.playerSpinner.classList.add('hidden');
+
+    state.isEmbedMode = true;
+    el.playerOverlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+
+    el.playerMediaTitle.textContent = title;
+    el.playerMediaSubtitle.textContent = subtitle;
+    el.nextEpisodeControlBtn.classList.add('hidden');
+
+    const activeChannel = channels[initialIndex] || channels[0];
+    if (el.embedPlayerIframe) {
+      el.embedPlayerIframe.src = activeChannel.url;
+      el.embedPlayerIframe.classList.remove('hidden');
+    }
+    if (el.currentServerLabel) {
+      el.currentServerLabel.textContent = activeChannel.name || `Server ${initialIndex + 1}`;
+    }
+
+    // Populate Server switcher
+    if (el.serverMenu) {
+      el.serverMenu.innerHTML = '';
+      const header = document.createElement('div');
+      header.style.cssText = 'padding:6px 10px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;';
+      header.textContent = `Live Broadcast Servers (${channels.length})`;
+      el.serverMenu.appendChild(header);
+
+      channels.forEach((c, idx) => {
+        const btn = document.createElement('button');
+        btn.className = `menu-item ${idx === initialIndex ? 'active' : ''}`;
+        btn.innerHTML = `🔴 <span>${c.name || 'Server ' + (idx + 1)}</span>`;
+        btn.addEventListener('click', () => {
+          openSportsPlayer(title, subtitle, channels, idx);
+          el.serverMenu.classList.add('hidden');
+        });
+        el.serverMenu.appendChild(btn);
+      });
+    }
+
+    showToast(`Streaming ${title}`);
+  }
+
   async function navigate(target) {
     state.currentNav = target;
     el.navLinks.forEach((link) => {
@@ -1395,6 +1849,8 @@
 
     if (target === 'home') {
       switchView('rails');
+    } else if (target === 'sports') {
+      openSportsView();
     } else if (target === 'movies') {
       loadCategoryGrid('Popular Movies', '1');
     } else if (target === 'series') {
@@ -1559,6 +2015,58 @@
           state.platformPage++;
           fetchPlatformData(true);
         }
+      });
+    }
+
+    // Live Sports View Controls & Event Handlers
+    if (el.sportsBackBtn) {
+      el.sportsBackBtn.addEventListener('click', () => {
+        navigate('home');
+      });
+    }
+
+    if (el.homeViewAllSportsBtn) {
+      el.homeViewAllSportsBtn.addEventListener('click', () => {
+        openSportsView();
+      });
+    }
+
+    if (el.sportsRefreshBtn) {
+      el.sportsRefreshBtn.addEventListener('click', () => {
+        fetchSportsData(true);
+      });
+    }
+
+    if (el.sportsSearchInput) {
+      el.sportsSearchInput.addEventListener('input', (e) => {
+        state.sportsSearchQuery = e.target.value;
+        renderSportsMatches();
+      });
+    }
+
+    if (el.sportsCategoryFilters) {
+      el.sportsCategoryFilters.querySelectorAll('.sports-cat-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          el.sportsCategoryFilters.querySelectorAll('.sports-cat-btn').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.sportsActiveCat = btn.dataset.cat || 'all';
+          if (state.sportsActiveCat === 'channels' && el.sportsChannelsGrid) {
+            el.sportsChannelsGrid.scrollIntoView({ behavior: 'smooth' });
+          } else {
+            renderSportsMatches();
+          }
+        });
+      });
+    }
+
+    if (el.sportsStatusTabs) {
+      el.sportsStatusTabs.querySelectorAll('.sports-tab').forEach((tab) => {
+        tab.addEventListener('click', () => {
+          el.sportsStatusTabs.querySelectorAll('.sports-tab').forEach((t) => t.classList.remove('active'));
+          tab.classList.add('active');
+          state.sportsActiveStatus = tab.dataset.status || 'all';
+          renderSportsMatches();
+        });
       });
     }
 

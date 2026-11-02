@@ -177,6 +177,115 @@ async function resolveImdbId(title, yearHint) {
   }
 }
 
+let sportsCache = null;
+let sportsCacheTime = 0;
+
+async function handleSports(params) {
+  const now = Date.now();
+  if (sportsCache && (now - sportsCacheTime < 60000)) {
+    return {
+      statusCode: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "public, max-age=60, s-maxage=120"
+      },
+      body: JSON.stringify(sportsCache),
+    };
+  }
+
+  try {
+    const [eventsRes, channelsRes] = await Promise.all([
+      fetch("https://api.cdnlivetv.tv/api/v1/events/sports/?user=cdnlivetv&plan=free", {
+        headers: { "User-Agent": USER_AGENT },
+        signal: AbortSignal.timeout(6000)
+      }).then(r => r.json()).catch(() => null),
+      fetch("https://api.cdnlivetv.tv/api/v1/channels/?user=cdnlivetv&plan=free", {
+        headers: { "User-Agent": USER_AGENT },
+        signal: AbortSignal.timeout(6000)
+      }).then(r => r.json()).catch(() => null)
+    ]);
+
+    const rawEvents = eventsRes?.["cdn-live-tv"] || {};
+    const sportsCategories = Object.keys(rawEvents).filter(k => !k.startsWith("total_") && Array.isArray(rawEvents[k]));
+
+    const matches = [];
+    for (const sport of sportsCategories) {
+      for (const ev of (rawEvents[sport] || [])) {
+        if (!ev.event) continue;
+        const hasChannels = ev.channels && ev.channels.length > 0;
+        matches.push({
+          id: ev.gameID || Math.random().toString(36).slice(2),
+          sport,
+          event: ev.event,
+          home_team: ev.homeTeam || ev.event.split(" vs ")[0] || "Home",
+          away_team: ev.awayTeam || ev.event.split(" vs ")[1] || "Away",
+          home_logo: ev.homeTeamIMG || "",
+          away_logo: ev.awayTeamIMG || "",
+          tournament: ev.tournament || sport,
+          country: ev.country || "",
+          country_flag: ev.countryIMG || "",
+          start: ev.start || "",
+          time: ev.time || "",
+          status: ev.status === "LIVE" ? "live" : (ev.status === "FT" ? "ended" : "upcoming"),
+          has_stream: hasChannels,
+          channels: (ev.channels || []).map((ch, idx) => ({
+            id: ch.id || String(idx),
+            name: ch.channel_name || `Server ${idx + 1}`,
+            url: ch.url
+          }))
+        });
+      }
+    }
+
+    // Prioritize live matches, then events with active stream channels
+    matches.sort((a, b) => {
+      if (a.status === "live" && b.status !== "live") return -1;
+      if (b.status === "live" && a.status !== "live") return 1;
+      if (a.has_stream && !b.has_stream) return -1;
+      if (b.has_stream && !a.has_stream) return 1;
+      return 0;
+    });
+
+    const rawChannels = channelsRes?.channels || [];
+    const sportsTvChannels = rawChannels
+      .filter(c => /sport|espn|tnt|bein|sky|fox|dazn|nba|nfl|mlb|nhl|cricket|tennis|golf|wwe/i.test(c.name))
+      .slice(0, 60)
+      .map(c => ({
+        name: c.name,
+        url: c.url,
+        status: c.status || "online"
+      }));
+
+    const result = {
+      total_matches: matches.length,
+      live_count: matches.filter(m => m.status === "live" || m.has_stream).length,
+      categories: sportsCategories,
+      matches,
+      channels: sportsTvChannels
+    };
+
+    sportsCache = result;
+    sportsCacheTime = now;
+
+    return {
+      statusCode: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "public, max-age=60, s-maxage=120"
+      },
+      body: JSON.stringify(result),
+    };
+  } catch (err) {
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ error: err.message }),
+    };
+  }
+}
+
 async function handlePlatforms() {
   return {
     statusCode: 200,
@@ -721,6 +830,9 @@ exports.handler = async (event) => {
   }
   if (cleanPath === "/platform") {
     return handlePlatformContent(params);
+  }
+  if (cleanPath === "/sports" || cleanPath === "/live-sports") {
+    return handleSports(params);
   }
   if (cleanPath === "/browse" || cleanPath === "/homepage") {
     return handleBrowse();

@@ -187,6 +187,38 @@ pub async fn get_platforms() -> Json<Vec<PlatformInfo>> {
     ])
 }
 
+fn clean_display_title(title: &str) -> String {
+    let mut s = title
+        .replace("&amp;", "&")
+        .replace("&#039;", "'")
+        .replace("&quot;", "\"")
+        .replace("&lt;", "<")
+        .replace("&gt;", ">");
+    while let Some(start) = s.find('[') {
+        if let Some(end) = s[start..].find(']') {
+            s.replace_range(start..=start + end, "");
+        } else {
+            break;
+        }
+    }
+    while let Some(start) = s.find('(') {
+        if let Some(end) = s[start..].find(')') {
+            s.replace_range(start..=start + end, "");
+        } else {
+            break;
+        }
+    }
+    s.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
+fn get_canonical_title(title: &str) -> String {
+    clean_display_title(title)
+        .to_lowercase()
+        .chars()
+        .filter(|c| c.is_ascii_alphanumeric())
+        .collect()
+}
+
 fn map_netmirror_item_to_catalog(item: &serde_json::Value) -> Option<CatalogItem> {
     let id_str = item.get("id").and_then(|v| {
         if let Some(n) = v.as_i64() {
@@ -196,7 +228,8 @@ fn map_netmirror_item_to_catalog(item: &serde_json::Value) -> Option<CatalogItem
         }
     })?;
 
-    let title = item.get("title").and_then(|t| t.as_str()).unwrap_or("Untitled").trim().to_string();
+    let raw_title = item.get("title").and_then(|t| t.as_str()).unwrap_or("Untitled").trim();
+    let title = clean_display_title(raw_title);
     let mtype_str = item.get("media_type").and_then(|m| m.as_str()).unwrap_or("movie");
     let media_type = if mtype_str.eq_ignore_ascii_case("tv") {
         MediaType::Series
@@ -378,9 +411,17 @@ pub async fn get_platform_content(
         .cloned()
         .unwrap_or_default();
 
-    let items = raw_results
+    let mut seen = std::collections::HashSet::new();
+    let items: Vec<CatalogItem> = raw_results
         .iter()
-        .filter_map(map_netmirror_item_to_catalog)
+        .filter_map(|raw| {
+            let canon = raw.get("title").and_then(|t| t.as_str()).map(get_canonical_title)?;
+            if canon.is_empty() || seen.contains(&canon) {
+                return None;
+            }
+            seen.insert(canon);
+            map_netmirror_item_to_catalog(raw)
+        })
         .collect();
 
     Ok(Json(PlatformResponse {
@@ -402,34 +443,31 @@ pub async fn get_browse(
         state.service.homepage("3", 1),
     );
 
-    let trending = trending_res.map(|(items, _)| items).unwrap_or_default();
-    let movies = movies_res.map(|(items, _)| items).unwrap_or_default();
-    let series = series_res.map(|(items, _)| items).unwrap_or_default();
-
-    let hero_slides: Vec<CatalogItem> = trending.iter().take(6).cloned().collect();
-    let hero = hero_slides.first().cloned().or_else(|| movies.first().cloned());
+    let raw_trending = trending_res.map(|(items, _)| items).unwrap_or_default();
+    let raw_movies = movies_res.map(|(items, _)| items).unwrap_or_default();
+    let raw_series = series_res.map(|(items, _)| items).unwrap_or_default();
 
     // Fetch top preview items for Netflix, Prime Video, Disney+
     let client = reqwest::Client::builder()
-        .timeout(std::time::Duration::from_millis(2500))
+        .timeout(std::time::Duration::from_millis(3000))
         .build()
         .ok();
 
-    let mut netflix = Vec::new();
-    let mut prime = Vec::new();
-    let mut disney = Vec::new();
+    let mut raw_netflix = Vec::new();
+    let mut raw_prime = Vec::new();
+    let mut raw_disney = Vec::new();
 
     if let Some(c) = client {
         let (nf_res, pv_res, dis_res) = tokio::join!(
-            c.get("https://api2.imdb3.shop/api/movies/list/filter?page=0&platform=netflix&items_per_page=14").header("User-Agent", "Mozilla/5.0").send(),
-            c.get("https://api2.imdb3.shop/api/movies/list/filter?page=0&platform=primeVideo&items_per_page=14").header("User-Agent", "Mozilla/5.0").send(),
-            c.get("https://api2.imdb3.shop/api/movies/list/filter?page=0&platform=disney&items_per_page=14").header("User-Agent", "Mozilla/5.0").send(),
+            c.get("https://api2.imdb3.shop/api/movies/list/filter?page=0&platform=netflix&items_per_page=30").header("User-Agent", "Mozilla/5.0").send(),
+            c.get("https://api2.imdb3.shop/api/movies/list/filter?page=0&platform=primeVideo&items_per_page=30").header("User-Agent", "Mozilla/5.0").send(),
+            c.get("https://api2.imdb3.shop/api/movies/list/filter?page=0&platform=disney&items_per_page=30").header("User-Agent", "Mozilla/5.0").send(),
         );
 
         if let Ok(res) = nf_res {
             if let Ok(json) = res.json::<serde_json::Value>().await {
                 if let Some(arr) = json.get("results").and_then(|r| r.as_array()) {
-                    netflix = arr.iter().filter_map(map_netmirror_item_to_catalog).take(12).collect();
+                    raw_netflix = arr.iter().filter_map(map_netmirror_item_to_catalog).collect();
                 }
             }
         }
@@ -437,7 +475,7 @@ pub async fn get_browse(
         if let Ok(res) = pv_res {
             if let Ok(json) = res.json::<serde_json::Value>().await {
                 if let Some(arr) = json.get("results").and_then(|r| r.as_array()) {
-                    prime = arr.iter().filter_map(map_netmirror_item_to_catalog).take(12).collect();
+                    raw_prime = arr.iter().filter_map(map_netmirror_item_to_catalog).collect();
                 }
             }
         }
@@ -445,11 +483,45 @@ pub async fn get_browse(
         if let Ok(res) = dis_res {
             if let Ok(json) = res.json::<serde_json::Value>().await {
                 if let Some(arr) = json.get("results").and_then(|r| r.as_array()) {
-                    disney = arr.iter().filter_map(map_netmirror_item_to_catalog).take(12).collect();
+                    raw_disney = arr.iter().filter_map(map_netmirror_item_to_catalog).collect();
                 }
             }
         }
     }
+
+    let mut global_seen = std::collections::HashSet::new();
+
+    let mut pick_unique = |items: Vec<CatalogItem>, max: usize| -> Vec<CatalogItem> {
+        let mut out = Vec::new();
+        for item in items {
+            let canon = get_canonical_title(&item.title);
+            if canon.is_empty() || global_seen.contains(&canon) {
+                continue;
+            }
+            global_seen.insert(canon);
+            out.push(item);
+            if out.len() >= max {
+                break;
+            }
+        }
+        out
+    };
+
+    // 1. Hero slides: 5 distinct blockbusters
+    let hero_slides = pick_unique(raw_trending.clone(), 5);
+    let hero = hero_slides.first().cloned();
+
+    // 2. Trending: remaining trending items (zero overlap with hero slides!)
+    let trending = pick_unique(raw_trending, 14);
+
+    // 3. Netflix, Prime, Disney (deduplicated across rails, no audio repeats)
+    let netflix = pick_unique(raw_netflix, 14);
+    let prime = pick_unique(raw_prime, 14);
+    let disney = pick_unique(raw_disney, 14);
+
+    // 4. Popular Movies & TV Series (distinct from all above)
+    let movies = pick_unique(raw_movies, 14);
+    let series = pick_unique(raw_series, 14);
 
     Ok(Json(BrowseSectionsResponse {
         hero,

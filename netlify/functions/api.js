@@ -89,11 +89,42 @@ const PLATFORMS = [
 
 const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)";
 
+function cleanTitle(title) {
+  if (!title) return "";
+  return title
+    .replace(/&amp;/g, "&")
+    .replace(/&#039;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/\[.*?\]/g, "")
+    .replace(/\(.*?\)/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getCanonical(title) {
+  if (!title) return "";
+  return title
+    .replace(/&amp;/g, "&")
+    .replace(/&#039;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/\[.*?\]/g, "")
+    .replace(/\(.*?\)/g, "")
+    .replace(/\bS\d+(-S\d+)?\b/gi, "")
+    .replace(/\bSeason\s*\d+\b/gi, "")
+    .replace(/\b(Hindi|English|Tamil|Telugu|Kannada|Malayalam|Bengali|Dubbed|Multi|Dual\s*Audio)\b/gi, "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
 function mapItem(item) {
   if (!item || !item.id) return null;
   const idStr = String(item.id);
-  const title = (item.title || "Untitled").trim();
-  const mediaType = item.media_type === "tv" || item.type === "TV series" ? "series" : "movie";
+  const rawTitle = (item.title || "Untitled").trim();
+  const title = cleanTitle(rawTitle);
+  const mediaType = item.media_type === "tv" || item.type === "TV series" || item.type === "tv" ? "series" : "movie";
 
   let year = "2026";
   if (item.release_date) {
@@ -154,115 +185,196 @@ async function handlePlatforms() {
   };
 }
 
+function getPlatformUrl(platformKey, pageIdx, params) {
+  let url;
+  switch (platformKey) {
+    case "netflix":
+      url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=netflix&items_per_page=30`;
+      break;
+    case "primevideo":
+    case "prime":
+      url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=primeVideo&items_per_page=30`;
+      break;
+    case "disney":
+    case "hotstar":
+      url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=disney&items_per_page=30`;
+      break;
+    case "appletv":
+    case "apple":
+      url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=appleTV&items_per_page=30`;
+      break;
+    case "hulu":
+      url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=hulu&items_per_page=30`;
+      break;
+    case "zee5":
+      url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=zee5&items_per_page=30`;
+      break;
+    case "viu":
+      url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=viu&items_per_page=30`;
+      break;
+    case "vivamax":
+      url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=vivamax&items_per_page=30`;
+      break;
+    case "hoichoi":
+      url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=hoichoi&items_per_page=30`;
+      break;
+    // Studio Universes
+    case "marvel":
+      url = `https://api2.imdb3.shop/api/tranding?id=42&items_per_page=18&page=${pageIdx}`;
+      break;
+    case "dc":
+      url = `https://api2.imdb3.shop/api/tranding?id=58&items_per_page=18&page=${pageIdx}`;
+      break;
+    case "anime":
+      url = `https://api2.imdb3.shop/api/tranding?id=30&items_per_page=18&page=${pageIdx}`;
+      break;
+    case "kdrama":
+      url = `https://api2.imdb3.shop/api/tranding?id=18&items_per_page=18&page=${pageIdx}`;
+      break;
+    case "bollywood":
+      url = `https://api2.imdb3.shop/api/tranding?id=14&items_per_page=18&page=${pageIdx}`;
+      break;
+    case "hollywood":
+      url = `https://api2.imdb3.shop/api/tranding?id=13&items_per_page=18&page=${pageIdx}`;
+      break;
+    case "boxoffice":
+      url = `https://api2.imdb3.shop/api/tranding?id=44&items_per_page=18&page=${pageIdx}`;
+      break;
+    default:
+      url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=${platformKey}&items_per_page=30`;
+  }
+
+  if (params && params.media_type === "movie") url += "&type=1";
+  else if (params && (params.media_type === "tv" || params.media_type === "series")) url += "&type=2";
+
+  if (params && params.sort_by === "rating") url += "&sort_by=rating";
+  else if (params && params.sort_by === "date") url += "&sort_by=date";
+
+  return url;
+}
+
 async function handlePlatformContent(params) {
   const rawName = (params.name || "netflix").toLowerCase().replace(/[\s-]/g, "");
   const page = Math.max(1, parseInt(params.page || "1", 10));
   const pageIdx = page - 1;
 
-  let url;
   let displayName;
   let platformKey = rawName;
 
   switch (rawName) {
     case "netflix":
-      url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=netflix`;
       displayName = "Netflix Originals";
       break;
     case "prime":
     case "primevideo":
     case "amazon":
-      url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=primeVideo`;
       displayName = "Prime Video Exclusives";
       platformKey = "primeVideo";
       break;
     case "disney":
     case "hotstar":
-      url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=disney`;
       displayName = "Disney+ Hotstar";
       break;
     case "apple":
     case "appletv":
-      url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=appleTV`;
       displayName = "Apple TV+ Originals";
       platformKey = "appleTV";
       break;
     case "hulu":
-      url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=hulu`;
       displayName = "Hulu Exclusives";
       break;
     case "zee5":
-      url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=zee5`;
       displayName = "Zee5 Exclusives";
       break;
     case "viu":
-      url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=viu`;
       displayName = "Viu Asian Dramas";
       break;
     case "vivamax":
-      url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=vivamax`;
       displayName = "Vivamax Filipino";
       break;
     case "hoichoi":
-      url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=hoichoi`;
       displayName = "Hoichoi Bengali";
       break;
-    // Studio Universes
     case "marvel":
-      url = `https://api2.imdb3.shop/api/tranding?id=42&items_per_page=18&page=${pageIdx}`;
       displayName = "Marvel Cinematic Universe";
       break;
     case "dc":
-      url = `https://api2.imdb3.shop/api/tranding?id=58&items_per_page=18&page=${pageIdx}`;
       displayName = "DC Studios Universe";
       break;
     case "anime":
-      url = `https://api2.imdb3.shop/api/tranding?id=30&items_per_page=18&page=${pageIdx}`;
       displayName = "Anime [English Dubbed]";
       break;
     case "kdrama":
-      url = `https://api2.imdb3.shop/api/tranding?id=18&items_per_page=18&page=${pageIdx}`;
       displayName = "Korean K-Drama";
       break;
     case "bollywood":
-      url = `https://api2.imdb3.shop/api/tranding?id=14&items_per_page=18&page=${pageIdx}`;
       displayName = "Bollywood Blockbusters";
       break;
     case "hollywood":
-      url = `https://api2.imdb3.shop/api/tranding?id=13&items_per_page=18&page=${pageIdx}`;
       displayName = "Hollywood Hits";
       break;
     case "boxoffice":
-      url = `https://api2.imdb3.shop/api/tranding?id=44&items_per_page=18&page=${pageIdx}`;
       displayName = "Top All-Time Box Office";
       break;
     default:
-      url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=${rawName}`;
       displayName = `${params.name} Titles`;
   }
 
-  if (params.media_type === "movie") url += "&type=1";
-  else if (params.media_type === "tv" || params.media_type === "series") url += "&type=2";
+  const isUniverse = ["marvel", "dc", "anime", "kdrama", "bollywood", "hollywood", "boxoffice"].includes(platformKey);
+  const upstreamPages = isUniverse
+    ? [pageIdx * 2, pageIdx * 2 + 1]
+    : [pageIdx * 3, pageIdx * 3 + 1, pageIdx * 3 + 2];
 
-  if (params.sort_by === "rating") url += "&sort_by=rating";
-  else if (params.sort_by === "date") url += "&sort_by=date";
+  const pageJsons = await Promise.all(
+    upstreamPages.map(async (p) => {
+      const url = getPlatformUrl(platformKey, p, params);
+      try {
+        const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+        if (!res.ok) return null;
+        return await res.json();
+      } catch {
+        return null;
+      }
+    })
+  );
 
-  const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) {
+  const validJsons = pageJsons.filter(Boolean);
+  if (validJsons.length === 0) {
     return {
-      statusCode: res.status,
+      statusCode: 502,
       headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
       body: JSON.stringify({ error: "Failed to fetch platform items" }),
     };
   }
 
-  const json = await res.json();
-  const totalResults = json.pager?.total_results || json.total_results || (json.results?.length || 0);
-  const totalPages = json.pager?.total_pages || json.total_pages || 1;
-  const items = (json.results || []).map(mapItem).filter(Boolean);
+  const first = validJsons[0];
+  const rawTotal = first.pager?.total_results || first.total_results || 300;
+  const totalResults = isUniverse ? rawTotal : Math.max(30, Math.floor(rawTotal * 0.45));
+  const totalPages = Math.max(1, Math.ceil(totalResults / 30));
+
+  const rawResults = validJsons.flatMap((j) => j.results || []);
+  const seenCanonical = new Set();
+  const items = [];
+
+  for (const raw of rawResults) {
+    if (!raw || !raw.id || !raw.title) continue;
+    const canon = getCanonical(raw.title);
+    if (!canon || seenCanonical.has(canon)) continue;
+    seenCanonical.add(canon);
+    const mapped = mapItem(raw);
+    if (mapped) {
+      items.push(mapped);
+      if (items.length >= 30) break;
+    }
+  }
 
   return {
     statusCode: 200,
-    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
+    },
     body: JSON.stringify({
       platform: platformKey,
       display_name: displayName,
@@ -275,24 +387,76 @@ async function handlePlatformContent(params) {
 }
 
 async function handleBrowse() {
-  const [netRes, priRes, disRes, treRes] = await Promise.all([
-    fetch("https://api2.imdb3.shop/api/movies/list/filter?page=0&platform=netflix", { headers: { "User-Agent": USER_AGENT } }).then(r => r.json()).catch(() => ({})),
-    fetch("https://api2.imdb3.shop/api/movies/list/filter?page=0&platform=primeVideo", { headers: { "User-Agent": USER_AGENT } }).then(r => r.json()).catch(() => ({})),
-    fetch("https://api2.imdb3.shop/api/movies/list/filter?page=0&platform=disney", { headers: { "User-Agent": USER_AGENT } }).then(r => r.json()).catch(() => ({})),
+  const [
+    tre0, tre1,
+    net0, net1,
+    pri0, pri1,
+    dis0, dis1,
+    mov0, mov1,
+    ser0, ser1
+  ] = await Promise.all([
     fetch("https://api2.imdb3.shop/api/tranding?id=44&items_per_page=18&page=0", { headers: { "User-Agent": USER_AGENT } }).then(r => r.json()).catch(() => ({})),
+    fetch("https://api2.imdb3.shop/api/tranding?id=44&items_per_page=18&page=1", { headers: { "User-Agent": USER_AGENT } }).then(r => r.json()).catch(() => ({})),
+    fetch("https://api2.imdb3.shop/api/movies/list/filter?page=0&platform=netflix&items_per_page=30", { headers: { "User-Agent": USER_AGENT } }).then(r => r.json()).catch(() => ({})),
+    fetch("https://api2.imdb3.shop/api/movies/list/filter?page=1&platform=netflix&items_per_page=30", { headers: { "User-Agent": USER_AGENT } }).then(r => r.json()).catch(() => ({})),
+    fetch("https://api2.imdb3.shop/api/movies/list/filter?page=0&platform=primeVideo&items_per_page=30", { headers: { "User-Agent": USER_AGENT } }).then(r => r.json()).catch(() => ({})),
+    fetch("https://api2.imdb3.shop/api/movies/list/filter?page=1&platform=primeVideo&items_per_page=30", { headers: { "User-Agent": USER_AGENT } }).then(r => r.json()).catch(() => ({})),
+    fetch("https://api2.imdb3.shop/api/movies/list/filter?page=0&platform=disney&items_per_page=30", { headers: { "User-Agent": USER_AGENT } }).then(r => r.json()).catch(() => ({})),
+    fetch("https://api2.imdb3.shop/api/movies/list/filter?page=1&platform=disney&items_per_page=30", { headers: { "User-Agent": USER_AGENT } }).then(r => r.json()).catch(() => ({})),
+    fetch("https://api2.imdb3.shop/api/movies/list/filter?page=0&type=1&items_per_page=30", { headers: { "User-Agent": USER_AGENT } }).then(r => r.json()).catch(() => ({})),
+    fetch("https://api2.imdb3.shop/api/movies/list/filter?page=1&type=1&items_per_page=30", { headers: { "User-Agent": USER_AGENT } }).then(r => r.json()).catch(() => ({})),
+    fetch("https://api2.imdb3.shop/api/movies/list/filter?page=0&type=2&items_per_page=30", { headers: { "User-Agent": USER_AGENT } }).then(r => r.json()).catch(() => ({})),
+    fetch("https://api2.imdb3.shop/api/movies/list/filter?page=1&type=2&items_per_page=30", { headers: { "User-Agent": USER_AGENT } }).then(r => r.json()).catch(() => ({})),
   ]);
 
-  const netflix = (netRes.results || []).map(mapItem).filter(Boolean).slice(0, 12);
-  const prime = (priRes.results || []).map(mapItem).filter(Boolean).slice(0, 12);
-  const disney = (disRes.results || []).map(mapItem).filter(Boolean).slice(0, 12);
-  const trending = (treRes.results || []).map(mapItem).filter(Boolean);
+  const globalSeen = new Set();
 
-  const heroSlides = trending.slice(0, 6);
-  const hero = heroSlides[0] || netflix[0] || null;
+  function pickUnique(rawLists, maxCount = 14) {
+    const list = [];
+    const flattened = rawLists.flatMap(r => r?.results || []);
+    for (const raw of flattened) {
+      if (!raw || !raw.id || !raw.title) continue;
+      const canon = getCanonical(raw.title);
+      if (!canon || globalSeen.has(canon)) continue;
+      globalSeen.add(canon);
+      const mapped = mapItem(raw);
+      if (mapped) {
+        list.push(mapped);
+        if (list.length >= maxCount) break;
+      }
+    }
+    return list;
+  }
+
+  // 1. Hero Slides: 5 distinct blockbusters
+  const heroSlides = pickUnique([tre0, tre1], 5);
+  const hero = heroSlides[0] || null;
+
+  // 2. Trending Now: next 14 trending blockbusters (zero duplicate with hero!)
+  const trending = pickUnique([tre0, tre1], 14);
+
+  // 3. Netflix Originals: 14 unique titles (zero duplicate with above, no language dub repeats!)
+  const netflix = pickUnique([net0, net1], 14);
+
+  // 4. Prime Video Exclusives: 14 unique titles
+  const prime = pickUnique([pri0, pri1], 14);
+
+  // 5. Disney+ Hotstar: 14 unique titles
+  const disney = pickUnique([dis0, dis1], 14);
+
+  // 6. Popular Movies: 14 real movie titles from type=1 (NOT netflix duplicate!)
+  const movies = pickUnique([mov0, mov1], 14);
+
+  // 7. TV Series: 14 real series titles from type=2 (NOT prime duplicate!)
+  const series = pickUnique([ser0, ser1], 14);
 
   return {
     statusCode: 200,
-    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "public, max-age=120, s-maxage=300, stale-while-revalidate=600"
+    },
     body: JSON.stringify({
       hero,
       hero_slides: heroSlides,
@@ -300,8 +464,8 @@ async function handleBrowse() {
       netflix,
       prime,
       disney,
-      movies: netflix,
-      series: prime,
+      movies,
+      series,
     }),
   };
 }
@@ -327,7 +491,16 @@ async function handleSearch(params) {
   }
 
   const json = await res.json();
-  const items = (json.results || []).map(mapItem).filter(Boolean);
+  const seen = new Set();
+  const items = [];
+  for (const raw of (json.results || [])) {
+    if (!raw || !raw.id || !raw.title) continue;
+    const canon = getCanonical(raw.title);
+    if (!canon || seen.has(canon)) continue;
+    seen.add(canon);
+    const mapped = mapItem(raw);
+    if (mapped) items.push(mapped);
+  }
 
   return {
     statusCode: 200,
@@ -346,7 +519,7 @@ async function handleSuggest(params) {
     };
   }
 
-  const url = `https://api2.imdb4.shop/suggest.php?q=${encodeURIComponent(q.toLowerCase())}&p=8`;
+  const url = `https://api2.imdb4.shop/suggest.php?q=${encodeURIComponent(q.toLowerCase())}&p=12`;
   const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
   if (!res.ok) {
     return {
@@ -357,7 +530,15 @@ async function handleSuggest(params) {
   }
 
   const json = await res.json();
-  const suggestions = (json.results || []).map(i => i.title).filter(Boolean);
+  const seen = new Set();
+  const suggestions = [];
+  for (const raw of (json.results || [])) {
+    if (!raw || !raw.title) continue;
+    const canon = getCanonical(raw.title);
+    if (!canon || seen.has(canon)) continue;
+    seen.add(canon);
+    suggestions.push(cleanTitle(raw.title));
+  }
 
   return {
     statusCode: 200,
@@ -565,3 +746,4 @@ exports.handler = async (event) => {
     body: JSON.stringify({ error: `Not found: ${cleanPath}` }),
   };
 };
+

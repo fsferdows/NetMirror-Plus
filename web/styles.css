@@ -1593,6 +1593,7 @@ body {
 .modal-actions {
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .modal-body {
@@ -2179,7 +2180,7 @@ body {
   stroke: none;
 }
 
-#fullscreenBtn svg, #pipBtn svg, #volumeBtn svg, #audioDubMenuBtn svg, #subtitlesMenuBtn svg {
+#fullscreenBtn svg, #pipBtn svg, #volumeBtn svg, #audioDubMenuBtn svg, #subtitlesMenuBtn svg, #playerShareBtn svg, #modalShareBtn svg {
   stroke: currentColor;
   stroke-width: 2;
   fill: none;

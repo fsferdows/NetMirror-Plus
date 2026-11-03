@@ -154,6 +154,9 @@
     modalGenres: document.getElementById('modalGenres'),
     modalPlayBtn: document.getElementById('modalPlayBtn'),
     modalFavBtn: document.getElementById('modalFavBtn'),
+    modalShareBtn: document.getElementById('modalShareBtn'),
+    modalShareBtnText: document.getElementById('modalShareBtnText'),
+    playerShareBtn: document.getElementById('playerShareBtn'),
     modalOverview: document.getElementById('modalOverview'),
     modalDirector: document.getElementById('modalDirector'),
     directorRow: document.getElementById('directorRow'),
@@ -481,6 +484,7 @@
     updateAudioEnhancerUI();
     initMonetization();
     renderContinueWatching();
+    handleDeepLinkOnLoad();
     await fetchBrowseData();
     fetchSportsData().catch(() => {});
   }
@@ -701,6 +705,137 @@
   }
 
   // ==========================================================================
+  // UNIVERSAL MOVIE URL GENERATION, SHARING & DEEP-LINKING
+  // ==========================================================================
+  function generateMovieUrl(id, title = '') {
+    const origin = window.location.origin;
+    const cleanT = encodeURIComponent(cleanDisplayTitle(title || ''));
+    return `${origin}/?movie=${encodeURIComponent(id)}${cleanT ? `&title=${cleanT}` : ''}`;
+  }
+
+  function generateWatchUrl(id, season = 0, episode = 0, title = '') {
+    const origin = window.location.origin;
+    const cleanT = encodeURIComponent(cleanDisplayTitle(title || ''));
+    const epParams = (season > 0 || episode > 0) ? `&s=${season}&e=${episode}` : '';
+    return `${origin}/?watch=${encodeURIComponent(id)}${epParams}${cleanT ? `&title=${cleanT}` : ''}`;
+  }
+
+  function updateMovieUrl(id, title = '', pushHistory = true) {
+    const url = generateMovieUrl(id, title);
+    if (pushHistory) {
+      window.history.pushState({ type: 'movie', id, title }, '', url);
+    } else {
+      window.history.replaceState({ type: 'movie', id, title }, '', url);
+    }
+  }
+
+  function updateWatchUrl(id, season = 0, episode = 0, title = '', pushHistory = true) {
+    const url = generateWatchUrl(id, season, episode, title);
+    if (pushHistory) {
+      window.history.pushState({ type: 'watch', id, season, episode, title }, '', url);
+    } else {
+      window.history.replaceState({ type: 'watch', id, season, episode, title }, '', url);
+    }
+  }
+
+  function revertUrlToBase() {
+    const origin = window.location.origin;
+    const pathname = window.location.pathname === '/watch' ? '/' : window.location.pathname;
+    window.history.replaceState({}, '', `${origin}${pathname}`);
+  }
+
+  async function shareMovieLink(id, title, desc = '', poster = '', isWatch = false, season = 0, episode = 0) {
+    const cleanT = cleanDisplayTitle(title || 'Movie');
+    const shareUrl = isWatch 
+      ? generateWatchUrl(id, season, episode, cleanT)
+      : generateMovieUrl(id, cleanT);
+
+    const shareData = {
+      title: `${cleanT} – NetMirror Plus`,
+      text: isWatch && season > 0
+        ? `Watch ${cleanT} Season ${season} Episode ${episode} on NetMirror Plus:`
+        : `Watch ${cleanT} in Full HD on NetMirror Plus:`,
+      url: shareUrl,
+    };
+
+    // Use native device Web Share API on mobile if supported
+    if (navigator.share && /mobile|android|iphone|ipad/i.test(navigator.userAgent)) {
+      try {
+        await navigator.share(shareData);
+        showToast('Link shared successfully!');
+        return;
+      } catch (err) {
+        // Fallback to clipboard if cancelled or failed
+      }
+    }
+
+    // Clipboard copy
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const dummy = document.createElement('input');
+        document.body.appendChild(dummy);
+        dummy.value = shareUrl;
+        dummy.select();
+        document.execCommand('copy');
+        document.body.removeChild(dummy);
+      }
+
+      if (el.modalShareBtnText) {
+        const orig = el.modalShareBtnText.textContent;
+        el.modalShareBtnText.textContent = 'Copied!';
+        setTimeout(() => { el.modalShareBtnText.textContent = orig; }, 2200);
+      }
+
+      showToast(`🔗 Movie URL copied to clipboard!`);
+    } catch (err) {
+      showToast('Could not copy link to clipboard');
+    }
+  }
+
+  // Deep-Link Route Handler on Initial Page Load
+  async function handleDeepLinkOnLoad() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const watchId = urlParams.get('watch') || (window.location.pathname.startsWith('/watch') ? urlParams.get('id') : null);
+    const movieId = urlParams.get('movie') || urlParams.get('details');
+    const title = urlParams.get('title') || '';
+    const season = parseInt(urlParams.get('s') || urlParams.get('season') || '0', 10);
+    const episode = parseInt(urlParams.get('e') || urlParams.get('episode') || '0', 10);
+
+    if (watchId) {
+      const mediaItem = {
+        id: { provider: 'moviebox', value: watchId },
+        title: decodeURIComponent(title) || 'Movie',
+        media_type: season > 0 || episode > 0 ? 'series' : 'movie',
+      };
+      startPlayback(mediaItem, season, episode);
+    } else if (movieId) {
+      openDetailsModal(movieId, 'moviebox', decodeURIComponent(title));
+    }
+  }
+
+  // Handle browser Back / Forward history buttons
+  window.addEventListener('popstate', (e) => {
+    if (!el.playerOverlay.classList.contains('hidden')) {
+      closePlayer();
+      return;
+    }
+    if (!el.detailsModal.classList.contains('hidden')) {
+      closeDetailsModal();
+      return;
+    }
+    if (e.state && e.state.id) {
+      if (e.state.type === 'watch') {
+        const item = { id: { provider: 'moviebox', value: e.state.id }, title: e.state.title, media_type: e.state.season > 0 ? 'series' : 'movie' };
+        startPlayback(item, e.state.season || 0, e.state.episode || 0);
+      } else if (e.state.type === 'movie') {
+        openDetailsModal(e.state.id, 'moviebox', e.state.title);
+      }
+    }
+  });
+
+  // ==========================================================================
   // MEDIA DETAILS MODAL
   // ==========================================================================
   async function openDetailsModal(id, provider = 'moviebox', titleHint = '') {
@@ -725,6 +860,16 @@
 
       const displayTitle = cleanDisplayTitle(details.title);
       const poster = details.poster_url || fallbackPoster(displayTitle);
+
+      // Update Browser URL so every movie has its own unique, shareable link
+      updateMovieUrl(details.id.value, details.title, true);
+
+      // Wire Share Link Button
+      if (el.modalShareBtn) {
+        el.modalShareBtn.onclick = () => {
+          shareMovieLink(details.id.value, details.title, details.description, poster, false);
+        };
+      }
       el.modalPoster.src = poster;
       el.modalHeroBg.style.backgroundImage = `url('${poster}')`;
       el.modalTitle.textContent = displayTitle;
@@ -885,6 +1030,9 @@
   function closeDetailsModal() {
     el.detailsModal.classList.add('hidden');
     document.body.style.overflow = 'auto';
+    if (el.playerOverlay.classList.contains('hidden')) {
+      revertUrlToBase();
+    }
   }
 
   function openPlayerDirect(item) {
@@ -1179,6 +1327,17 @@
     state.currentEpisode = episode;
     state.isEmbedMode = false;
     state.currentStreamIndex = 0;
+
+    // Update Browser URL so every watch stream has its own unique, shareable watch URL
+    updateWatchUrl(media.id.value, season, episode, media.title, true);
+
+    // Wire Share Stream URL button
+    if (el.playerShareBtn) {
+      el.playerShareBtn.onclick = () => {
+        shareMovieLink(media.id.value, media.title, '', media.poster_url || '', true, season, episode);
+      };
+    }
+
     if (el.embedPlayerIframe) {
       el.embedPlayerIframe.classList.add('hidden');
       el.embedPlayerIframe.src = '';
@@ -1519,6 +1678,7 @@
     state.isEmbedMode = false;
     el.playerOverlay.classList.add('hidden');
     document.body.style.overflow = 'auto';
+    revertUrlToBase();
     renderContinueWatching();
   }
 

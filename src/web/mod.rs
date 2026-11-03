@@ -10,7 +10,7 @@ use axum::{
     Router,
 };
 use tower_http::cors::{Any, CorsLayer};
-use tower_http::services::ServeDir;
+use tower_http::services::{ServeDir, ServeFile};
 
 use crate::service::MovieBoxService;
 use api::AppState;
@@ -45,7 +45,7 @@ pub fn create_router(service: Arc<MovieBoxService>) -> Router {
 
     Router::new()
         .nest("/api", api_routes)
-        .fallback_service(ServeDir::new("web"))
+        .fallback_service(ServeDir::new("web").not_found_service(ServeFile::new("web/index.html")))
         .layer(cors)
 }
 

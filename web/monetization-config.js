@@ -1,6 +1,12 @@
 /**
  * NetMirror Plus – Monetization & Revenue Configuration
- * Customize your affiliate links, donation URLs, crypto wallet addresses, and VIP passcodes here!
+ * Customize your affiliate links, donation URLs, crypto wallet addresses, VIP passcodes, and ad banners here!
+ *
+ * POLICY:
+ * Ads are shown ONLY when you configure and enable them here (when you get money).
+ * When ads are disabled or empty, ZERO ads are displayed to your users.
+ * All unauthorized 3rd-party malware, popups, and rogue redirects from video servers
+ * are permanently blocked by NetMirror AdShield at all times.
  */
 window.NETMIRROR_MONETIZATION = {
   // 1. HIGH-PAYING STREAMING VPN AFFILIATE (NordVPN, Surfshark, CyberGhost, etc.)
@@ -31,12 +37,15 @@ window.NETMIRROR_MONETIZATION = {
   // You can sell these passcodes on Gumroad, Discord, Telegram, or Ko-fi!
   vipPasscodes: ["VIP2026", "NETMIRRORVIP", "PREMIUM4K", "GOLDENPASS", "FSFERDOWS"],
 
-  // 5. BANNER ADVERTISING NETWORKS (e.g. Monetag, Adsterra, PropellerAds)
-  // Set enabled to true when you sign up with an ad network:
+  // 5. BANNER ADVERTISING NETWORKS (e.g. Monetag, Adsterra, PropellerAds, Google AdSense)
+  // Set enabled to true when you sign up with an ad network and paste your banner ad HTML:
+  // When enabled: true, your banners will appear in dedicated, clean sponsor slots.
+  // When enabled: false, ALL ad slots are completely removed and blocked.
   adBanners: {
     enabled: false,
-    headerBannerHtml: "",
-    detailsBannerHtml: ""
+    headerBannerHtml: "", // Paste your ad code here (e.g. 728x90 leaderboard or responsive banner)
+    detailsBannerHtml: "" // Paste your ad code here (e.g. 300x250 or native banner)
   }
 };
+
 

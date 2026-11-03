@@ -65,6 +65,10 @@
     navLinks: document.querySelectorAll('.nav-link[data-nav]'),
     ottDropdownBtn: document.getElementById('ottDropdownBtn'),
     ottDropdownMenu: document.getElementById('ottDropdownMenu'),
+    languagesDropdownBtn: document.getElementById('languagesDropdownBtn'),
+    languagesDropdownMenu: document.getElementById('languagesDropdownMenu'),
+    userHeaderAdBanner: document.getElementById('userHeaderAdBanner'),
+    userDetailsAdBanner: document.getElementById('userDetailsAdBanner'),
     searchInput: document.getElementById('searchInput'),
     searchWrapper: document.getElementById('searchWrapper'),
     clearSearchBtn: document.getElementById('clearSearchBtn'),
@@ -360,10 +364,32 @@
     if (el.btcAddrInput) el.btcAddrInput.value = wallets.btc || 'bc1... (Configure in monetization-config.js)';
     if (el.solAddrInput) el.solAddrInput.value = wallets.sol || 'So1... (Configure in monetization-config.js)';
 
-    // 4. Update VIP Status UI
+    // 4. Render Owner Monetized Banner Ads (ONLY when site owner enables them)
+    if (config.adBanners && config.adBanners.enabled) {
+      if (el.userHeaderAdBanner && config.adBanners.headerBannerHtml) {
+        el.userHeaderAdBanner.innerHTML = config.adBanners.headerBannerHtml;
+        el.userHeaderAdBanner.classList.remove('hidden');
+      }
+      if (el.userDetailsAdBanner && config.adBanners.detailsBannerHtml) {
+        el.userDetailsAdBanner.innerHTML = config.adBanners.detailsBannerHtml;
+        el.userDetailsAdBanner.classList.remove('hidden');
+      }
+    } else {
+      // Guarantee zero ads are displayed when not monetized
+      if (el.userHeaderAdBanner) {
+        el.userHeaderAdBanner.innerHTML = '';
+        el.userHeaderAdBanner.classList.add('hidden');
+      }
+      if (el.userDetailsAdBanner) {
+        el.userDetailsAdBanner.innerHTML = '';
+        el.userDetailsAdBanner.classList.add('hidden');
+      }
+    }
+
+    // 5. Update VIP Status UI
     updateVipStatusUI();
 
-    // 5. Setup VIP & Monetization Listeners
+    // 6. Setup VIP & Monetization Listeners
     setupMonetizationListeners();
   }
 
@@ -381,6 +407,12 @@
       }
       if (el.playerSponsorPill) {
         el.playerSponsorPill.style.display = 'none';
+      }
+      if (el.userHeaderAdBanner) {
+        el.userHeaderAdBanner.style.display = 'none';
+      }
+      if (el.userDetailsAdBanner) {
+        el.userDetailsAdBanner.style.display = 'none';
       }
     }
   }
@@ -909,11 +941,16 @@
   // Deep-Link Route Handler on Initial Page Load
   async function handleDeepLinkOnLoad() {
     const urlParams = new URLSearchParams(window.location.search);
+    const hash = window.location.hash || '';
+    const hashParams = new URLSearchParams(hash.replace(/^#/, ''));
+
     const watchId = urlParams.get('watch') || (window.location.pathname.startsWith('/watch') ? urlParams.get('id') : null);
     const movieId = urlParams.get('movie') || urlParams.get('details');
     const title = urlParams.get('title') || '';
     const season = parseInt(urlParams.get('s') || urlParams.get('season') || '0', 10);
     const episode = parseInt(urlParams.get('e') || urlParams.get('episode') || '0', 10);
+    const lang = urlParams.get('lang') || urlParams.get('language') || hashParams.get('language') || hashParams.get('lang');
+    const platform = urlParams.get('platform') || hashParams.get('platform');
 
     if (watchId) {
       const mediaItem = {
@@ -924,6 +961,10 @@
       startPlayback(mediaItem, season, episode);
     } else if (movieId) {
       openDetailsModal(movieId, 'moviebox', decodeURIComponent(title));
+    } else if (lang) {
+      openLanguageView(lang);
+    } else if (platform) {
+      openPlatformView(platform);
     }
   }
 
@@ -2029,7 +2070,42 @@
     bollywood: { name: 'Bollywood Blockbusters', badge: 'BOLLYWOOD', color: '#eab308', desc: 'Massive Hindi cinema blockbusters, music, romantic classics, and star-studded releases.' },
     hollywood: { name: 'Hollywood Hits', badge: 'HOLLYWOOD', color: '#06b6d4', desc: 'Worldwide box office hits, theatrical releases, Hollywood action blockbusters, and classics.' },
     boxoffice: { name: 'Top All-Time Box Office', badge: 'BOX OFFICE', color: '#10b981', desc: 'Highest grossing cinema movies of all time: Avatar, Avengers, Titanic, Star Wars, and more.' },
+
+    // Multi-Language Worldwide Cinema Catalogs
+    hindi: { name: 'Hindi Cinema (Bollywood)', badge: 'BOLLYWOOD / हिन्दी', color: '#eab308', desc: 'Stream blockbuster Bollywood movies, Hindi originals, and top Indian drama series.' },
+    japanese: { name: 'Japanese Anime & Cinema', badge: 'ANIME / 日本語', color: '#ec4899', desc: 'Stream world-famous anime series and films: Demon Slayer, Attack on Titan, Jujutsu Kaisen, and more.' },
+    korean: { name: 'Korean K-Drama & Cinema', badge: 'K-DRAMA / 한국어', color: '#f43f5e', desc: 'Binge the most captivating Korean romantic dramas, award-winning films like Parasite, and revenge thrillers.' },
+    english: { name: 'Hollywood & Global English', badge: 'HOLLYWOOD / ENGLISH', color: '#06b6d4', desc: 'All-time box office champions, Hollywood blockbusters, and award-winning American and British cinema.' },
+    spanish: { name: 'Spanish Cinema (Español)', badge: 'ESPAÑOL / CINEMA', color: '#f59e0b', desc: 'Top Spanish and Latin American titles: Money Heist, Berlin, Elite, Society of the Snow, and Narcos.' },
+    french: { name: 'French Cinema (Français)', badge: 'FRANÇAIS / CINEMA', color: '#3b82f6', desc: 'Masterpieces of French cinema and hit series: Lupin, Anatomy of a Fall, Amélie, and French thrillers.' },
+    tamil_telugu: { name: 'South Indian Cinema (Tamil & Telugu)', badge: 'SOUTH CINEMA', color: '#f97316', desc: 'Blockbusters from Tollywood & Kollywood: RRR, Baahubali, Pushpa, KGF, Kantara, and Kalki 2898 AD.' },
+    tamil: { name: 'Tamil Cinema (Kollywood)', badge: 'TAMIL CINEMA', color: '#f97316', desc: 'Top Tamil blockbusters and movies: Leo, Jailer, Vikram, Master, and Ponniyin Selvan.' },
+    telugu: { name: 'Telugu Cinema (Tollywood)', badge: 'TELUGU CINEMA', color: '#f97316', desc: 'Top Telugu blockbusters: RRR, Baahubali, Pushpa, Salaar, Devara, and Kalki 2898 AD.' },
+    bengali: { name: 'Bengali Cinema (বাংলা)', badge: 'বাংলা / TOLLYWOOD', color: '#10b981', desc: 'Iconic Bengali cinema, Hoichoi originals, detective thrillers (Byomkesh, Feluda), and drama.' },
+    german: { name: 'German Cinema (Deutsch)', badge: 'DEUTSCH / CINEMA', color: '#6366f1', desc: 'Acclaimed German sci-fi and drama: Dark, 1899, All Quiet on the Western Front, and Babylon Berlin.' },
+    italian: { name: 'Italian Cinema (Italiano)', badge: 'ITALIANO / CINEMA', color: '#14b8a6', desc: 'Cinematic classics and gritty series: Cinema Paradiso, Life is Beautiful, Suburra, and Gomorrah.' },
+    arabic: { name: 'Arabic Cinema & Dramas (العربية)', badge: 'العربية / CINEMA', color: '#84cc16', desc: 'Middle Eastern and North African hits: AlRawabi School for Girls, Fauda, Capernaum, and historical epics.' },
+    turkish: { name: 'Turkish Cinema (Türkçe)', badge: 'TÜRKÇE / DIZI', color: '#e11d48', desc: 'Famous Turkish historical epics and dramas: Resurrection: Ertugrul, Kurulus: Osman, and Miracle in Cell No. 7.' },
+    chinese: { name: 'Chinese Cinema & C-Drama (中文)', badge: '中文 / C-DRAMA', color: '#d97706', desc: 'Epic martial arts, Wuxia fantasy, and modern C-Dramas: The Untamed, Word of Honor, and Ip Man.' },
+    russian: { name: 'Russian Cinema (Русский)', badge: 'РУССКИЙ / CINEMA', color: '#8b5cf6', desc: 'Renowned Russian sci-fi, historical epics, and action: Major Grom, To the Lake, Leviathan, and Solaris.' },
+    tagalog: { name: 'Filipino Cinema (Tagalog)', badge: 'PINOY / TAGALOG', color: '#ea580c', desc: 'Top Filipino films and Vivamax originals: romance, action thrillers, and acclaimed independent cinema.' },
+    filipino: { name: 'Filipino Cinema (Tagalog)', badge: 'PINOY / TAGALOG', color: '#ea580c', desc: 'Top Filipino films and Vivamax originals: romance, action thrillers, and acclaimed independent cinema.' },
+    portuguese: { name: 'Portuguese & Brazilian Cinema', badge: 'PORTUGUÊS / CINEMA', color: '#059669', desc: 'Celebrated Brazilian and Portuguese cinema: City of God, Elite Squad, Invisible City, and 3%.' },
   };
+
+  function openLanguageView(langKey, titleHint, brandColor) {
+    const norm = (langKey || 'hindi').toLowerCase().replace(/[\s-]/g, '_');
+    const meta = PLATFORM_METADATA[norm] || {
+      name: titleHint || `${norm.toUpperCase()} Cinema`,
+      badge: norm.toUpperCase(),
+      color: brandColor || '#3b82f6',
+      desc: `Explore movies and series in ${titleHint || norm}.`,
+    };
+    try {
+      history.replaceState(null, '', `#language=${encodeURIComponent(norm)}`);
+    } catch (_) {}
+    openPlatformView(norm, meta.name, meta.color);
+  }
 
   async function openPlatformView(platformKey, titleHint, brandColor) {
     state.currentPlatformKey = platformKey;
@@ -2904,6 +2980,14 @@
       });
     });
 
+    document.querySelectorAll('.mobile-plat-btn[data-lang]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const lang = btn.dataset.lang;
+        closeMobilePlatformsSheet();
+        openLanguageView(lang, btn.textContent.trim());
+      });
+    });
+
     // Hero Slider Arrows
     if (el.heroPrevBtn) el.heroPrevBtn.addEventListener('click', () => { prevHeroSlide(); resetHeroAutoRotate(); });
     if (el.heroNextBtn) el.heroNextBtn.addEventListener('click', () => { nextHeroSlide(); resetHeroAutoRotate(); });
@@ -2942,11 +3026,41 @@
       });
     });
 
+    // Language Dropdown Items
+    document.querySelectorAll('.dropdown-item[data-lang]').forEach((item) => {
+      item.addEventListener('click', () => {
+        const lang = item.dataset.lang;
+        openLanguageView(lang, item.textContent.trim());
+      });
+    });
+
     // OTT Brand Cards on Home
     document.querySelectorAll('.ott-card[data-ott]').forEach((card) => {
       card.addEventListener('click', () => {
         const ott = card.dataset.ott;
         openPlatformView(ott, card.dataset.title, card.dataset.color);
+      });
+    });
+
+    // Language Brand Cards on Home
+    document.querySelectorAll('.lang-card[data-lang]').forEach((card) => {
+      card.addEventListener('click', () => {
+        const lang = card.dataset.lang;
+        openLanguageView(lang, card.dataset.title, card.dataset.color);
+      });
+    });
+
+    // Grid View Language Filter Chips
+    document.querySelectorAll('.lang-filter-chip[data-lang]').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.lang-filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        const lang = chip.dataset.lang;
+        if (lang === 'all') {
+          renderGrid();
+        } else {
+          openLanguageView(lang);
+        }
       });
     });
 

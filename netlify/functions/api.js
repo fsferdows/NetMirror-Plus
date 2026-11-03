@@ -87,6 +87,110 @@ const PLATFORMS = [
   },
 ];
 
+const LANGUAGES = [
+  { key: "hindi", name: "Hindi (Bollywood)", flag: "🇮🇳", badge: "BOLLYWOOD", color: "#EAB308", subtitle: "Hindi Cinema & Web Series" },
+  { key: "japanese", name: "Japanese (Anime)", flag: "🇯🇵", badge: "ANIME", color: "#EC4899", subtitle: "Anime Series & Films" },
+  { key: "korean", name: "Korean (K-Drama)", flag: "🇰🇷", badge: "K-DRAMA", color: "#F43F5E", subtitle: "K-Drama Hits & Cinema" },
+  { key: "english", name: "English (Hollywood)", flag: "🇺🇸", badge: "HOLLYWOOD", color: "#06B6D4", subtitle: "Global Blockbusters" },
+  { key: "spanish", name: "Spanish (Español)", flag: "🇪🇸", badge: "ESPAÑOL", color: "#F59E0B", subtitle: "Spanish & Latin Cinema" },
+  { key: "french", name: "French (Français)", flag: "🇫🇷", badge: "FRANÇAIS", color: "#3B82F6", subtitle: "French Cinema & Series" },
+  { key: "tamil_telugu", name: "Tamil & Telugu", flag: "🇮🇳", badge: "SOUTH CINEMA", color: "#F97316", subtitle: "Tollywood & Kollywood" },
+  { key: "bengali", name: "Bengali (বাংলা)", flag: "🇧🇩", badge: "বাংলা", color: "#10B981", subtitle: "Tollywood & Bangla Hits" },
+  { key: "german", name: "German (Deutsch)", flag: "🇩🇪", badge: "DEUTSCH", color: "#6366F1", subtitle: "Dark, 1899 & Cinema" },
+  { key: "italian", name: "Italian (Italiano)", flag: "🇮🇹", badge: "ITALIANO", color: "#14B8A6", subtitle: "Cinema Italiano" },
+  { key: "arabic", name: "Arabic (العربية)", flag: "🇸🇦", badge: "العربية", color: "#84CC16", subtitle: "Arab Cinema & Dramas" },
+  { key: "turkish", name: "Turkish (Türkçe)", flag: "🇹🇷", badge: "TÜRKÇE", color: "#E11D48", subtitle: "Historical Epics & Dramas" },
+  { key: "chinese", name: "Chinese (中文)", flag: "🇨🇳", badge: "C-DRAMA", color: "#D97706", subtitle: "C-Drama & Martial Arts" },
+  { key: "russian", name: "Russian (Русский)", flag: "🇷🇺", badge: "РУССКИЙ", color: "#8B5CF6", subtitle: "Cinema & Sci-Fi" },
+  { key: "tagalog", name: "Filipino (Tagalog)", flag: "🇵🇭", badge: "PINOY", color: "#EA580C", subtitle: "Vivamax & Pinoy Hits" },
+  { key: "portuguese", name: "Portuguese", flag: "🇵🇹", badge: "PORTUGUÊS", color: "#059669", subtitle: "Brazilian & Portuguese" },
+];
+
+const LANGUAGE_SEEDS = {
+  hindi: [
+    "Mirzapur", "Jawan", "Pathaan", "3 Idiots", "Dangal", "Stree 2", "Animal", "Sacred Games",
+    "Brahmastra", "Sholay", "Kabir Singh", "PK", "Bajrangi Bhaijaan", "Gangs of Wasseypur",
+    "Panchayat", "Farzi", "The Family Man", "Lagaan", "Taare Zameen Par", "Chhichhore"
+  ],
+  japanese: [
+    "Demon Slayer: Kimetsu no Yaiba", "Attack on Titan", "Jujutsu Kaisen", "One Piece",
+    "Spirited Away", "Death Note", "Naruto Shippuden", "Bleach", "Your Name", "Chainsaw Man",
+    "Solo Leveling", "Tokyo Ghoul", "Hunter x Hunter", "My Hero Academia", "Princess Mononoke",
+    "Fullmetal Alchemist: Brotherhood", "Suzume", "Dragon Ball Z"
+  ],
+  korean: [
+    "Squid Game", "All of Us Are Dead", "Crash Landing on You", "The Glory", "Parasite",
+    "Train to Busan", "Sweet Home", "Vincenzo", "Business Proposal", "Guardian: The Lonely and Great God",
+    "Happiness", "Extraordinary Attorney Woo", "Kingdom", "Queen of Tears", "Descendants of the Sun",
+    "Itaewon Class", "Signal", "My Demon", "Hellbound"
+  ],
+  spanish: [
+    "Money Heist", "Berlin", "Elite", "Society of the Snow", "Pan's Labyrinth", "The Platform",
+    "Narcos", "Wild Tales", "Roma", "Cable Girls", "Vis a Vis", "Through My Window",
+    "The Invisible Guest", "The Secret in Their Eyes", "Amores Perros"
+  ],
+  french: [
+    "Lupin", "Anatomy of a Fall", "Amelie", "La Haine", "Portrait of a Lady on Fire",
+    "The Intouchables", "Call My Agent!", "Athena", "Black Spot", "La Mante", "Oxygen",
+    "A Prophet", "Blue Is the Warmest Color", "The Artist", "Les Miserables"
+  ],
+  tamil_telugu: [
+    "RRR", "Baahubali: The Beginning", "Baahubali 2: The Conclusion", "Pushpa: The Rise",
+    "Pushpa 2: The Rule", "K.G.F: Chapter 2", "Kantara", "Leo", "Jailer", "Salaar",
+    "Devara: Part 1", "Kalki 2898 AD", "Vikram", "Ponniyin Selvan", "Master", "The Greatest of All Time"
+  ],
+  bengali: [
+    "Detective Byomkesh Bakshy!", "Pather Panchali", "Asur", "Feluda", "Gumnaami",
+    "Chander Pahar", "Sharey Showlo", "Ballabhpurer Roopkotha", "Mahananda", "Aparajito",
+    "Professor Shonku", "Taqdeer", "Karagar", "Kishore Kumar Junior", "Dracula Sir"
+  ],
+  german: [
+    "Dark", "1899", "All Quiet on the Western Front", "Babylon Berlin", "The Lives of Others",
+    "Run Lola Run", "Biohackers", "Kleo", "How to Sell Drugs Online (Fast)", "Dogs of Berlin",
+    "Blood & Gold", "Das Boot", "Good Bye Lenin!", "The Empress"
+  ],
+  italian: [
+    "Cinema Paradiso", "Life is Beautiful", "Suburra: Blood on Rome", "Gomorrah",
+    "The Great Beauty", "The Hand of God", "The Leopard", "Devils", "My Brilliant Friend",
+    "Baby", "The Two Popes", "The Eight Mountains", "Rose Island"
+  ],
+  arabic: [
+    "AlRawabi School for Girls", "Fauda", "Capernaum", "The Message", "Paranormal",
+    "Six Windows in the Desert", "Finding Ola", "The Exchange", "Crashing Eid", "The Platform",
+    "Rattle the Cage", "Omar"
+  ],
+  turkish: [
+    "Resurrection: Ertugrul", "Kurulus: Osman", "Miracle in Cell No. 7", "The Protector",
+    "The Club", "Shahmaran", "Winter Sleep", "The Gift", "Midnight at the Pera Palace",
+    "As the Crow Flies", "Another Self", "Thank You, Next"
+  ],
+  chinese: [
+    "The Untamed", "Word of Honor", "Crouching Tiger, Hidden Dragon", "Farewell My Concubine",
+    "Hero", "Ip Man", "The Wandering Earth", "Hidden Love", "Love Between Fairy and Devil",
+    "Till the End of the Moon", "House of Flying Daggers", "Kung Fu Hustle"
+  ],
+  russian: [
+    "Major Grom: Plague Doctor", "To the Lake", "Leviathan", "Loveless", "Stalker",
+    "Solaris", "Better Than Us", "Hardcore Henry", "Silver Spoon", "Sputnik",
+    "The Silver Skates", "T-34"
+  ],
+  tagalog: [
+    "Scorpio Nights", "Silip", "Virgin Forest", "Island of Desire", "Selina's Gold",
+    "Relyevo", "Pabuya", "Balahibong Pusa", "Bata, Bata... Pa'no Ka Ginawa?", "Metro Manila",
+    "Birdshot", "Goyo: The Boy General", "Heneral Luna"
+  ],
+  portuguese: [
+    "City of God", "Elite Squad", "Invisible City", "3%", "Sintonia",
+    "Bacurau", "Central Station", "Brotherhood", "Good Morning, Verônica", "Aquarius",
+    "The Mechanism", "Glória"
+  ],
+  english: [
+    "Avatar", "Avengers: Endgame", "Oppenheimer", "Interstellar", "The Dark Knight",
+    "Inception", "Titanic", "Gladiator", "The Matrix", "Top Gun: Maverick",
+    "Dune: Part Two", "Stranger Things", "Breaking Bad", "Game of Thrones", "Succession"
+  ]
+};
+
 const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)";
 
 function cleanTitle(title) {
@@ -747,9 +851,19 @@ function getPlatformUrl(platformKey, pageIdx, params) {
 }
 
 async function handlePlatformContent(params) {
-  const rawName = (params.name || "netflix").toLowerCase().replace(/[\s-]/g, "");
+  const rawName = (params.name || "netflix").toLowerCase().replace(/[\s-]/g, "_");
   const page = Math.max(1, parseInt(params.page || "1", 10));
   const pageIdx = page - 1;
+
+  // Delegate multi-language queries to dedicated language handler
+  const languageAliases = [
+    "hindi", "japanese", "korean", "spanish", "french", "tamil", "telugu", "tamil_telugu",
+    "bengali", "german", "italian", "arabic", "turkish", "chinese", "russian", "tagalog",
+    "filipino", "portuguese"
+  ];
+  if (languageAliases.includes(rawName)) {
+    return handleLanguageContent({ ...params, lang: rawName });
+  }
 
   let displayName;
   let platformKey = rawName;
@@ -879,6 +993,130 @@ async function handlePlatformContent(params) {
   };
 }
 
+async function handleLanguages() {
+  return {
+    statusCode: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "public, max-age=3600"
+    },
+    body: JSON.stringify(LANGUAGES),
+  };
+}
+
+const languageCache = {};
+const languageCacheTime = {};
+
+async function handleLanguageContent(params) {
+  const rawLang = (params.lang || params.name || "hindi").toLowerCase().replace(/[\s-]/g, "_");
+  const page = Math.max(1, parseInt(params.page || "1", 10));
+  const pageIdx = page - 1;
+
+  // Normalize aliases
+  let langKey = rawLang;
+  if (langKey === "bollywood") langKey = "hindi";
+  if (langKey === "anime") langKey = "japanese";
+  if (langKey === "kdrama") langKey = "korean";
+  if (langKey === "hollywood" || langKey === "boxoffice") langKey = "english";
+  if (langKey === "tamil" || langKey === "telugu") langKey = "tamil_telugu";
+  if (langKey === "filipino") langKey = "tagalog";
+
+  const langInfo = LANGUAGES.find(l => l.key === langKey) || {
+    key: langKey,
+    name: `${langKey.toUpperCase()} Cinema`,
+    flag: "🌍",
+    color: "#3b82f6"
+  };
+
+  const cacheKey = `${langKey}_p${page}`;
+  if (languageCache[cacheKey] && (Date.now() - (languageCacheTime[cacheKey] || 0) < 15 * 60 * 1000)) {
+    return {
+      statusCode: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "public, max-age=120, s-maxage=300"
+      },
+      body: JSON.stringify(languageCache[cacheKey]),
+    };
+  }
+
+  // 1. Check if language has an upstream platform channel or trending ID
+  let upstreamUrl = null;
+  if (langKey === "hindi") upstreamUrl = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=zee5&items_per_page=30`;
+  else if (langKey === "japanese") upstreamUrl = `https://api2.imdb3.shop/api/tranding?id=30&items_per_page=18&page=${pageIdx}`;
+  else if (langKey === "korean") upstreamUrl = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=viu&items_per_page=30`;
+  else if (langKey === "english") upstreamUrl = `https://api2.imdb3.shop/api/tranding?id=44&items_per_page=18&page=${pageIdx}`;
+  else if (langKey === "bengali") upstreamUrl = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=hoichoi&items_per_page=30`;
+  else if (langKey === "tagalog") upstreamUrl = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=vivamax&items_per_page=30`;
+  else if (langKey === "tamil_telugu") upstreamUrl = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=zee5&items_per_page=30`;
+  else upstreamUrl = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=netflix&items_per_page=30`;
+
+  const fetchPromises = [];
+  if (upstreamUrl) {
+    fetchPromises.push(
+      fetch(upstreamUrl, { headers: { "User-Agent": USER_AGENT } })
+        .then(r => r.json())
+        .then(j => (j.results || []).map(mapItem).filter(Boolean))
+        .catch(() => [])
+    );
+  }
+
+  // 2. Resolve curated seed movies for this language
+  const seeds = LANGUAGE_SEEDS[langKey] || [];
+  const startIdx = pageIdx * 10;
+  const pageSeeds = seeds.slice(startIdx, startIdx + 12);
+
+  for (const seed of pageSeeds) {
+    fetchPromises.push(
+      fetch(`https://api2.imdb4.shop/suggest.php?q=${encodeURIComponent(seed.toLowerCase())}&p=1`, { headers: { "User-Agent": USER_AGENT } })
+        .then(r => r.json())
+        .then(j => (j.results || []).map(mapItem).filter(Boolean))
+        .catch(() => [])
+    );
+  }
+
+  const results = await Promise.all(fetchPromises);
+  const seen = new Set();
+  const items = [];
+
+  for (const list of results) {
+    for (const item of list) {
+      if (!item || !item.id || !item.title) continue;
+      const canon = getCanonical(item.title);
+      if (!canon || seen.has(canon)) continue;
+      seen.add(canon);
+      items.push(item);
+    }
+  }
+
+  const payload = {
+    platform: langKey,
+    language: langKey,
+    display_name: langInfo.name,
+    flag: langInfo.flag,
+    color: langInfo.color,
+    page,
+    total_pages: Math.max(5, Math.ceil((seeds.length + 30) / 12)),
+    total_results: (seeds.length + 50),
+    items,
+  };
+
+  languageCache[cacheKey] = payload;
+  languageCacheTime[cacheKey] = Date.now();
+
+  return {
+    statusCode: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "public, max-age=120, s-maxage=300"
+    },
+    body: JSON.stringify(payload),
+  };
+}
+
 let browseCache = null;
 let browseCacheTime = 0;
 const BROWSE_CACHE_TTL = 15 * 60 * 1000; // 15 minutes in-memory cache
@@ -982,8 +1220,34 @@ async function handleBrowse() {
   };
 }
 
+async function resolveMultiLanguageTerms(rawQuery) {
+  const q = (rawQuery || "").trim();
+  if (!q) return [];
+  const terms = [q];
+  const normalized = q.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+  if (normalized && normalized.toLowerCase() !== q.toLowerCase()) {
+    terms.push(normalized);
+  }
+  const hasNonAscii = /[^\u0000-\u007F]/.test(q);
+  if (hasNonAscii) {
+    try {
+      const transUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(q)}`;
+      const res = await fetch(transUrl, { headers: { "User-Agent": USER_AGENT } });
+      if (res.ok) {
+        const json = await res.json();
+        const translated = (json[0] || []).map(p => p[0]).join("").trim();
+        if (translated && !terms.map(t => t.toLowerCase()).includes(translated.toLowerCase())) {
+          terms.push(translated);
+        }
+      }
+    } catch (_) {}
+  }
+  return terms;
+}
+
 async function searchIMDb(query) {
-  const clean = (query || "").toLowerCase().replace(/[^a-z0-9]/g, "_").replace(/_+/g, "_").replace(/^_|_$/g, "");
+  const norm = (query || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+  const clean = norm.toLowerCase().replace(/[^a-z0-9]/g, "_").replace(/_+/g, "_").replace(/^_|_$/g, "");
   if (!clean) return [];
   const first = clean[0] || "a";
   const url = `https://v3.sg.media-imdb.com/suggestion/${first}/${clean}.json`;
@@ -1016,31 +1280,32 @@ async function handleSearch(params) {
     };
   }
 
-  const [imdbItems, shopItems] = await Promise.all([
-    searchIMDb(q),
-    fetch(`https://api2.imdb4.shop/suggest.php?q=${encodeURIComponent(q.toLowerCase())}&p=24`, { headers: { "User-Agent": USER_AGENT } })
-      .then(r => r.json())
-      .then(j => (j.results || []).map(mapItem).filter(Boolean))
-      .catch(() => [])
-  ]);
+  const terms = await resolveMultiLanguageTerms(q);
+  const searchPromises = [];
 
+  for (const term of terms) {
+    searchPromises.push(searchIMDb(term));
+    searchPromises.push(
+      fetch(`https://api2.imdb4.shop/suggest.php?q=${encodeURIComponent(term.toLowerCase())}&p=24`, { headers: { "User-Agent": USER_AGENT } })
+        .then(r => r.json())
+        .then(j => (j.results || []).map(mapItem).filter(Boolean))
+        .catch(() => [])
+    );
+  }
+
+  const resultsLists = await Promise.all(searchPromises);
   const seen = new Set();
   const items = [];
 
-  // Priority 1: Top worldwide IMDb matches (official title, year, poster & IMDb tt... ID)
-  for (const item of imdbItems) {
-    const canon = getCanonical(item.title);
-    if (!canon || seen.has(canon)) continue;
-    seen.add(canon);
-    items.push(item);
-  }
-
-  // Priority 2: MovieBox indexed catalog
-  for (const item of shopItems) {
-    const canon = getCanonical(item.title);
-    if (!canon || seen.has(canon)) continue;
-    seen.add(canon);
-    items.push(item);
+  // Priority: Interleave & deduplicate matches
+  for (const list of resultsLists) {
+    for (const item of list) {
+      if (!item || !item.id || !item.title) continue;
+      const canon = getCanonical(item.title);
+      if (!canon || seen.has(canon)) continue;
+      seen.add(canon);
+      items.push(item);
+    }
   }
 
   return {
@@ -1060,31 +1325,42 @@ async function handleSuggest(params) {
     };
   }
 
-  const [imdbItems, shopJson] = await Promise.all([
-    searchIMDb(q),
-    fetch(`https://api2.imdb4.shop/suggest.php?q=${encodeURIComponent(q.toLowerCase())}&p=12`, { headers: { "User-Agent": USER_AGENT } })
-      .then(r => r.json())
-      .catch(() => ({}))
-  ]);
+  const terms = await resolveMultiLanguageTerms(q);
+  const searchPromises = [];
 
+  for (const term of terms) {
+    searchPromises.push(searchIMDb(term));
+    searchPromises.push(
+      fetch(`https://api2.imdb4.shop/suggest.php?q=${encodeURIComponent(term.toLowerCase())}&p=12`, { headers: { "User-Agent": USER_AGENT } })
+        .then(r => r.json())
+        .catch(() => ({}))
+    );
+  }
+
+  const results = await Promise.all(searchPromises);
   const seen = new Set();
   const suggestions = [];
 
-  for (const item of imdbItems) {
-    const canon = getCanonical(item.title);
-    if (!canon || seen.has(canon)) continue;
-    seen.add(canon);
-    suggestions.push(item.title);
-    if (suggestions.length >= 10) break;
-  }
+  for (let i = 0; i < results.length; i += 2) {
+    const imdbItems = results[i] || [];
+    const shopJson = results[i + 1] || {};
 
-  for (const raw of (shopJson.results || [])) {
-    if (!raw || !raw.title) continue;
-    const canon = getCanonical(raw.title);
-    if (!canon || seen.has(canon)) continue;
-    seen.add(canon);
-    suggestions.push(cleanTitle(raw.title));
-    if (suggestions.length >= 14) break;
+    for (const item of imdbItems) {
+      const canon = getCanonical(item.title);
+      if (!canon || seen.has(canon)) continue;
+      seen.add(canon);
+      suggestions.push(item.title);
+      if (suggestions.length >= 10) break;
+    }
+
+    for (const raw of (shopJson.results || [])) {
+      if (!raw || !raw.title) continue;
+      const canon = getCanonical(raw.title);
+      if (!canon || seen.has(canon)) continue;
+      seen.add(canon);
+      suggestions.push(cleanTitle(raw.title));
+      if (suggestions.length >= 14) break;
+    }
   }
 
   return {
@@ -1363,6 +1639,12 @@ exports.handler = async (event) => {
   }
   if (cleanPath === "/platform") {
     return handlePlatformContent(params);
+  }
+  if (cleanPath === "/languages") {
+    return handleLanguages();
+  }
+  if (cleanPath === "/language") {
+    return handleLanguageContent(params);
   }
   if (cleanPath === "/sports" || cleanPath === "/live-sports") {
     return handleSports(params);

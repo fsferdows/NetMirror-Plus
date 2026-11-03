@@ -84,6 +84,29 @@
               <button class="dropdown-item" data-ott="boxoffice"><span class="dropdown-dot" style="background:#10b981"></span> Top Box Office</button>
             </div>
           </div>
+          <div class="nav-dropdown">
+            <button class="nav-link dropdown-toggle" id="languagesDropdownBtn">
+              Languages <svg class="chevron-icon" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="dropdown-menu" id="languagesDropdownMenu">
+              <button class="dropdown-item" data-lang="hindi">🇮🇳 Hindi / हिन्दी</button>
+              <button class="dropdown-item" data-lang="japanese">🇯🇵 Anime / 日本語</button>
+              <button class="dropdown-item" data-lang="korean">🇰🇷 K-Drama / 한국어</button>
+              <button class="dropdown-item" data-lang="english">🇺🇸 English / Hollywood</button>
+              <button class="dropdown-item" data-lang="spanish">🇪🇸 Spanish / Español</button>
+              <button class="dropdown-item" data-lang="french">🇫🇷 French / Français</button>
+              <button class="dropdown-item" data-lang="tamil_telugu">🇮🇳 Tamil & Telugu</button>
+              <button class="dropdown-item" data-lang="bengali">🇧🇩 Bengali / বাংলা</button>
+              <button class="dropdown-item" data-lang="german">🇩🇪 German / Deutsch</button>
+              <button class="dropdown-item" data-lang="italian">🇮🇹 Italian / Italiano</button>
+              <button class="dropdown-item" data-lang="arabic">🇸🇦 Arabic / العربية</button>
+              <button class="dropdown-item" data-lang="turkish">🇹🇷 Turkish / Türkçe</button>
+              <button class="dropdown-item" data-lang="chinese">🇨🇳 Chinese / 中文</button>
+              <button class="dropdown-item" data-lang="russian">🇷🇺 Russian / Русский</button>
+              <button class="dropdown-item" data-lang="tagalog">🇵🇭 Filipino / Tagalog</button>
+              <button class="dropdown-item" data-lang="portuguese">🇵🇹 Portuguese / Português</button>
+            </div>
+          </div>
           <a href="#" class="nav-link" data-nav="mylist">My List</a>
           <a href="#" class="nav-link" data-nav="history">History</a>
         </nav>
@@ -180,6 +203,9 @@
 
   <!-- Main Body Content -->
   <main class="main-container" id="mainContainer">
+    <!-- User Owner-Monetized Header Ad Banner (Rendered ONLY when site owner configures ad network) -->
+    <div id="userHeaderAdBanner" class="user-ad-banner hidden" aria-label="Sponsored Content"></div>
+
     <!-- Carousel Rails View (Home) -->
     <div id="railsView" class="view-active">
 
@@ -265,6 +291,115 @@
             <button class="universe-chip chip-boxoffice" data-ott="boxoffice" data-title="Top All-Time Box Office">
               <span class="chip-dot"></span>Top Box Office
             </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Explore Movies by Language & World Cinema -->
+      <section class="rail-section language-rail-section" id="languagesSection">
+        <div class="rail-header">
+          <div>
+            <h2 class="rail-title"><span class="rail-indicator lang-indicator"></span> 🌍 Explore Movies by Language</h2>
+            <p class="rail-subtitle">Stream Hollywood, Bollywood, Anime, K-Drama, Spanish, French, Bengali & 16+ global languages</p>
+          </div>
+          <span class="platform-count-tag lang-count-tag">16 Languages Live</span>
+        </div>
+        <div class="language-brand-cards" id="languageBrandCards">
+          <div class="lang-card" data-lang="hindi" data-title="Hindi Cinema (Bollywood)" data-color="#eab308">
+            <span class="lang-flag">🇮🇳</span>
+            <span class="lang-name">Hindi / हिन्दी</span>
+            <span class="lang-desc">Bollywood Blockbusters</span>
+            <span class="lang-badge">1,800+ Titles</span>
+          </div>
+          <div class="lang-card" data-lang="japanese" data-title="Japanese Anime & Cinema" data-color="#ec4899">
+            <span class="lang-flag">🇯🇵</span>
+            <span class="lang-name">Anime / 日本語</span>
+            <span class="lang-desc">Dubbed & Subbed</span>
+            <span class="lang-badge">Top Rated</span>
+          </div>
+          <div class="lang-card" data-lang="korean" data-title="Korean K-Drama & Cinema" data-color="#f43f5e">
+            <span class="lang-flag">🇰🇷</span>
+            <span class="lang-name">K-Drama / 한국어</span>
+            <span class="lang-desc">Global Phenomenon</span>
+            <span class="lang-badge">Trending</span>
+          </div>
+          <div class="lang-card" data-lang="english" data-title="Hollywood & Global English" data-color="#06b6d4">
+            <span class="lang-flag">🇺🇸</span>
+            <span class="lang-name">English / Hollywood</span>
+            <span class="lang-desc">Global Blockbusters</span>
+            <span class="lang-badge">2,500+</span>
+          </div>
+          <div class="lang-card" data-lang="spanish" data-title="Spanish Cinema (Español)" data-color="#f59e0b">
+            <span class="lang-flag">🇪🇸</span>
+            <span class="lang-name">Spanish / Español</span>
+            <span class="lang-desc">Money Heist, Elite, Narcos</span>
+            <span class="lang-badge">Popular</span>
+          </div>
+          <div class="lang-card" data-lang="french" data-title="French Cinema (Français)" data-color="#3b82f6">
+            <span class="lang-flag">🇫🇷</span>
+            <span class="lang-name">French / Français</span>
+            <span class="lang-desc">Lupin & French Classics</span>
+            <span class="lang-badge">HD</span>
+          </div>
+          <div class="lang-card" data-lang="tamil_telugu" data-title="South Indian Cinema (Tamil & Telugu)" data-color="#f97316">
+            <span class="lang-flag">🇮🇳</span>
+            <span class="lang-name">Tamil & Telugu</span>
+            <span class="lang-desc">RRR, Pushpa, Kalki</span>
+            <span class="lang-badge">Blockbusters</span>
+          </div>
+          <div class="lang-card" data-lang="bengali" data-title="Bengali Cinema (বাংলা)" data-color="#10b981">
+            <span class="lang-flag">🇧🇩</span>
+            <span class="lang-name">Bengali / বাংলা</span>
+            <span class="lang-desc">Hoichoi & Tollywood</span>
+            <span class="lang-badge">Exclusive</span>
+          </div>
+          <div class="lang-card" data-lang="german" data-title="German Cinema (Deutsch)" data-color="#6366f1">
+            <span class="lang-flag">🇩🇪</span>
+            <span class="lang-name">German / Deutsch</span>
+            <span class="lang-desc">Dark, 1899, European</span>
+            <span class="lang-badge">Sci-Fi</span>
+          </div>
+          <div class="lang-card" data-lang="italian" data-title="Italian Cinema (Italiano)" data-color="#14b8a6">
+            <span class="lang-flag">🇮🇹</span>
+            <span class="lang-name">Italian / Italiano</span>
+            <span class="lang-desc">Classics & Thrillers</span>
+            <span class="lang-badge">Cinema</span>
+          </div>
+          <div class="lang-card" data-lang="arabic" data-title="Arabic Cinema (العربية)" data-color="#84cc16">
+            <span class="lang-flag">🇸🇦</span>
+            <span class="lang-name">Arabic / العربية</span>
+            <span class="lang-desc">Middle Eastern Hits</span>
+            <span class="lang-badge">Dramas</span>
+          </div>
+          <div class="lang-card" data-lang="turkish" data-title="Turkish Cinema (Türkçe)" data-color="#e11d48">
+            <span class="lang-flag">🇹🇷</span>
+            <span class="lang-name">Turkish / Türkçe</span>
+            <span class="lang-desc">Ertugrul & Historical</span>
+            <span class="lang-badge">Epics</span>
+          </div>
+          <div class="lang-card" data-lang="chinese" data-title="Chinese Cinema & C-Drama (中文)" data-color="#d97706">
+            <span class="lang-flag">🇨🇳</span>
+            <span class="lang-name">Chinese / 中文</span>
+            <span class="lang-desc">C-Drama & Wuxia</span>
+            <span class="lang-badge">Series</span>
+          </div>
+          <div class="lang-card" data-lang="russian" data-title="Russian Cinema (Русский)" data-color="#8b5cf6">
+            <span class="lang-flag">🇷🇺</span>
+            <span class="lang-name">Russian / Русский</span>
+            <span class="lang-desc">Sci-Fi & Action</span>
+            <span class="lang-badge">HD</span>
+          </div>
+          <div class="lang-card" data-lang="tagalog" data-title="Filipino Cinema (Tagalog)" data-color="#ea580c">
+            <span class="lang-flag">🇵🇭</span>
+            <span class="lang-name">Tagalog / Pinoy</span>
+            <span class="lang-desc">Vivamax & Pinoy Films</span>
+            <span class="lang-badge">Pinoy</span>
+          </div>
+          <div class="lang-card" data-lang="portuguese" data-title="Portuguese Cinema (Português)" data-color="#059669">
+            <span class="lang-flag">🇵🇹</span>
+            <span class="lang-name">Portuguese / Português</span>
+            <span class="lang-desc">City of God & Brazilian</span>
+            <span class="lang-badge">Dramas</span>
           </div>
         </div>
       </section>
@@ -526,6 +661,26 @@
           <button class="filter-chip" data-filter="series">TV Shows</button>
         </div>
       </div>
+      <!-- Multi-Language Quick Filter Rail -->
+      <div class="grid-language-bar" id="gridLanguageBar">
+        <button class="lang-filter-chip active" data-lang="all">🌐 All Languages</button>
+        <button class="lang-filter-chip" data-lang="hindi">🇮🇳 Hindi</button>
+        <button class="lang-filter-chip" data-lang="japanese">🇯🇵 Anime</button>
+        <button class="lang-filter-chip" data-lang="korean">🇰🇷 Korean</button>
+        <button class="lang-filter-chip" data-lang="english">🇺🇸 English</button>
+        <button class="lang-filter-chip" data-lang="spanish">🇪🇸 Spanish</button>
+        <button class="lang-filter-chip" data-lang="french">🇫🇷 French</button>
+        <button class="lang-filter-chip" data-lang="tamil_telugu">🇮🇳 Tamil & Telugu</button>
+        <button class="lang-filter-chip" data-lang="bengali">🇧🇩 Bengali</button>
+        <button class="lang-filter-chip" data-lang="german">🇩🇪 German</button>
+        <button class="lang-filter-chip" data-lang="italian">🇮🇹 Italian</button>
+        <button class="lang-filter-chip" data-lang="arabic">🇸🇦 Arabic</button>
+        <button class="lang-filter-chip" data-lang="turkish">🇹🇷 Turkish</button>
+        <button class="lang-filter-chip" data-lang="chinese">🇨🇳 Chinese</button>
+        <button class="lang-filter-chip" data-lang="russian">🇷🇺 Russian</button>
+        <button class="lang-filter-chip" data-lang="tagalog">🇵🇭 Tagalog</button>
+        <button class="lang-filter-chip" data-lang="portuguese">🇵🇹 Portuguese</button>
+      </div>
       <div class="media-grid" id="mediaGrid"></div>
       <div class="grid-pagination" id="gridPagination">
         <button class="btn btn-secondary" id="loadMoreBtn">Load More</button>
@@ -600,6 +755,9 @@
               </a>
             </div>
           </div>
+
+          <!-- User Owner-Monetized Details Ad Banner (Rendered ONLY when site owner configures ad network) -->
+          <div id="userDetailsAdBanner" class="user-ad-banner hidden" aria-label="Sponsored Content"></div>
         </div>
 
         <!-- Audio Dubs / Languages selector -->
@@ -1078,6 +1236,28 @@
         <button class="mobile-plat-btn" data-ott="kdrama" style="--c:#f43f5e">K-Drama</button>
         <button class="mobile-plat-btn" data-ott="bollywood" style="--c:#eab308">Bollywood</button>
         <button class="mobile-plat-btn" data-ott="boxoffice" style="--c:#10b981">Box Office</button>
+      </div>
+
+      <div class="sheet-title-row" style="margin-top: 18px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px;">
+        <h3>Browse By Language</h3>
+      </div>
+      <div class="mobile-platforms-grid mobile-languages-grid">
+        <button class="mobile-plat-btn" data-lang="hindi" style="--c:#eab308">🇮🇳 Hindi</button>
+        <button class="mobile-plat-btn" data-lang="japanese" style="--c:#ec4899">🇯🇵 Anime</button>
+        <button class="mobile-plat-btn" data-lang="korean" style="--c:#f43f5e">🇰🇷 Korean</button>
+        <button class="mobile-plat-btn" data-lang="english" style="--c:#06b6d4">🇺🇸 English</button>
+        <button class="mobile-plat-btn" data-lang="spanish" style="--c:#f59e0b">🇪🇸 Spanish</button>
+        <button class="mobile-plat-btn" data-lang="french" style="--c:#3b82f6">🇫🇷 French</button>
+        <button class="mobile-plat-btn" data-lang="tamil_telugu" style="--c:#f97316">🇮🇳 South</button>
+        <button class="mobile-plat-btn" data-lang="bengali" style="--c:#10b981">🇧🇩 Bengali</button>
+        <button class="mobile-plat-btn" data-lang="german" style="--c:#6366f1">🇩🇪 German</button>
+        <button class="mobile-plat-btn" data-lang="italian" style="--c:#14b8a6">🇮🇹 Italian</button>
+        <button class="mobile-plat-btn" data-lang="arabic" style="--c:#84cc16">🇸🇦 Arabic</button>
+        <button class="mobile-plat-btn" data-lang="turkish" style="--c:#e11d48">🇹🇷 Turkish</button>
+        <button class="mobile-plat-btn" data-lang="chinese" style="--c:#d97706">🇨🇳 Chinese</button>
+        <button class="mobile-plat-btn" data-lang="russian" style="--c:#8b5cf6">🇷🇺 Russian</button>
+        <button class="mobile-plat-btn" data-lang="tagalog" style="--c:#ea580c">🇵🇭 Tagalog</button>
+        <button class="mobile-plat-btn" data-lang="portuguese" style="--c:#059669">🇵🇹 Portuguese</button>
       </div>
     </div>
   </div>

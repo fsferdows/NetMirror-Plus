@@ -389,6 +389,87 @@ pub async fn get_platform_content(
             "Top All-Time Box Office".to_string(),
             "boxoffice".to_string(),
         ),
+        // Multi-Language Worldwide Cinema
+        "hindi" => (
+            format!("https://api2.imdb3.shop/api/movies/list/filter?page={page_idx}&platform=zee5"),
+            "Hindi Cinema (Bollywood)".to_string(),
+            "hindi".to_string(),
+        ),
+        "japanese" => (
+            format!("https://api2.imdb3.shop/api/tranding?id=30&items_per_page=18&page={page_idx}"),
+            "Japanese Anime & Cinema".to_string(),
+            "japanese".to_string(),
+        ),
+        "korean" => (
+            format!("https://api2.imdb3.shop/api/movies/list/filter?page={page_idx}&platform=viu"),
+            "Korean K-Drama & Cinema".to_string(),
+            "korean".to_string(),
+        ),
+        "english" => (
+            format!("https://api2.imdb3.shop/api/tranding?id=44&items_per_page=18&page={page_idx}"),
+            "Hollywood & Global English".to_string(),
+            "english".to_string(),
+        ),
+        "spanish" => (
+            format!("https://api2.imdb3.shop/api/movies/list/filter?page={page_idx}&platform=netflix"),
+            "Spanish Cinema (Español)".to_string(),
+            "spanish".to_string(),
+        ),
+        "french" => (
+            format!("https://api2.imdb3.shop/api/movies/list/filter?page={page_idx}&platform=netflix"),
+            "French Cinema (Français)".to_string(),
+            "french".to_string(),
+        ),
+        "tamil" | "telugu" | "tamil_telugu" => (
+            format!("https://api2.imdb3.shop/api/movies/list/filter?page={page_idx}&platform=zee5"),
+            "South Indian Cinema (Tamil & Telugu)".to_string(),
+            "tamil_telugu".to_string(),
+        ),
+        "bengali" => (
+            format!("https://api2.imdb3.shop/api/movies/list/filter?page={page_idx}&platform=hoichoi"),
+            "Bengali Cinema (বাংলা)".to_string(),
+            "bengali".to_string(),
+        ),
+        "german" => (
+            format!("https://api2.imdb3.shop/api/movies/list/filter?page={page_idx}&platform=netflix"),
+            "German Cinema (Deutsch)".to_string(),
+            "german".to_string(),
+        ),
+        "italian" => (
+            format!("https://api2.imdb3.shop/api/movies/list/filter?page={page_idx}&platform=netflix"),
+            "Italian Cinema (Italiano)".to_string(),
+            "italian".to_string(),
+        ),
+        "arabic" => (
+            format!("https://api2.imdb3.shop/api/movies/list/filter?page={page_idx}&platform=netflix"),
+            "Arabic Cinema (العربية)".to_string(),
+            "arabic".to_string(),
+        ),
+        "turkish" => (
+            format!("https://api2.imdb3.shop/api/movies/list/filter?page={page_idx}&platform=netflix"),
+            "Turkish Cinema (Türkçe)".to_string(),
+            "turkish".to_string(),
+        ),
+        "chinese" => (
+            format!("https://api2.imdb3.shop/api/movies/list/filter?page={page_idx}&platform=viu"),
+            "Chinese Cinema & C-Drama (中文)".to_string(),
+            "chinese".to_string(),
+        ),
+        "russian" => (
+            format!("https://api2.imdb3.shop/api/movies/list/filter?page={page_idx}&platform=netflix"),
+            "Russian Cinema (Русский)".to_string(),
+            "russian".to_string(),
+        ),
+        "tagalog" | "filipino" => (
+            format!("https://api2.imdb3.shop/api/movies/list/filter?page={page_idx}&platform=vivamax"),
+            "Filipino Cinema (Tagalog)".to_string(),
+            "vivamax".to_string(),
+        ),
+        "portuguese" => (
+            format!("https://api2.imdb3.shop/api/movies/list/filter?page={page_idx}&platform=netflix"),
+            "Portuguese Cinema (Português)".to_string(),
+            "portuguese".to_string(),
+        ),
         _ => (
             format!("https://api2.imdb3.shop/api/movies/list/filter?page={page_idx}&platform={norm_name}"),
             format!("{} Titles", params.name),

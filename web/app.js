@@ -494,7 +494,7 @@
         e.stopPropagation();
         openPlayerDirect(item);
       } else {
-        openDetailsModal(item.id.value, item.id.provider);
+        openDetailsModal(item.id.value, item.id.provider, item.title);
       }
     });
 
@@ -518,12 +518,12 @@
   // ==========================================================================
   // MEDIA DETAILS MODAL
   // ==========================================================================
-  async function openDetailsModal(id, provider = 'moviebox') {
+  async function openDetailsModal(id, provider = 'moviebox', titleHint = '') {
     el.detailsModal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 
     // Show skeletons/loading state
-    el.modalTitle.textContent = 'Loading...';
+    el.modalTitle.textContent = titleHint || 'Loading...';
     el.modalOverview.textContent = 'Fetching metadata and stream mirrors...';
     el.modalHeroBg.style.backgroundImage = 'none';
     el.modalPoster.src = '';
@@ -532,7 +532,8 @@
     el.modalDubsSection.classList.add('hidden');
 
     try {
-      const res = await fetch(`/api/details/${id}?provider=${provider}`);
+      const titleParam = titleHint ? `&title=${encodeURIComponent(titleHint)}` : '';
+      const res = await fetch(`/api/details/${id}?provider=${provider}${titleParam}`);
       if (!res.ok) throw new Error('Details not found');
       const details = await res.json();
       state.currentDetails = details;
@@ -1199,7 +1200,7 @@
       `;
       div.onclick = () => {
         el.suggestionsPopover.classList.add('hidden');
-        openDetailsModal(item.id.value, item.id.provider);
+        openDetailsModal(item.id.value, item.id.provider, item.title);
       };
       el.suggestionsPopover.appendChild(div);
     });
@@ -2303,7 +2304,7 @@
     });
 
     el.heroDetailsBtn.addEventListener('click', () => {
-      if (state.heroItem) openDetailsModal(state.heroItem.id.value, state.heroItem.id.provider);
+      if (state.heroItem) openDetailsModal(state.heroItem.id.value, state.heroItem.id.provider, state.heroItem.title);
     });
 
     el.heroFavBtn.addEventListener('click', () => {

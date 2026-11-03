@@ -4,6 +4,8 @@
  */
 window.NETMIRROR_MONETIZATION = {
   // 1. HIGH-PAYING STREAMING VPN AFFILIATE (NordVPN, Surfshark, CyberGhost, etc.)
+  // Kept off by default to guarantee 100% clean, ad-free mobile & desktop experience.
+  showVpnBanners: false,
   // Replace with your real affiliate link from CJ Affiliate, Impact, or NordVPN/Surfshark directly:
   affiliateVpnUrl: "https://nordvpn.com/special-deal/?coupon=save70",
   affiliateVpnBadge: "70% OFF + 3 MO FREE",

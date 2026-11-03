@@ -1,4 +1,5 @@
-use std::sync::Arc;
+use std::sync::{Arc, LazyLock, RwLock};
+use std::time::{Duration, Instant};
 
 use axum::{
     extract::{Path, Query, State},
@@ -60,7 +61,7 @@ pub async fn get_homepage(
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct BrowseSectionsResponse {
     pub hero: Option<CatalogItem>,
     pub hero_slides: Vec<CatalogItem>,
@@ -71,6 +72,9 @@ pub struct BrowseSectionsResponse {
     pub movies: Vec<CatalogItem>,
     pub series: Vec<CatalogItem>,
 }
+
+static BROWSE_CACHE: LazyLock<RwLock<Option<(Instant, BrowseSectionsResponse)>>> =
+    LazyLock::new(|| RwLock::new(None));
 
 #[derive(Serialize, Clone)]
 pub struct PlatformInfo {
@@ -463,6 +467,14 @@ pub async fn get_platform_content(
 pub async fn get_browse(
     State(state): State<AppState>,
 ) -> Result<Json<BrowseSectionsResponse>, (StatusCode, String)> {
+    if let Ok(guard) = BROWSE_CACHE.read() {
+        if let Some((cached_at, ref res)) = *guard {
+            if cached_at.elapsed() < Duration::from_secs(900) {
+                return Ok(Json(res.clone()));
+            }
+        }
+    }
+
     let (trending_res, movies_res, series_res) = tokio::join!(
         state.service.homepage("2", 1),
         state.service.homepage("1", 1),
@@ -558,7 +570,7 @@ pub async fn get_browse(
     let movies = pick_unique(raw_movies, 14);
     let series = pick_unique(raw_series, 14);
 
-    Ok(Json(BrowseSectionsResponse {
+    let response = BrowseSectionsResponse {
         hero,
         hero_slides,
         trending,
@@ -567,7 +579,13 @@ pub async fn get_browse(
         disney,
         movies,
         series,
-    }))
+    };
+
+    if let Ok(mut guard) = BROWSE_CACHE.write() {
+        *guard = Some((Instant::now(), response.clone()));
+    }
+
+    Ok(Json(response))
 }
 
 async fn resolve_netmirror_subject(id: &str) -> Option<(String, Option<String>, Option<String>, Option<String>, bool)> {

@@ -343,6 +343,12 @@
     if (el.sponsorBannerDesc && config.affiliateVpnDesc) el.sponsorBannerDesc.textContent = config.affiliateVpnDesc;
     if (el.sponsorDiscountPill && config.affiliateVpnBadge) el.sponsorDiscountPill.textContent = config.affiliateVpnBadge;
 
+    // Respect showVpnBanners flag to ensure 100% ad-free mobile browsing
+    if (!config.showVpnBanners) {
+      if (el.detailsSponsorBanner) el.detailsSponsorBanner.classList.add('hidden');
+      if (el.playerSponsorPill) el.playerSponsorPill.classList.add('hidden');
+    }
+
     // 2. Populate Donation Links
     if (el.vipBmacLink && config.buyMeACoffeeUrl) el.vipBmacLink.href = config.buyMeACoffeeUrl;
     if (el.vipKofiLink && config.kofiUrl) el.vipKofiLink.href = config.kofiUrl;
@@ -477,67 +483,164 @@
   }
 
   // ==========================================================================
-  // INITIALIZATION & DATA FETCHING
+  // INITIALIZATION & DATA FETCHING (FAST ZERO-WAIT ARCHITECTURE)
   // ==========================================================================
+  function initAdShield() {
+    try {
+      const nativeOpen = window.open;
+      window.open = function (url, target, features) {
+        if (typeof url === 'string') {
+          const lower = url.toLowerCase();
+          const isSafe =
+            url.startsWith('/') ||
+            lower.includes('nordvpn.com') ||
+            lower.includes('twitter.com') ||
+            lower.includes('facebook.com') ||
+            lower.includes('t.me') ||
+            lower.includes('wa.me') ||
+            lower.includes('github.com') ||
+            lower.includes('buymeacoffee.com') ||
+            lower.includes('ko-fi.com') ||
+            lower.includes('paypal.me');
+          if (!isSafe) {
+            console.warn('[AdShield] Blocked popup attempt:', url);
+            return null;
+          }
+        }
+        return nativeOpen.call(window, url, target, features);
+      };
+    } catch (_) {}
+  }
+
   async function init() {
+    initAdShield();
     setupEventListeners();
     updateAudioEnhancerUI();
     initMonetization();
     renderContinueWatching();
     handleDeepLinkOnLoad();
-    await fetchBrowseData();
-    fetchSportsData().catch(() => {});
+
+    // Start browse fetching immediately (renders cached data in <15ms)
+    fetchBrowseData();
+
+    // Defer sports schedule fetching until main thread is idle to conserve mobile bandwidth
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(() => {
+        fetchSportsData().catch(() => {});
+      }, { timeout: 2500 });
+    } else {
+      setTimeout(() => {
+        fetchSportsData().catch(() => {});
+      }, 1500);
+    }
+  }
+
+  function applyBrowseData(data) {
+    if (!data) return;
+
+    const globalSeen = new Set();
+    function filterUnique(list, max = 14) {
+      const out = [];
+      for (const item of (list || [])) {
+        if (!item || !item.id) continue;
+        const k = getCanonicalKey(item);
+        if (k && globalSeen.has(k)) continue;
+        if (k) globalSeen.add(k);
+        out.push(item);
+        if (out.length >= max) break;
+      }
+      return out;
+    }
+
+    // Multi-slide Hero Setup
+    const heroSlides = filterUnique(data.hero_slides || [], 5);
+    if (heroSlides.length) {
+      state.heroSlides = heroSlides;
+      state.heroCurrentIndex = 0;
+      setHero(state.heroSlides[0]);
+      renderHeroIndicators();
+      startHeroAutoRotate();
+    } else if (data.hero) {
+      setHero(data.hero);
+    }
+
+    // Rails with global deduplication across sections
+    const trending = filterUnique(data.trending || [], 14);
+    const netflix = filterUnique(data.netflix || [], 14);
+    const prime = filterUnique(data.prime || [], 14);
+    const disney = filterUnique(data.disney || [], 14);
+    const movies = filterUnique(data.movies || [], 14);
+    const series = filterUnique(data.series || [], 14);
+
+    if (trending.length && el.trendingCarousel) renderCarousel(el.trendingCarousel, trending);
+    if (netflix.length && el.netflixCarousel) renderCarousel(el.netflixCarousel, netflix);
+    if (prime.length && el.primeCarousel) renderCarousel(el.primeCarousel, prime);
+    if (disney.length && el.disneyCarousel) renderCarousel(el.disneyCarousel, disney);
+    if (movies.length && el.moviesCarousel) renderCarousel(el.moviesCarousel, movies);
+    if (series.length && el.seriesCarousel) renderCarousel(el.seriesCarousel, series);
+  }
+
+  function renderBrowseSkeletons() {
+    const carousels = [
+      el.trendingCarousel,
+      el.netflixCarousel,
+      el.primeCarousel,
+      el.disneyCarousel,
+      el.moviesCarousel,
+      el.seriesCarousel
+    ];
+    carousels.forEach((carousel) => {
+      if (!carousel || carousel.children.length > 0) return;
+      const frag = document.createDocumentFragment();
+      for (let i = 0; i < 6; i++) {
+        const skel = document.createElement('div');
+        skel.className = 'skeleton-card';
+        frag.appendChild(skel);
+      }
+      carousel.appendChild(frag);
+    });
   }
 
   async function fetchBrowseData() {
+    const CACHE_KEY = 'netmirror_browse_cache_v1';
+    let hasRenderedFromCache = false;
+
+    // 1. Instant Stale-While-Revalidate from client local storage (<15ms first paint)
     try {
-      const res = await fetch('/api/browse?_t=' + Date.now());
+      const cachedStr = localStorage.getItem(CACHE_KEY);
+      if (cachedStr) {
+        const cached = JSON.parse(cachedStr);
+        if (cached && cached.data) {
+          applyBrowseData(cached.data);
+          hasRenderedFromCache = true;
+        }
+      }
+    } catch (_) {}
+
+    // 2. If no cache yet, show sleek animated skeleton placeholder cards
+    if (!hasRenderedFromCache) {
+      renderBrowseSkeletons();
+    }
+
+    // 3. Fetch fresh edge-cached data without cache-busting timestamp
+    try {
+      const res = await fetch('/api/browse');
       if (!res.ok) throw new Error('Failed to load browse data');
       const data = await res.json();
 
-      const globalSeen = new Set();
-      function filterUnique(list, max = 14) {
-        const out = [];
-        for (const item of (list || [])) {
-          if (!item || !item.id) continue;
-          const k = getCanonicalKey(item);
-          if (k && globalSeen.has(k)) continue;
-          if (k) globalSeen.add(k);
-          out.push(item);
-          if (out.length >= max) break;
-        }
-        return out;
-      }
+      applyBrowseData(data);
 
-      // Multi-slide Hero Setup
-      const heroSlides = filterUnique(data.hero_slides || [], 5);
-      if (heroSlides.length) {
-        state.heroSlides = heroSlides;
-        state.heroCurrentIndex = 0;
-        setHero(state.heroSlides[0]);
-        renderHeroIndicators();
-        startHeroAutoRotate();
-      } else if (data.hero) {
-        setHero(data.hero);
-      }
-
-      // Rails with global deduplication across sections
-      const trending = filterUnique(data.trending || [], 14);
-      const netflix = filterUnique(data.netflix || [], 14);
-      const prime = filterUnique(data.prime || [], 14);
-      const disney = filterUnique(data.disney || [], 14);
-      const movies = filterUnique(data.movies || [], 14);
-      const series = filterUnique(data.series || [], 14);
-
-      if (trending.length && el.trendingCarousel) renderCarousel(el.trendingCarousel, trending);
-      if (netflix.length && el.netflixCarousel) renderCarousel(el.netflixCarousel, netflix);
-      if (prime.length && el.primeCarousel) renderCarousel(el.primeCarousel, prime);
-      if (disney.length && el.disneyCarousel) renderCarousel(el.disneyCarousel, disney);
-      if (movies.length && el.moviesCarousel) renderCarousel(el.moviesCarousel, movies);
-      if (series.length && el.seriesCarousel) renderCarousel(el.seriesCarousel, series);
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+          timestamp: Date.now(),
+          data
+        }));
+      } catch (_) {}
     } catch (err) {
       console.error(err);
-      showToast('Error connecting to MovieBox service. Retrying...');
+      if (!hasRenderedFromCache) {
+        showToast('Error connecting to MovieBox service. Retrying...');
+      }
     }
   }
 
@@ -1462,6 +1565,10 @@
       el.playerControls.classList.add('hidden');
     }
     if (el.embedPlayerIframe) {
+      // Enforce strict sandbox and referrer policy to prevent mobile ad redirects/popups
+      el.embedPlayerIframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation');
+      el.embedPlayerIframe.setAttribute('referrerpolicy', 'no-referrer');
+      el.embedPlayerIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
       el.embedPlayerIframe.src = url;
       el.embedPlayerIframe.classList.remove('hidden');
     }
@@ -2594,7 +2701,8 @@
     }
 
     if (el.embedPlayerIframe) {
-      el.embedPlayerIframe.removeAttribute('sandbox');
+      el.embedPlayerIframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation');
+      el.embedPlayerIframe.setAttribute('referrerpolicy', 'no-referrer');
       el.embedPlayerIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
       el.embedPlayerIframe.src = streamUrl;
       el.embedPlayerIframe.classList.remove('hidden');

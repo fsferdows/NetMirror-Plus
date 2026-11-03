@@ -917,6 +917,22 @@ body {
   z-index: 2;
 }
 
+/* Skeleton Loading Shimmer Placeholders */
+.skeleton-card {
+  flex: 0 0 185px;
+  aspect-ratio: 2 / 3;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.4s infinite;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 .poster-wrap {
   position: relative;
   width: 100%;
@@ -4410,7 +4426,7 @@ kbd {
     scroll-snap-type: x mandatory !important;
     scrollbar-width: none !important;
   }
-  .movie-card {
+  .movie-card, .skeleton-card {
     flex: 0 0 130px !important;
     scroll-snap-align: start;
     border-radius: 10px !important;
@@ -4818,7 +4834,7 @@ kbd {
   .ott-logo {
     font-size: 13.5px !important;
   }
-  .movie-card {
+  .movie-card, .skeleton-card {
     flex: 0 0 125px !important;
   }
   .media-grid {
@@ -4890,7 +4906,7 @@ kbd {
     padding: 8px 10px;
     font-size: 11.5px;
   }
-  .movie-card {
+  .movie-card, .skeleton-card {
     flex: 0 0 115px !important;
   }
   .card-title {

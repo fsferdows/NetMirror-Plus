@@ -584,8 +584,8 @@
             <div class="credit-row" id="starsRow"><span class="credit-label">Starring:</span> <span id="modalStars" class="credit-val"></span></div>
           </div>
 
-          <!-- High-Converting Streaming Partner / VPN Banner -->
-          <div class="sponsor-banner-card" id="detailsSponsorBanner">
+          <!-- High-Converting Streaming Partner / VPN Banner (Hidden by default to prevent ads) -->
+          <div class="sponsor-banner-card hidden" id="detailsSponsorBanner">
             <div class="sponsor-card-inner">
               <div class="sponsor-icon-badge">🛡️</div>
               <div class="sponsor-text">
@@ -639,8 +639,8 @@
           <span class="player-subtitle" id="playerMediaSubtitle"></span>
         </div>
         <div class="player-header-actions">
-          <!-- In-Player VPN Sponsor Pill -->
-          <a href="https://nordvpn.com" target="_blank" rel="noopener noreferrer" class="player-sponsor-pill" id="playerSponsorPill" title="Ultra-Fast Buffer-Free Streaming VPN">
+          <!-- In-Player VPN Sponsor Pill (Hidden to ensure 100% ad-free experience) -->
+          <a href="https://nordvpn.com" target="_blank" rel="noopener noreferrer" class="player-sponsor-pill hidden" id="playerSponsorPill" title="Ultra-Fast Buffer-Free Streaming VPN">
             <span>🛡️ 4K VPN Boost</span>
           </a>
 
@@ -671,8 +671,8 @@
       <!-- Native HTML5 Video Element -->
       <video id="videoElement" class="video-element" playsinline crossorigin="anonymous"></video>
 
-      <!-- Universal Fallback Web Embed Player -->
-      <iframe id="embedPlayerIframe" class="embed-player-iframe hidden" allowfullscreen allow="autoplay; fullscreen; picture-in-picture; encrypted-media"></iframe>
+      <!-- Universal Fallback Web Embed Player with Strict Anti-Ad Sandbox & No-Referrer Shield -->
+      <iframe id="embedPlayerIframe" class="embed-player-iframe hidden" allowfullscreen allow="autoplay; fullscreen; picture-in-picture; encrypted-media" sandbox="allow-scripts allow-same-origin allow-forms allow-presentation" referrerpolicy="no-referrer"></iframe>
 
       <!-- Center Big Splash Icon (on play/pause) -->
       <div class="player-center-icon hidden" id="playerCenterIcon">

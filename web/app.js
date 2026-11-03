@@ -2941,6 +2941,14 @@
       });
     });
 
+    // Footer Nav Links Click
+    document.querySelectorAll('.footer a[data-nav]').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        navigate(link.dataset.nav);
+      });
+    });
+
     // Mobile Bottom Nav items click
     document.querySelectorAll('.mobile-nav-item[data-nav]').forEach((item) => {
       item.addEventListener('click', (e) => {

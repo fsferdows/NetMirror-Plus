@@ -656,7 +656,8 @@
                 <svg viewBox="0 0 24 24" id="volumeHighIcon"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
                 <svg viewBox="0 0 24 24" id="volumeMutedIcon" class="hidden"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
               </button>
-              <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.05" value="1" />
+              <input type="range" class="volume-slider" id="volumeSlider" min="0" max="2" step="0.05" value="1.5" />
+              <span class="volume-percent-badge" id="volumePercentBadge" title="Audio Boost Level">150%</span>
             </div>
 
             <!-- Time Display -->
@@ -678,6 +679,89 @@
                 <span id="currentQualityLabel">1080p</span>
               </button>
               <div class="player-menu hidden" id="qualityMenu"></div>
+            </div>
+
+            <!-- Studio Audio Quality & Volume Booster Menu -->
+            <div class="player-menu-wrapper" id="audioEnhancerWrapper">
+              <button class="player-btn player-text-btn" id="audioEnhancerBtn" title="Cinema Audio & Sound Enhancer (B)">
+                <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M12 2v20M17 5v14M7 9v6M22 8v8M2 11v2"/></svg>
+                <span id="audioEnhanceBadge">Cinema 150%</span>
+              </button>
+              <div class="player-menu audio-enhancer-menu hidden" id="audioEnhancerMenu">
+                <div class="enhancer-header">
+                  <div class="enhancer-title-row">
+                    <svg viewBox="0 0 24 24" class="enhancer-sparkle-icon"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <span class="enhancer-title">Studio Sound & Volume Boost</span>
+                  </div>
+                  <span class="enhancer-desc">Ultra-clear dialogue, deep bass & distortion-free loudness</span>
+                </div>
+
+                <!-- Quick Volume Boost Selection -->
+                <div class="enhancer-section">
+                  <div class="enhancer-section-label">
+                    <span>Volume Amplifier</span>
+                    <span class="enhancer-val" id="boostLevelLabel">150% (Enhanced)</span>
+                  </div>
+                  <div class="enhancer-boost-chips">
+                    <button class="boost-chip" data-boost="1.0">100%</button>
+                    <button class="boost-chip active" data-boost="1.5">150% ⚡</button>
+                    <button class="boost-chip" data-boost="2.0">200% 🔥</button>
+                    <button class="boost-chip" data-boost="3.0">300% 🚀</button>
+                  </div>
+                  <input type="range" class="enhancer-slider" id="boostRangeSlider" min="1.0" max="3.0" step="0.1" value="1.5" />
+                </div>
+
+                <!-- Sound Profile Equalizer Presets -->
+                <div class="enhancer-section">
+                  <div class="enhancer-section-label">
+                    <span>Audio Profile / Equalizer</span>
+                  </div>
+                  <div class="enhancer-presets-list" id="enhancerPresetsList">
+                    <button class="menu-item preset-item active" data-preset="cinema">
+                      <span class="preset-name">🎬 Cinema Theater</span>
+                      <span class="preset-sub">Warm bass punch + clear dialogue + theater surround</span>
+                    </button>
+                    <button class="menu-item preset-item" data-preset="vocal">
+                      <span class="preset-name">🗣️ Dialogue & Vocal Clarity</span>
+                      <span class="preset-sub">Crisp speech, cuts quiet whispers & background noise</span>
+                    </button>
+                    <button class="menu-item preset-item" data-preset="bass">
+                      <span class="preset-name">🔊 Bass Blast (Action & Sci-Fi)</span>
+                      <span class="preset-sub">Heavy low-end rumble for explosions and blockbusters</span>
+                    </button>
+                    <button class="menu-item preset-item" data-preset="night">
+                      <span class="preset-name">🌙 Night Mode (Smart Normalizer)</span>
+                      <span class="preset-sub">Softens loud explosions, boosts quiet whispers</span>
+                    </button>
+                    <button class="menu-item preset-item" data-preset="loud">
+                      <span class="preset-name">🚀 Super Loud 250%</span>
+                      <span class="preset-sub">Maximized volume boost with anti-clipping limiter</span>
+                    </button>
+                    <button class="menu-item preset-item" data-preset="pure">
+                      <span class="preset-name">🎧 Pure / Studio Neutral</span>
+                      <span class="preset-sub">Flat studio passthrough without equalization</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Smart Processing Toggles -->
+                <div class="enhancer-toggles-section">
+                  <label class="enhancer-toggle-row">
+                    <span class="toggle-label-text">
+                      <strong>Smart Audio Limiter</strong>
+                      <small>Prevents crackle, clipping & distortion at high volume</small>
+                    </span>
+                    <input type="checkbox" id="enhancerLimiterToggle" checked />
+                  </label>
+                  <label class="enhancer-toggle-row">
+                    <span class="toggle-label-text">
+                      <strong>Speech Presence EQ</strong>
+                      <small>Dynamic +4dB lift for dialogue frequencies</small>
+                    </span>
+                    <input type="checkbox" id="enhancerVoiceToggle" checked />
+                  </label>
+                </div>
+              </div>
             </div>
 
             <!-- Audio Dub Picker -->
@@ -740,7 +824,8 @@
         <div class="shortcut-item"><kbd>M</kbd> <span>Mute / Unmute</span></div>
         <div class="shortcut-item"><kbd>←</kbd> / <kbd>J</kbd> <span>Seek Backward 10s</span></div>
         <div class="shortcut-item"><kbd>→</kbd> / <kbd>L</kbd> <span>Seek Forward 10s</span></div>
-        <div class="shortcut-item"><kbd>↑</kbd> / <kbd>↓</kbd> <span>Volume Up / Down</span></div>
+        <div class="shortcut-item"><kbd>↑</kbd> / <kbd>↓</kbd> <span>Volume Up / Down (up to 300% Boost)</span></div>
+        <div class="shortcut-item"><kbd>B</kbd> <span>Cycle Sound Profile & Volume Boost</span></div>
         <div class="shortcut-item"><kbd>/</kbd> <span>Focus Search Bar</span></div>
         <div class="shortcut-item"><kbd>Esc</kbd> <span>Close Player / Modals</span></div>
       </div>

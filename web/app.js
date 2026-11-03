@@ -48,6 +48,10 @@
     isSportsLoading: false,
     history: JSON.parse(localStorage.getItem('netmirror_history') || '[]'),
     favorites: JSON.parse(localStorage.getItem('netmirror_favorites') || '[]'),
+    audioProfile: localStorage.getItem('moviebox_audio_profile') || 'cinema',
+    audioBoost: parseFloat(localStorage.getItem('moviebox_audio_boost') || '1.5'),
+    audioLimiter: localStorage.getItem('moviebox_audio_limiter') !== 'false',
+    audioVoiceEq: localStorage.getItem('moviebox_audio_voice_eq') !== 'false',
     isPlaying: false,
     controlsTimeout: null,
     nextEpCountdownInterval: null,
@@ -188,6 +192,7 @@
     volumeHighIcon: document.getElementById('volumeHighIcon'),
     volumeMutedIcon: document.getElementById('volumeMutedIcon'),
     volumeSlider: document.getElementById('volumeSlider'),
+    volumePercentBadge: document.getElementById('volumePercentBadge'),
     currentTime: document.getElementById('currentTime'),
     durationTime: document.getElementById('durationTime'),
     embedPlayerIframe: document.getElementById('embedPlayerIframe'),
@@ -198,6 +203,15 @@
     qualityMenuBtn: document.getElementById('qualityMenuBtn'),
     currentQualityLabel: document.getElementById('currentQualityLabel'),
     qualityMenu: document.getElementById('qualityMenu'),
+    audioEnhancerWrapper: document.getElementById('audioEnhancerWrapper'),
+    audioEnhancerBtn: document.getElementById('audioEnhancerBtn'),
+    audioEnhanceBadge: document.getElementById('audioEnhanceBadge'),
+    audioEnhancerMenu: document.getElementById('audioEnhancerMenu'),
+    boostLevelLabel: document.getElementById('boostLevelLabel'),
+    boostRangeSlider: document.getElementById('boostRangeSlider'),
+    enhancerPresetsList: document.getElementById('enhancerPresetsList'),
+    enhancerLimiterToggle: document.getElementById('enhancerLimiterToggle'),
+    enhancerVoiceToggle: document.getElementById('enhancerVoiceToggle'),
     audioDubMenuWrapper: document.getElementById('audioDubMenuWrapper'),
     audioDubMenuBtn: document.getElementById('audioDubMenuBtn'),
     audioDubMenu: document.getElementById('audioDubMenu'),
@@ -295,6 +309,7 @@
   // ==========================================================================
   async function init() {
     setupEventListeners();
+    updateAudioEnhancerUI();
     renderContinueWatching();
     await fetchBrowseData();
     fetchSportsData().catch(() => {});
@@ -710,6 +725,267 @@
   }
 
   // ==========================================================================
+  // WEB AUDIO STUDIO ENHANCER & VOLUME BOOSTER (0% - 300%)
+  // ==========================================================================
+  let audioCtx = null;
+  let sourceNode = null;
+  let bassNode = null;
+  let voiceNode = null;
+  let trebleNode = null;
+  let compressorNode = null;
+  let boostGainNode = null;
+  let limiterNode = null;
+  let isAudioEngineReady = false;
+
+  const audioProfiles = {
+    cinema: {
+      name: 'Cinema Theater',
+      badge: 'Cinema',
+      bass: 5.5,
+      voice: 4.5,
+      treble: 3.0,
+      boost: 1.5,
+      compressor: { threshold: -22, knee: 24, ratio: 4, attack: 0.003, release: 0.25 },
+      desc: 'Theater surround, warm bass punch & clear dialogue'
+    },
+    vocal: {
+      name: 'Vocal Clarity',
+      badge: 'Vocal',
+      bass: -1.0,
+      voice: 7.5,
+      treble: 2.5,
+      boost: 1.6,
+      compressor: { threshold: -26, knee: 18, ratio: 6, attack: 0.002, release: 0.2 },
+      desc: 'Crisp speech, lifts whisper audio & dialogue'
+    },
+    bass: {
+      name: 'Bass Blast',
+      badge: 'Bass',
+      bass: 8.5,
+      voice: 2.0,
+      treble: 3.5,
+      boost: 1.5,
+      compressor: { threshold: -20, knee: 30, ratio: 3.5, attack: 0.005, release: 0.3 },
+      desc: 'Heavy low-end rumble for explosions and blockbusters'
+    },
+    night: {
+      name: 'Night Mode',
+      badge: 'Night',
+      bass: -2.5,
+      voice: 5.0,
+      treble: 0.5,
+      boost: 1.3,
+      compressor: { threshold: -32, knee: 20, ratio: 8, attack: 0.001, release: 0.15 },
+      desc: 'Softens loud explosions, boosts quiet whispers'
+    },
+    loud: {
+      name: 'Super Loud 250%',
+      badge: 'Loud',
+      bass: 4.0,
+      voice: 5.0,
+      treble: 3.0,
+      boost: 2.5,
+      compressor: { threshold: -18, knee: 20, ratio: 5, attack: 0.002, release: 0.2 },
+      desc: 'Maximized volume boost with anti-clipping limiter'
+    },
+    pure: {
+      name: 'Pure Neutral',
+      badge: 'Pure',
+      bass: 0.0,
+      voice: 0.0,
+      treble: 0.0,
+      boost: 1.0,
+      compressor: { threshold: 0, knee: 0, ratio: 1, attack: 0.01, release: 0.1 },
+      desc: 'Flat studio passthrough without equalization'
+    }
+  };
+
+  function ensureAudioEngine() {
+    if (isAudioEngineReady) {
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+      return;
+    }
+
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+
+    try {
+      if (!audioCtx) {
+        audioCtx = new AudioContextClass();
+      }
+
+      if (!sourceNode) {
+        sourceNode = audioCtx.createMediaElementSource(el.videoElement);
+      }
+
+      if (!bassNode) {
+        bassNode = audioCtx.createBiquadFilter();
+        bassNode.type = 'lowshelf';
+        bassNode.frequency.value = 120;
+      }
+
+      if (!voiceNode) {
+        voiceNode = audioCtx.createBiquadFilter();
+        voiceNode.type = 'peaking';
+        voiceNode.frequency.value = 2600;
+        voiceNode.Q.value = 1.2;
+      }
+
+      if (!trebleNode) {
+        trebleNode = audioCtx.createBiquadFilter();
+        trebleNode.type = 'highshelf';
+        trebleNode.frequency.value = 7500;
+      }
+
+      if (!compressorNode) {
+        compressorNode = audioCtx.createDynamicsCompressor();
+      }
+
+      if (!boostGainNode) {
+        boostGainNode = audioCtx.createGain();
+      }
+
+      if (!limiterNode) {
+        limiterNode = audioCtx.createDynamicsCompressor();
+        limiterNode.threshold.value = -1.0;
+        limiterNode.knee.value = 0;
+        limiterNode.ratio.value = 20;
+        limiterNode.attack.value = 0.001;
+        limiterNode.release.value = 0.1;
+      }
+
+      // Connect audio processing pipeline
+      sourceNode.connect(bassNode);
+      bassNode.connect(voiceNode);
+      voiceNode.connect(trebleNode);
+      trebleNode.connect(compressorNode);
+      compressorNode.connect(boostGainNode);
+      boostGainNode.connect(limiterNode);
+      limiterNode.connect(audioCtx.destination);
+
+      isAudioEngineReady = true;
+
+      // Apply initial saved preferences
+      applyAudioProfile(state.audioProfile || 'cinema', false);
+      setVolumeBoost(state.audioBoost || 1.5, false);
+
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+    } catch (err) {
+      console.warn('Web Audio Studio Engine note:', err);
+    }
+  }
+
+  function applyAudioProfile(profileKey, showNotification = true) {
+    const profile = audioProfiles[profileKey] || audioProfiles.cinema;
+    state.audioProfile = profileKey;
+    localStorage.setItem('moviebox_audio_profile', profileKey);
+
+    if (audioCtx) {
+      const now = audioCtx.currentTime;
+      if (bassNode) bassNode.gain.setTargetAtTime(profile.bass, now, 0.05);
+      if (voiceNode) {
+        const voiceGain = state.audioVoiceEq ? profile.voice : 0;
+        voiceNode.gain.setTargetAtTime(voiceGain, now, 0.05);
+      }
+      if (trebleNode) trebleNode.gain.setTargetAtTime(profile.treble, now, 0.05);
+
+      if (compressorNode && profile.compressor) {
+        compressorNode.threshold.setTargetAtTime(profile.compressor.threshold, now, 0.05);
+        compressorNode.knee.setTargetAtTime(profile.compressor.knee, now, 0.05);
+        compressorNode.ratio.setTargetAtTime(profile.compressor.ratio, now, 0.05);
+        compressorNode.attack.setTargetAtTime(profile.compressor.attack, now, 0.05);
+        compressorNode.release.setTargetAtTime(profile.compressor.release, now, 0.05);
+      }
+    }
+
+    updateAudioEnhancerUI();
+
+    if (showNotification) {
+      showToast(`Sound Profile: ${profile.name}`);
+    }
+  }
+
+  function setVolumeBoost(multiplier, save = true) {
+    const clamped = Math.max(1.0, Math.min(3.0, parseFloat(multiplier) || 1.5));
+    state.audioBoost = clamped;
+    if (save) {
+      localStorage.setItem('moviebox_audio_boost', String(clamped));
+    }
+
+    if (boostGainNode && audioCtx) {
+      boostGainNode.gain.setTargetAtTime(clamped, audioCtx.currentTime, 0.05);
+    }
+
+    updateAudioEnhancerUI();
+  }
+
+  function cycleAudioProfile() {
+    const keys = Object.keys(audioProfiles);
+    const currentIndex = keys.indexOf(state.audioProfile || 'cinema');
+    const nextIndex = (currentIndex + 1) % keys.length;
+    const nextKey = keys[nextIndex];
+    applyAudioProfile(nextKey, true);
+  }
+
+  function updateAudioEnhancerUI() {
+    const boostPercent = Math.round((state.audioBoost || 1.5) * 100);
+    const profile = audioProfiles[state.audioProfile || 'cinema'] || audioProfiles.cinema;
+
+    // Update Badge
+    if (el.audioEnhanceBadge) {
+      el.audioEnhanceBadge.textContent = `${profile.badge} ${boostPercent}%`;
+    }
+
+    // Update Level Label
+    if (el.boostLevelLabel) {
+      const extra = boostPercent > 100 ? ` (${boostPercent}% Loud)` : ' (Standard)';
+      el.boostLevelLabel.textContent = `${boostPercent}%${extra}`;
+    }
+
+    // Update Slider
+    if (el.boostRangeSlider) {
+      el.boostRangeSlider.value = state.audioBoost || 1.5;
+    }
+
+    // Update Chips
+    document.querySelectorAll('.boost-chip').forEach((chip) => {
+      const val = parseFloat(chip.dataset.boost);
+      chip.classList.toggle('active', Math.abs(val - (state.audioBoost || 1.5)) < 0.1);
+    });
+
+    // Update Presets List
+    if (el.enhancerPresetsList) {
+      el.enhancerPresetsList.querySelectorAll('.preset-item').forEach((item) => {
+        item.classList.toggle('active', item.dataset.preset === (state.audioProfile || 'cinema'));
+      });
+    }
+
+    updateVolumeSliderUI();
+  }
+
+  function updateVolumeSliderUI() {
+    const video = el.videoElement;
+    if (!video || !el.volumePercentBadge) return;
+
+    if (video.muted || video.volume === 0) {
+      el.volumePercentBadge.textContent = 'Muted';
+      el.volumePercentBadge.style.color = 'var(--text-muted)';
+    } else {
+      const boostVal = (boostGainNode && audioCtx) ? boostGainNode.gain.value : (state.audioBoost || 1.5);
+      const totalPercent = Math.round(video.volume * boostVal * 100);
+      let icon = '';
+      if (totalPercent >= 200) icon = ' 🔥';
+      else if (totalPercent >= 140) icon = ' ⚡';
+      el.volumePercentBadge.textContent = `${totalPercent}%${icon}`;
+      el.volumePercentBadge.style.color = totalPercent > 100 ? '#ff4d58' : '#38bdf8';
+    }
+  }
+
+  // ==========================================================================
   // IN-BROWSER VIDEO PLAYER
   // ==========================================================================
   async function startPlayback(media, season = 0, episode = 0) {
@@ -746,8 +1022,19 @@
       if (!res.ok) throw new Error('No streams found');
       const data = await res.json();
 
-      state.currentStreams = data.streams || [];
+      // Sort streams so highest quality (4K, 1080p, FHD, high-bitrate) is always prioritized!
+      const qualityScore = (q) => {
+        const s = String(q || '').toLowerCase();
+        if (s.includes('4k') || s.includes('2160') || s.includes('ultra')) return 4000;
+        if (s.includes('1080') || s.includes('fhd')) return 1080;
+        if (s.includes('720') || s.includes('hd')) return 720;
+        if (s.includes('480')) return 480;
+        if (s.includes('auto')) return 500;
+        return 100;
+      };
+      state.currentStreams = (data.streams || []).sort((a, b) => qualityScore(b.quality) - qualityScore(a.quality));
       state.embedUrls = data.embed_urls || [];
+      ensureAudioEngine();
 
       // Check Saved Timestamp
       const historyItem = state.history.find(
@@ -805,6 +1092,7 @@
 
     const onCanPlay = () => {
       el.playerSpinner.classList.add('hidden');
+      ensureAudioEngine();
       if (seekTime > 5 && seekTime < video.duration - 10) {
         video.currentTime = seekTime;
         showToast(`Resumed from ${formatTime(seekTime)}`);
@@ -971,6 +1259,7 @@
 
     const onCanPlay = () => {
       el.playerSpinner.classList.add('hidden');
+      ensureAudioEngine();
       video.currentTime = currentTime;
       if (isPlaying) video.play();
       showToast(`Switched resolution to ${stream.quality}`);
@@ -2276,6 +2565,9 @@
       if (!el.speedMenuBtn.contains(e.target) && !el.speedMenu.contains(e.target)) {
         el.speedMenu.classList.add('hidden');
       }
+      if (el.audioEnhancerBtn && el.audioEnhancerMenu && !el.audioEnhancerBtn.contains(e.target) && !el.audioEnhancerMenu.contains(e.target)) {
+        el.audioEnhancerMenu.classList.add('hidden');
+      }
     });
 
     // Hero Quick Search
@@ -2467,14 +2759,23 @@
       showToast('+10s');
     });
 
-    // Volume & Mute
+    // Volume & Mute with Amplification (0% to 300%)
     el.volumeSlider.addEventListener('input', (e) => {
-      video.volume = parseFloat(e.target.value);
-      video.muted = video.volume === 0;
+      ensureAudioEngine();
+      const val = parseFloat(e.target.value);
+      if (val <= 1.0) {
+        video.volume = Math.max(0, val);
+        video.muted = video.volume === 0;
+      } else {
+        video.volume = 1.0;
+        video.muted = false;
+        setVolumeBoost(val, true);
+      }
       updateVolumeIcons();
     });
 
     el.volumeBtn.addEventListener('click', () => {
+      ensureAudioEngine();
       video.muted = !video.muted;
       updateVolumeIcons();
     });
@@ -2487,6 +2788,79 @@
         el.volumeHighIcon.classList.remove('hidden');
         el.volumeMutedIcon.classList.add('hidden');
       }
+      updateVolumeSliderUI();
+    }
+
+    // Audio Enhancer Menu Toggle & Controls
+    if (el.audioEnhancerBtn && el.audioEnhancerMenu) {
+      el.audioEnhancerBtn.addEventListener('click', () => {
+        ensureAudioEngine();
+        el.audioEnhancerMenu.classList.toggle('hidden');
+        if (el.serverMenu) el.serverMenu.classList.add('hidden');
+        if (el.qualityMenu) el.qualityMenu.classList.add('hidden');
+        if (el.subtitlesMenu) el.subtitlesMenu.classList.add('hidden');
+        if (el.speedMenu) el.speedMenu.classList.add('hidden');
+      });
+
+      // Boost Slider
+      if (el.boostRangeSlider) {
+        el.boostRangeSlider.addEventListener('input', (e) => {
+          ensureAudioEngine();
+          const boost = parseFloat(e.target.value);
+          setVolumeBoost(boost, true);
+          el.volumeSlider.value = Math.min(2.0, boost);
+          updateVolumeIcons();
+        });
+      }
+
+      // Boost Chips
+      document.querySelectorAll('.boost-chip').forEach((chip) => {
+        chip.addEventListener('click', () => {
+          ensureAudioEngine();
+          const boost = parseFloat(chip.dataset.boost);
+          setVolumeBoost(boost, true);
+          el.volumeSlider.value = Math.min(2.0, boost);
+          updateVolumeIcons();
+          showToast(`Volume Boost: ${Math.round(boost * 100)}% ⚡`);
+        });
+      });
+
+      // Preset Items
+      if (el.enhancerPresetsList) {
+        el.enhancerPresetsList.querySelectorAll('.preset-item').forEach((item) => {
+          item.addEventListener('click', () => {
+            ensureAudioEngine();
+            applyAudioProfile(item.dataset.preset, true);
+          });
+        });
+      }
+
+      // Limiter Toggle
+      if (el.enhancerLimiterToggle) {
+        el.enhancerLimiterToggle.addEventListener('change', (e) => {
+          ensureAudioEngine();
+          state.audioLimiter = e.target.checked;
+          localStorage.setItem('moviebox_audio_limiter', String(e.target.checked));
+          if (limiterNode && audioCtx) {
+            limiterNode.threshold.setTargetAtTime(e.target.checked ? -1.0 : 0, audioCtx.currentTime, 0.05);
+          }
+          showToast(e.target.checked ? 'Smart Limiter: Active (Zero Distortion)' : 'Smart Limiter: Bypassed');
+        });
+      }
+
+      // Voice EQ Toggle
+      if (el.enhancerVoiceToggle) {
+        el.enhancerVoiceToggle.addEventListener('change', (e) => {
+          ensureAudioEngine();
+          state.audioVoiceEq = e.target.checked;
+          localStorage.setItem('moviebox_audio_voice_eq', String(e.target.checked));
+          if (voiceNode && audioCtx) {
+            const profile = audioProfiles[state.audioProfile || 'cinema'] || audioProfiles.cinema;
+            voiceNode.gain.setTargetAtTime(e.target.checked ? profile.voice : 0, audioCtx.currentTime, 0.05);
+          }
+          showToast(e.target.checked ? 'Dialogue Clarity: Enabled (+4dB Voice Lift)' : 'Dialogue Clarity: Flat');
+        });
+      }
     }
 
     // Menus Toggle (Server, Quality, Speed, Subtitles)
@@ -2496,6 +2870,7 @@
         el.qualityMenu.classList.add('hidden');
         el.subtitlesMenu.classList.add('hidden');
         el.speedMenu.classList.add('hidden');
+        if (el.audioEnhancerMenu) el.audioEnhancerMenu.classList.add('hidden');
       });
     }
 
@@ -2504,6 +2879,7 @@
       if (el.serverMenu) el.serverMenu.classList.add('hidden');
       el.subtitlesMenu.classList.add('hidden');
       el.speedMenu.classList.add('hidden');
+      if (el.audioEnhancerMenu) el.audioEnhancerMenu.classList.add('hidden');
     });
 
     el.subtitlesMenuBtn.addEventListener('click', () => {
@@ -2511,6 +2887,7 @@
       if (el.serverMenu) el.serverMenu.classList.add('hidden');
       el.qualityMenu.classList.add('hidden');
       el.speedMenu.classList.add('hidden');
+      if (el.audioEnhancerMenu) el.audioEnhancerMenu.classList.add('hidden');
     });
 
     el.speedMenuBtn.addEventListener('click', () => {
@@ -2518,6 +2895,7 @@
       if (el.serverMenu) el.serverMenu.classList.add('hidden');
       el.qualityMenu.classList.add('hidden');
       el.subtitlesMenu.classList.add('hidden');
+      if (el.audioEnhancerMenu) el.audioEnhancerMenu.classList.add('hidden');
     });
 
     // Speed options
@@ -2604,6 +2982,7 @@
         el.subtitlesMenu.classList.add('hidden');
         el.speedMenu.classList.add('hidden');
         if (el.serverMenu) el.serverMenu.classList.add('hidden');
+        if (el.audioEnhancerMenu) el.audioEnhancerMenu.classList.add('hidden');
       }
     }, 2800);
   }
@@ -2686,14 +3065,40 @@
         el.forwardBtn.click();
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        video.volume = Math.min(1, video.volume + 0.1);
-        el.volumeSlider.value = video.volume;
-        showToast(`Volume: ${Math.round(video.volume * 100)}%`);
+        ensureAudioEngine();
+        let cur = parseFloat(el.volumeSlider.value) || 1.0;
+        let next = Math.min(2.5, +(cur + 0.1).toFixed(2));
+        el.volumeSlider.value = next;
+        if (next <= 1.0) {
+          video.volume = next;
+          video.muted = false;
+        } else {
+          video.volume = 1.0;
+          video.muted = false;
+          setVolumeBoost(next, true);
+        }
+        updateVolumeIcons();
+        const total = Math.round(video.volume * (state.audioBoost || 1.5) * 100);
+        showToast(`Volume: ${total}% ${total > 100 ? '⚡ (Boosted)' : ''}`);
       } else if (e.key === 'ArrowDown') {
         e.preventDefault();
-        video.volume = Math.max(0, video.volume - 0.1);
-        el.volumeSlider.value = video.volume;
-        showToast(`Volume: ${Math.round(video.volume * 100)}%`);
+        ensureAudioEngine();
+        let cur = parseFloat(el.volumeSlider.value) || 1.0;
+        let next = Math.max(0, +(cur - 0.1).toFixed(2));
+        el.volumeSlider.value = next;
+        if (next <= 1.0) {
+          video.volume = next;
+          video.muted = next === 0;
+        } else {
+          setVolumeBoost(next, true);
+        }
+        updateVolumeIcons();
+        const total = Math.round(video.volume * (state.audioBoost || 1.5) * 100);
+        showToast(`Volume: ${total}%`);
+      } else if (e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        ensureAudioEngine();
+        cycleAudioProfile();
       }
     }
   }

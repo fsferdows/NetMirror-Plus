@@ -994,6 +994,8 @@
   async function openDetailsModal(id, provider = 'moviebox', titleHint = '') {
     el.detailsModal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
+    const modalCard = el.detailsModal.querySelector('.modal-card');
+    if (modalCard) modalCard.scrollTop = 0;
 
     // Show skeletons/loading state
     el.modalTitle.textContent = titleHint || 'Loading...';
@@ -1976,6 +1978,7 @@
       `;
       div.onclick = () => {
         el.suggestionsPopover.classList.add('hidden');
+        if (el.searchInput) el.searchInput.blur();
         openDetailsModal(item.id.value, item.id.provider, item.title);
       };
       el.suggestionsPopover.appendChild(div);
@@ -1990,6 +1993,7 @@
     viewAllDiv.textContent = `Search all results for "${query}" →`;
     viewAllDiv.onclick = () => {
       el.suggestionsPopover.classList.add('hidden');
+      if (el.searchInput) el.searchInput.blur();
       executeSearch(query);
     };
     el.suggestionsPopover.appendChild(viewAllDiv);
@@ -1998,6 +2002,7 @@
   }
 
   async function executeSearch(query) {
+    if (el.searchInput) el.searchInput.blur();
     state.currentQuery = query;
     state.gridPage = 1;
     switchView('grid');

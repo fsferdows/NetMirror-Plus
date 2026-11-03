@@ -1086,8 +1086,8 @@ pub async fn get_streams(
                 url: format!("https://www.2embed.cc/embedtv/{id}&s={s}&e={ep}"),
             });
             embed_urls.push(EmbedSource {
-                name: "VidLink Stream".to_string(),
-                url: format!("https://vidlink.pro/tv/{id}/{s}/{ep}"),
+                name: "AutoEmbed Stream".to_string(),
+                url: format!("https://autoembed.me/tv/imdb/{id}-{s}-{ep}"),
             });
         } else {
             embed_urls.push(EmbedSource {
@@ -1107,8 +1107,8 @@ pub async fn get_streams(
                 url: format!("https://www.2embed.cc/embed/{id}"),
             });
             embed_urls.push(EmbedSource {
-                name: "VidLink Stream".to_string(),
-                url: format!("https://vidlink.pro/movie/{id}"),
+                name: "AutoEmbed Stream".to_string(),
+                url: format!("https://autoembed.me/movie/imdb/{id}"),
             });
         }
         return Ok(Json(StreamsResponse {
@@ -1327,8 +1327,8 @@ pub async fn get_streams(
                 url: format!("https://www.2embed.cc/embedtv/{imdb_id}&s={season}&e={episode}"),
             });
             embed_urls.push(EmbedSource {
-                name: "VidLink Stream".to_string(),
-                url: format!("https://vidlink.pro/tv/{imdb_id}/{season}/{episode}"),
+                name: "AutoEmbed Stream".to_string(),
+                url: format!("https://autoembed.me/tv/imdb/{imdb_id}-{season}-{episode}"),
             });
         } else {
             embed_urls.push(EmbedSource {
@@ -1348,8 +1348,8 @@ pub async fn get_streams(
                 url: format!("https://www.2embed.cc/embed/{imdb_id}"),
             });
             embed_urls.push(EmbedSource {
-                name: "VidLink Stream".to_string(),
-                url: format!("https://vidlink.pro/movie/{imdb_id}"),
+                name: "AutoEmbed Stream".to_string(),
+                url: format!("https://autoembed.me/movie/imdb/{imdb_id}"),
             });
         }
     } else {

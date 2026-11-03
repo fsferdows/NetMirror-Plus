@@ -509,6 +509,15 @@
         }
         return nativeOpen.call(window, url, target, features);
       };
+
+      // Anti-hijack: prevent rogue iframe ad scripts from redirecting the user away during video playback
+      window.addEventListener('beforeunload', (e) => {
+        if (state.isEmbedMode) {
+          // If in active playback, protect tab from unauthorized background navigation
+          e.preventDefault();
+          e.returnValue = '';
+        }
+      });
     } catch (_) {}
   }
 
@@ -1565,8 +1574,8 @@
       el.playerControls.classList.add('hidden');
     }
     if (el.embedPlayerIframe) {
-      // Enforce strict sandbox and referrer policy to prevent mobile ad redirects/popups
-      el.embedPlayerIframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation');
+      // Remove sandbox attribute so YouTube and modern video players load without sandbox restriction errors
+      el.embedPlayerIframe.removeAttribute('sandbox');
       el.embedPlayerIframe.setAttribute('referrerpolicy', 'no-referrer');
       el.embedPlayerIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
       el.embedPlayerIframe.src = url;
@@ -2701,7 +2710,7 @@
     }
 
     if (el.embedPlayerIframe) {
-      el.embedPlayerIframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation');
+      el.embedPlayerIframe.removeAttribute('sandbox');
       el.embedPlayerIframe.setAttribute('referrerpolicy', 'no-referrer');
       el.embedPlayerIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
       el.embedPlayerIframe.src = streamUrl;

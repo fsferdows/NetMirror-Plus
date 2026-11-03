@@ -52,6 +52,7 @@
     audioBoost: parseFloat(localStorage.getItem('moviebox_audio_boost') || '1.5'),
     audioLimiter: localStorage.getItem('moviebox_audio_limiter') !== 'false',
     audioVoiceEq: localStorage.getItem('moviebox_audio_voice_eq') !== 'false',
+    isVip: localStorage.getItem('netmirror_is_vip') === 'true',
     isPlaying: false,
     controlsTimeout: null,
     nextEpCountdownInterval: null,
@@ -235,6 +236,27 @@
     shortcutsModal: document.getElementById('shortcutsModal'),
     shortcutsCloseBtn: document.getElementById('shortcutsCloseBtn'),
     toastContainer: document.getElementById('toastContainer'),
+
+    // VIP & Monetization Elements
+    vipModalBtn: document.getElementById('vipModalBtn'),
+    vipModal: document.getElementById('vipModal'),
+    vipCloseBtn: document.getElementById('vipCloseBtn'),
+    footerVipLink: document.getElementById('footerVipLink'),
+    detailsSponsorBanner: document.getElementById('detailsSponsorBanner'),
+    playerSponsorPill: document.getElementById('playerSponsorPill'),
+    sponsorBannerCta: document.getElementById('sponsorBannerCta'),
+    sponsorBannerTitle: document.getElementById('sponsorBannerTitle'),
+    sponsorBannerDesc: document.getElementById('sponsorBannerDesc'),
+    sponsorDiscountPill: document.getElementById('sponsorDiscountPill'),
+    vipPasscodeInput: document.getElementById('vipPasscodeInput'),
+    activateVipBtn: document.getElementById('activateVipBtn'),
+    vipStatusMsg: document.getElementById('vipStatusMsg'),
+    usdtAddrInput: document.getElementById('usdtAddrInput'),
+    btcAddrInput: document.getElementById('btcAddrInput'),
+    solAddrInput: document.getElementById('solAddrInput'),
+    vipBmacLink: document.getElementById('vipBmacLink'),
+    vipKofiLink: document.getElementById('vipKofiLink'),
+    vipPaypalLink: document.getElementById('vipPaypalLink'),
   };
 
   // Toast Helper
@@ -305,11 +327,159 @@
   }
 
   // ==========================================================================
+  // MONETIZATION, VIP & SPONSOR MANAGEMENT
+  // ==========================================================================
+  function initMonetization() {
+    const config = window.NETMIRROR_MONETIZATION || {};
+
+    // 1. Populate VPN Affiliate Links
+    const vpnUrl = config.affiliateVpnUrl || 'https://nordvpn.com';
+    if (el.sponsorBannerCta) el.sponsorBannerCta.href = vpnUrl;
+    if (el.playerSponsorPill) el.playerSponsorPill.href = vpnUrl;
+    if (el.sponsorBannerTitle && config.affiliateVpnTitle) el.sponsorBannerTitle.textContent = config.affiliateVpnTitle;
+    if (el.sponsorBannerDesc && config.affiliateVpnDesc) el.sponsorBannerDesc.textContent = config.affiliateVpnDesc;
+    if (el.sponsorDiscountPill && config.affiliateVpnBadge) el.sponsorDiscountPill.textContent = config.affiliateVpnBadge;
+
+    // 2. Populate Donation Links
+    if (el.vipBmacLink && config.buyMeACoffeeUrl) el.vipBmacLink.href = config.buyMeACoffeeUrl;
+    if (el.vipKofiLink && config.kofiUrl) el.vipKofiLink.href = config.kofiUrl;
+    if (el.vipPaypalLink && config.paypalUrl) el.vipPaypalLink.href = config.paypalUrl;
+
+    // 3. Populate Crypto Addresses
+    const wallets = config.cryptoWallets || {};
+    if (el.usdtAddrInput) el.usdtAddrInput.value = wallets.usdt || 'TQ... (Configure in monetization-config.js)';
+    if (el.btcAddrInput) el.btcAddrInput.value = wallets.btc || 'bc1... (Configure in monetization-config.js)';
+    if (el.solAddrInput) el.solAddrInput.value = wallets.sol || 'So1... (Configure in monetization-config.js)';
+
+    // 4. Update VIP Status UI
+    updateVipStatusUI();
+
+    // 5. Setup VIP & Monetization Listeners
+    setupMonetizationListeners();
+  }
+
+  function updateVipStatusUI() {
+    if (state.isVip) {
+      if (el.vipModalBtn) {
+        el.vipModalBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" class="vip-crown-icon" style="fill:#22c55e"><path d="M2 4l3 12h14l3-12-6 7-4-11-4 11-6-7zm3 16h14v2H5v-2z"/></svg>
+          <span class="vip-btn-text" style="color:#86efac">VIP Active</span>
+        `;
+        el.vipModalBtn.style.borderColor = '#22c55e';
+      }
+      if (el.detailsSponsorBanner) {
+        el.detailsSponsorBanner.style.display = 'none';
+      }
+      if (el.playerSponsorPill) {
+        el.playerSponsorPill.style.display = 'none';
+      }
+    }
+  }
+
+  function setupMonetizationListeners() {
+    // Open VIP Modal
+    if (el.vipModalBtn && el.vipModal) {
+      el.vipModalBtn.addEventListener('click', () => {
+        el.vipModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      });
+    }
+
+    if (el.footerVipLink && el.vipModal) {
+      el.footerVipLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        el.vipModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      });
+    }
+
+    // Close VIP Modal
+    if (el.vipCloseBtn && el.vipModal) {
+      el.vipCloseBtn.addEventListener('click', () => {
+        el.vipModal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+      });
+    }
+
+    if (el.vipModal) {
+      el.vipModal.addEventListener('click', (e) => {
+        if (e.target === el.vipModal) {
+          el.vipModal.classList.add('hidden');
+          document.body.style.overflow = 'auto';
+        }
+      });
+    }
+
+    // Copy Crypto Addresses
+    document.querySelectorAll('.btn-copy-crypto').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.target;
+        const input = document.getElementById(targetId);
+        if (input && input.value) {
+          navigator.clipboard.writeText(input.value).then(() => {
+            const orig = btn.textContent;
+            btn.textContent = 'Copied!';
+            showToast('Wallet address copied to clipboard!');
+            setTimeout(() => { btn.textContent = orig; }, 2000);
+          }).catch(() => {
+            input.select();
+            document.execCommand('copy');
+            showToast('Wallet address copied!');
+          });
+        }
+      });
+    });
+
+    // Activate VIP Passcode
+    if (el.activateVipBtn && el.vipPasscodeInput) {
+      el.activateVipBtn.addEventListener('click', handleVipActivation);
+      el.vipPasscodeInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleVipActivation();
+      });
+    }
+  }
+
+  function handleVipActivation() {
+    const inputVal = (el.vipPasscodeInput.value || '').trim().toUpperCase();
+    const config = window.NETMIRROR_MONETIZATION || {};
+    const validCodes = (config.vipPasscodes || ['VIP2026', 'NETMIRRORVIP', 'PREMIUM4K', 'FSFERDOWS']).map(c => String(c).toUpperCase());
+
+    if (!inputVal) {
+      showVipMessage('Please enter a valid supporter passcode.', 'error');
+      return;
+    }
+
+    if (validCodes.includes(inputVal)) {
+      state.isVip = true;
+      localStorage.setItem('netmirror_is_vip', 'true');
+      updateVipStatusUI();
+      showVipMessage('🎉 VIP Supporter Pass Activated! Ultra 4K Priority & Ad-Free Cinema unlocked.', 'success');
+      showToast('👑 VIP Pass Activated! Enjoy Premium NetMirror.');
+      setTimeout(() => {
+        if (el.vipModal) {
+          el.vipModal.classList.add('hidden');
+          document.body.style.overflow = 'auto';
+        }
+      }, 2500);
+    } else {
+      showVipMessage('Invalid passcode. Support the site or check your code and try again.', 'error');
+    }
+  }
+
+  function showVipMessage(msg, type) {
+    if (!el.vipStatusMsg) return;
+    el.vipStatusMsg.textContent = msg;
+    el.vipStatusMsg.className = `vip-status-message ${type}`;
+    el.vipStatusMsg.classList.remove('hidden');
+  }
+
+  // ==========================================================================
   // INITIALIZATION & DATA FETCHING
   // ==========================================================================
   async function init() {
     setupEventListeners();
     updateAudioEnhancerUI();
+    initMonetization();
     renderContinueWatching();
     await fetchBrowseData();
     fetchSportsData().catch(() => {});
@@ -3029,6 +3199,11 @@
 
     // Escape closes modals/player
     if (e.key === 'Escape') {
+      if (el.vipModal && !el.vipModal.classList.contains('hidden')) {
+        el.vipModal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        return;
+      }
       if (!el.shortcutsModal.classList.contains('hidden')) {
         el.shortcutsModal.classList.add('hidden');
         return;

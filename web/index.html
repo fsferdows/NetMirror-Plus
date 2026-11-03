@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css" />
+  <script src="/monetization-config.js"></script>
 </head>
 <body class="bg-dark text-light">
   <!-- Top Navigation Bar -->
@@ -77,6 +78,12 @@
           <!-- Autocomplete Dropdown -->
           <div class="suggestions-popover hidden" id="suggestionsPopover"></div>
         </div>
+
+        <!-- VIP & Supporter Monetization Pass -->
+        <button class="vip-upgrade-btn" id="vipModalBtn" title="VIP Access & Support">
+          <svg viewBox="0 0 24 24" class="vip-crown-icon"><path d="M2 4l3 12h14l3-12-6 7-4-11-4 11-6-7zm3 16h14v2H5v-2z"/></svg>
+          <span class="vip-btn-text">VIP Pass</span>
+        </button>
 
         <button class="icon-btn" id="shortcutsBtn" title="Keyboard Shortcuts (?)">
           <svg viewBox="0 0 24 24" class="header-icon"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -540,6 +547,23 @@
             <div class="credit-row" id="directorRow"><span class="credit-label">Director:</span> <span id="modalDirector" class="credit-val"></span></div>
             <div class="credit-row" id="starsRow"><span class="credit-label">Starring:</span> <span id="modalStars" class="credit-val"></span></div>
           </div>
+
+          <!-- High-Converting Streaming Partner / VPN Banner -->
+          <div class="sponsor-banner-card" id="detailsSponsorBanner">
+            <div class="sponsor-card-inner">
+              <div class="sponsor-icon-badge">🛡️</div>
+              <div class="sponsor-text">
+                <div class="sponsor-title-row">
+                  <span class="sponsor-title" id="sponsorBannerTitle">Stream in 4K Buffer-Free with High-Speed VPN</span>
+                  <span class="sponsor-discount-pill" id="sponsorDiscountPill">70% OFF</span>
+                </div>
+                <p class="sponsor-desc" id="sponsorBannerDesc">Bypass ISP speed throttling & protect your privacy while streaming worldwide titles.</p>
+              </div>
+              <a href="https://nordvpn.com" target="_blank" rel="noopener noreferrer" class="btn-sponsor-cta" id="sponsorBannerCta">
+                <span id="sponsorBannerCtaText">Unlock 4K VPN &rarr;</span>
+              </a>
+            </div>
+          </div>
         </div>
 
         <!-- Audio Dubs / Languages selector -->
@@ -579,6 +603,11 @@
           <span class="player-subtitle" id="playerMediaSubtitle"></span>
         </div>
         <div class="player-header-actions">
+          <!-- In-Player VPN Sponsor Pill -->
+          <a href="https://nordvpn.com" target="_blank" rel="noopener noreferrer" class="player-sponsor-pill" id="playerSponsorPill" title="Ultra-Fast Buffer-Free Streaming VPN">
+            <span>🛡️ 4K VPN Boost</span>
+          </a>
+
           <!-- Server / Source Picker -->
           <div class="player-menu-wrapper" id="serverMenuWrapper">
             <button class="player-btn player-text-btn" id="serverMenuBtn" title="Streaming Server">
@@ -811,6 +840,106 @@
     </div>
   </div>
 
+  <!-- VIP Access & Monetization Modal -->
+  <div class="modal-backdrop hidden" id="vipModal">
+    <div class="vip-modal-card">
+      <button class="modal-close-btn" id="vipCloseBtn">&times;</button>
+      <div class="vip-modal-header">
+        <div class="vip-crown-badge">
+          <svg viewBox="0 0 24 24"><path d="M2 4l3 12h14l3-12-6 7-4-11-4 11-6-7zm3 16h14v2H5v-2z"/></svg>
+        </div>
+        <h2>NetMirror VIP Supporter Pass</h2>
+        <p class="vip-subtitle">Support development & unlock ultra-fast dedicated 4K streaming servers, zero ads, and VIP cinema privileges.</p>
+      </div>
+
+      <!-- VIP Perks Grid -->
+      <div class="vip-perks-grid">
+        <div class="vip-perk-item">
+          <div class="vip-perk-icon">⚡</div>
+          <div class="vip-perk-text">
+            <h4>Ultra 4K Direct Speed</h4>
+            <p>Dedicated high-bandwidth stream CDN with zero buffering or wait times.</p>
+          </div>
+        </div>
+        <div class="vip-perk-item">
+          <div class="vip-perk-icon">🛡️</div>
+          <div class="vip-perk-text">
+            <h4>100% Ad-Free Cinema</h4>
+            <p>Enjoy uninterrupted cinema without third-party popups or redirects.</p>
+          </div>
+        </div>
+        <div class="vip-perk-item">
+          <div class="vip-perk-icon">🔊</div>
+          <div class="vip-perk-text">
+            <h4>Studio Sound & 300% Boost</h4>
+            <p>Permanently unlocked dialogue clarity EQ and 3x audio booster.</p>
+          </div>
+        </div>
+        <div class="vip-perk-item">
+          <div class="vip-perk-icon">🚀</div>
+          <div class="vip-perk-text">
+            <h4>Priority Content Requests</h4>
+            <p>Request any worldwide movie or series and get it added within 24 hours.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ways to Support / Pay -->
+      <div class="vip-ways-to-pay">
+        <h4 class="vip-section-title">Support & Unlock VIP Pass</h4>
+        <div class="vip-pay-buttons">
+          <a href="https://buymeacoffee.com" target="_blank" rel="noopener noreferrer" class="vip-pay-btn bmac-btn" id="vipBmacLink">
+            <span class="pay-btn-icon">☕</span>
+            <span>Buy Me a Coffee ($5)</span>
+          </a>
+          <a href="https://ko-fi.com" target="_blank" rel="noopener noreferrer" class="vip-pay-btn kofi-btn" id="vipKofiLink">
+            <span class="pay-btn-icon">❤️</span>
+            <span>Support on Ko-fi</span>
+          </a>
+          <a href="https://paypal.me" target="_blank" rel="noopener noreferrer" class="vip-pay-btn paypal-btn" id="vipPaypalLink">
+            <span class="pay-btn-icon">🅿️</span>
+            <span>Tip via PayPal</span>
+          </a>
+        </div>
+
+        <!-- Crypto Tipping Section -->
+        <div class="vip-crypto-section">
+          <div class="vip-crypto-header">
+            <span>🪙 Instant Crypto Tip (USDT / BTC / ETH / SOL)</span>
+          </div>
+          <div class="crypto-addresses-list" id="cryptoAddressesList">
+            <div class="crypto-addr-row">
+              <span class="crypto-coin">USDT (TRC20)</span>
+              <input type="text" class="crypto-addr-input" readonly value="Loading..." id="usdtAddrInput" />
+              <button class="btn-copy-crypto" data-target="usdtAddrInput">Copy</button>
+            </div>
+            <div class="crypto-addr-row">
+              <span class="crypto-coin">Bitcoin</span>
+              <input type="text" class="crypto-addr-input" readonly value="Loading..." id="btcAddrInput" />
+              <button class="btn-copy-crypto" data-target="btcAddrInput">Copy</button>
+            </div>
+            <div class="crypto-addr-row">
+              <span class="crypto-coin">Solana</span>
+              <input type="text" class="crypto-addr-input" readonly value="Loading..." id="solAddrInput" />
+              <button class="btn-copy-crypto" data-target="solAddrInput">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Enter VIP Passcode / License Key -->
+        <div class="vip-license-section">
+          <h4 class="vip-section-title">Already Have a Supporter Passcode?</h4>
+          <p class="vip-license-desc">Enter your supporter passcode to unlock VIP status instantly on this device:</p>
+          <div class="vip-code-input-row">
+            <input type="text" id="vipPasscodeInput" class="vip-code-input" placeholder="Enter VIP Passcode (e.g. VIP2026)" />
+            <button class="btn btn-primary" id="activateVipBtn">Activate VIP</button>
+          </div>
+          <div class="vip-status-message hidden" id="vipStatusMsg"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Keyboard Shortcuts Modal -->
   <div class="modal-backdrop hidden" id="shortcutsModal">
     <div class="shortcuts-card">
@@ -847,6 +976,7 @@
         <a href="#" data-nav="movies">Movies</a>
         <a href="#" data-nav="series">TV Shows</a>
         <a href="#" data-nav="trending">Trending</a>
+        <a href="#" id="footerVipLink" style="color:#eab308;font-weight:700;">👑 VIP Pass & Support</a>
         <a href="https://github.com/mesamirh/MovieBox-Tui" target="_blank" rel="noreferrer">GitHub Project</a>
       </div>
     </div>

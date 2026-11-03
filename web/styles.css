@@ -3765,5 +3765,442 @@ kbd {
   }
 }
 
+/* ==========================================================================
+   MONETIZATION, VIP & SPONSOR STYLES
+   ========================================================================== */
+
+/* Navbar VIP Upgrade Button */
+.vip-upgrade-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.25) 0%, rgba(202, 138, 4, 0.4) 100%);
+  border: 1px solid rgba(234, 179, 8, 0.6);
+  color: #fef08a;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 12.5px;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all var(--transition-fast);
+  box-shadow: 0 0 16px rgba(234, 179, 8, 0.25);
+  animation: vipPulseGlow 3s infinite ease-in-out;
+}
+
+@keyframes vipPulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 14px rgba(234, 179, 8, 0.25);
+    border-color: rgba(234, 179, 8, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 24px rgba(234, 179, 8, 0.6), 0 0 8px #fef08a;
+    border-color: #fef08a;
+  }
+}
+
+.vip-upgrade-btn:hover {
+  background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+  color: #000;
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 0 25px rgba(234, 179, 8, 0.8);
+}
+
+.vip-crown-icon {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+/* Streaming Partner / VPN Banner in Movie Details Modal */
+.sponsor-banner-card {
+  margin-top: 18px;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.85) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(56, 189, 248, 0.1);
+  transition: all var(--transition-fast);
+}
+
+.sponsor-banner-card:hover {
+  border-color: rgba(56, 189, 248, 0.6);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(56, 189, 248, 0.2);
+}
+
+.sponsor-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.sponsor-icon-badge {
+  font-size: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background: rgba(56, 189, 248, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sponsor-text {
+  flex: 1;
+  min-width: 220px;
+}
+
+.sponsor-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 3px;
+  flex-wrap: wrap;
+}
+
+.sponsor-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.sponsor-discount-pill {
+  background: #e50914;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.5px;
+}
+
+.sponsor-desc {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.btn-sponsor-cta {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+}
+
+.btn-sponsor-cta:hover {
+  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  color: #000;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.6);
+}
+
+/* In-Player VPN Sponsor Pill */
+.player-sponsor-pill {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(2, 132, 199, 0.25);
+  border: 1px solid rgba(56, 189, 248, 0.5);
+  color: #7dd3fc;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.player-sponsor-pill:hover {
+  background: #0284c7;
+  color: #fff;
+  border-color: #38bdf8;
+  transform: scale(1.04);
+}
+
+/* VIP Modal Styles */
+.vip-modal-card {
+  background: linear-gradient(180deg, #181d2f 0%, #0f1422 100%);
+  border: 1px solid rgba(234, 179, 8, 0.4);
+  border-radius: var(--radius-lg);
+  padding: 30px;
+  max-width: 620px;
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(234, 179, 8, 0.2);
+}
+
+.vip-modal-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.vip-crown-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.2) 0%, rgba(202, 138, 4, 0.3) 100%);
+  border: 2px solid #eab308;
+  border-radius: 50%;
+  margin-bottom: 12px;
+  box-shadow: 0 0 20px rgba(234, 179, 8, 0.4);
+}
+
+.vip-crown-badge svg {
+  width: 26px;
+  height: 26px;
+  fill: #fef08a;
+}
+
+.vip-modal-header h2 {
+  font-size: 24px;
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.vip-subtitle {
+  font-size: 13px;
+  color: #94a3b8;
+  max-width: 500px;
+  margin: 0 auto;
+  line-height: 1.45;
+}
+
+.vip-perks-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 540px) {
+  .vip-perks-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.vip-perk-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.vip-perk-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.vip-perk-text h4 {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 2px;
+}
+
+.vip-perk-text p {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.vip-section-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #e2e8f0;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.vip-pay-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 540px) {
+  .vip-pay-buttons {
+    grid-template-columns: 1fr;
+  }
+}
+
+.vip-pay-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  color: #fff;
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.bmac-btn {
+  background: #ffdd00;
+  color: #000;
+  font-weight: 800;
+}
+.bmac-btn:hover {
+  background: #ffea47;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(255, 221, 0, 0.4);
+}
+
+.kofi-btn {
+  background: #ff5e5b;
+}
+.kofi-btn:hover {
+  background: #ff7572;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(255, 94, 91, 0.4);
+}
+
+.paypal-btn {
+  background: #0070ba;
+}
+.paypal-btn:hover {
+  background: #008be5;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 112, 186, 0.4);
+}
+
+/* Crypto Addresses List */
+.vip-crypto-section {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  margin-bottom: 20px;
+}
+
+.vip-crypto-header {
+  font-size: 12px;
+  font-weight: 700;
+  color: #cbd5e1;
+  margin-bottom: 8px;
+}
+
+.crypto-addresses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.crypto-addr-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.crypto-coin {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  min-width: 95px;
+}
+
+.crypto-addr-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  padding: 5px 8px;
+  color: #e2e8f0;
+  font-family: monospace;
+  font-size: 11px;
+  outline: none;
+}
+
+.btn-copy-crypto {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-copy-crypto:hover {
+  background: #e50914;
+  border-color: #ff3344;
+}
+
+/* VIP License Code Section */
+.vip-license-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 16px;
+}
+
+.vip-license-desc {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 10px;
+}
+
+.vip-code-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.vip-code-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-size: 13px;
+  outline: none;
+}
+
+.vip-code-input:focus {
+  border-color: #eab308;
+  box-shadow: 0 0 12px rgba(234, 179, 8, 0.4);
+}
+
+.vip-status-message {
+  margin-top: 10px;
+  font-size: 12.5px;
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+.vip-status-message.success {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid #22c55e;
+  color: #4ade80;
+}
+.vip-status-message.error {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid #ef4444;
+  color: #f87171;
+}
+
 
 

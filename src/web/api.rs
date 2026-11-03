@@ -1151,45 +1151,45 @@ pub async fn get_streams(
         let mut embed_urls = Vec::new();
         if is_series {
             embed_urls.push(EmbedSource {
-                name: "VidSrc Cloud (Fast)".to_string(),
+                name: "VidLink Cloud (Ad-Free)".to_string(),
+                url: format!("https://vidlink.pro/tv/{id}/{s}/{ep}?primaryColor=e50914"),
+            });
+            embed_urls.push(EmbedSource {
+                name: "AutoEmbed Server (Fast)".to_string(),
+                url: format!("https://autoembed.me/tv/imdb/{id}-{s}-{ep}"),
+            });
+            embed_urls.push(EmbedSource {
+                name: "VidSrc Cloud (Ultra)".to_string(),
                 url: format!("https://vidsrc.pm/embed/tv/{id}/{s}/{ep}"),
             });
             embed_urls.push(EmbedSource {
-                name: "VidSrc Pro (HD)".to_string(),
+                name: "VidSrc Net (HD)".to_string(),
+                url: format!("https://vidsrc.net/embed/tv/{id}/{s}/{ep}"),
+            });
+            embed_urls.push(EmbedSource {
+                name: "VidSrc Pro (Backup)".to_string(),
                 url: format!("https://vidsrc.to/embed/tv/{id}/{s}/{ep}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "MultiEmbed VIP".to_string(),
-                url: format!("https://multiembed.mov/?video_id={id}&s={s}&e={ep}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "2Embed Cinema".to_string(),
-                url: format!("https://www.2embed.cc/embedtv/{id}&s={s}&e={ep}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "AutoEmbed Stream".to_string(),
-                url: format!("https://autoembed.me/tv/imdb/{id}-{s}-{ep}"),
             });
         } else {
             embed_urls.push(EmbedSource {
-                name: "VidSrc Cloud (Fast)".to_string(),
+                name: "VidLink Cloud (Ad-Free)".to_string(),
+                url: format!("https://vidlink.pro/movie/{id}?primaryColor=e50914"),
+            });
+            embed_urls.push(EmbedSource {
+                name: "AutoEmbed Server (Fast)".to_string(),
+                url: format!("https://autoembed.me/movie/imdb/{id}"),
+            });
+            embed_urls.push(EmbedSource {
+                name: "VidSrc Cloud (Ultra)".to_string(),
                 url: format!("https://vidsrc.pm/embed/movie/{id}"),
             });
             embed_urls.push(EmbedSource {
-                name: "VidSrc Pro (HD)".to_string(),
+                name: "VidSrc Net (HD)".to_string(),
+                url: format!("https://vidsrc.net/embed/movie/{id}"),
+            });
+            embed_urls.push(EmbedSource {
+                name: "VidSrc Pro (Backup)".to_string(),
                 url: format!("https://vidsrc.to/embed/movie/{id}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "MultiEmbed VIP".to_string(),
-                url: format!("https://multiembed.mov/?video_id={id}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "2Embed Cinema".to_string(),
-                url: format!("https://www.2embed.cc/embed/{id}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "AutoEmbed Stream".to_string(),
-                url: format!("https://autoembed.me/movie/imdb/{id}"),
             });
         }
         return Ok(Json(StreamsResponse {
@@ -1392,81 +1392,73 @@ pub async fn get_streams(
     if let Some(imdb_id) = imdb_id_opt {
         if is_series {
             embed_urls.push(EmbedSource {
-                name: "VidSrc Cloud (Fast)".to_string(),
+                name: "VidLink Cloud (Ad-Free)".to_string(),
+                url: format!("https://vidlink.pro/tv/{imdb_id}/{season}/{episode}?primaryColor=e50914"),
+            });
+            embed_urls.push(EmbedSource {
+                name: "AutoEmbed Server (Fast)".to_string(),
+                url: format!("https://autoembed.me/tv/imdb/{imdb_id}-{season}-{episode}"),
+            });
+            embed_urls.push(EmbedSource {
+                name: "VidSrc Cloud (Ultra)".to_string(),
                 url: format!("https://vidsrc.pm/embed/tv/{imdb_id}/{season}/{episode}"),
             });
             embed_urls.push(EmbedSource {
-                name: "VidSrc Pro (HD)".to_string(),
+                name: "VidSrc Net (HD)".to_string(),
+                url: format!("https://vidsrc.net/embed/tv/{imdb_id}/{season}/{episode}"),
+            });
+            embed_urls.push(EmbedSource {
+                name: "VidSrc Pro (Backup)".to_string(),
                 url: format!("https://vidsrc.to/embed/tv/{imdb_id}/{season}/{episode}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "MultiEmbed VIP".to_string(),
-                url: format!("https://multiembed.mov/?video_id={imdb_id}&s={season}&e={episode}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "2Embed Cinema".to_string(),
-                url: format!("https://www.2embed.cc/embedtv/{imdb_id}&s={season}&e={episode}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "AutoEmbed Stream".to_string(),
-                url: format!("https://autoembed.me/tv/imdb/{imdb_id}-{season}-{episode}"),
             });
         } else {
             embed_urls.push(EmbedSource {
-                name: "VidSrc Cloud (Fast)".to_string(),
+                name: "VidLink Cloud (Ad-Free)".to_string(),
+                url: format!("https://vidlink.pro/movie/{imdb_id}?primaryColor=e50914"),
+            });
+            embed_urls.push(EmbedSource {
+                name: "AutoEmbed Server (Fast)".to_string(),
+                url: format!("https://autoembed.me/movie/imdb/{imdb_id}"),
+            });
+            embed_urls.push(EmbedSource {
+                name: "VidSrc Cloud (Ultra)".to_string(),
                 url: format!("https://vidsrc.pm/embed/movie/{imdb_id}"),
             });
             embed_urls.push(EmbedSource {
-                name: "VidSrc Pro (HD)".to_string(),
+                name: "VidSrc Net (HD)".to_string(),
+                url: format!("https://vidsrc.net/embed/movie/{imdb_id}"),
+            });
+            embed_urls.push(EmbedSource {
+                name: "VidSrc Pro (Backup)".to_string(),
                 url: format!("https://vidsrc.to/embed/movie/{imdb_id}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "MultiEmbed VIP".to_string(),
-                url: format!("https://multiembed.mov/?video_id={imdb_id}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "2Embed Cinema".to_string(),
-                url: format!("https://www.2embed.cc/embed/{imdb_id}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "AutoEmbed Stream".to_string(),
-                url: format!("https://autoembed.me/movie/imdb/{imdb_id}"),
             });
         }
     } else {
         if is_series {
             embed_urls.push(EmbedSource {
+                name: "AutoEmbed Server (Fast)".to_string(),
+                url: format!("https://autoembed.me/tv?title={encoded_title}&season={season}&episode={episode}"),
+            });
+            embed_urls.push(EmbedSource {
                 name: "VidSrc Cloud (Fast)".to_string(),
                 url: format!("https://vidsrc.pm/embed/tv?title={encoded_title}&season={season}&episode={episode}"),
             });
             embed_urls.push(EmbedSource {
-                name: "VidSrc Pro (HD)".to_string(),
-                url: format!("https://vidsrc.to/embed/tv/{encoded_title}/{season}/{episode}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "MultiEmbed VIP".to_string(),
-                url: format!("https://multiembed.mov/?video_id={encoded_title}&s={season}&e={episode}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "2Embed Cinema".to_string(),
-                url: format!("https://www.2embed.cc/embedtv/{encoded_title}&s={season}&e={episode}"),
+                name: "VidSrc Net (HD)".to_string(),
+                url: format!("https://vidsrc.net/embed/tv?title={encoded_title}&season={season}&episode={episode}"),
             });
         } else {
+            embed_urls.push(EmbedSource {
+                name: "AutoEmbed Server (Fast)".to_string(),
+                url: format!("https://autoembed.me/movie?title={encoded_title}"),
+            });
             embed_urls.push(EmbedSource {
                 name: "VidSrc Cloud (Fast)".to_string(),
                 url: format!("https://vidsrc.pm/embed/movie?title={encoded_title}"),
             });
             embed_urls.push(EmbedSource {
-                name: "VidSrc Pro (HD)".to_string(),
-                url: format!("https://vidsrc.to/embed/movie/{encoded_title}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "MultiEmbed VIP".to_string(),
-                url: format!("https://multiembed.mov/?video_id={encoded_title}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "2Embed Cinema".to_string(),
-                url: format!("https://www.2embed.cc/embed/{encoded_title}"),
+                name: "VidSrc Net (HD)".to_string(),
+                url: format!("https://vidsrc.net/embed/movie?title={encoded_title}"),
             });
         }
     }

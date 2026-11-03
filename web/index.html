@@ -798,6 +798,12 @@
           <span class="player-subtitle" id="playerMediaSubtitle"></span>
         </div>
         <div class="player-header-actions">
+          <!-- Player AdShield Protection Badge -->
+          <div class="player-adshield-pill" id="playerAdShieldPill" title="AdShield Active: Rogue popups and redirects are blocked">
+            <span class="adshield-dot"></span>
+            <span>🛡️ AdShield</span>
+          </div>
+
           <!-- In-Player VPN Sponsor Pill (Hidden to ensure 100% ad-free experience) -->
           <a href="https://nordvpn.com" target="_blank" rel="noopener noreferrer" class="player-sponsor-pill hidden" id="playerSponsorPill" title="Ultra-Fast Buffer-Free Streaming VPN">
             <span>🛡️ 4K VPN Boost</span>
@@ -831,7 +837,7 @@
       <video id="videoElement" class="video-element" playsinline crossorigin="anonymous"></video>
 
       <!-- Universal Fallback Web Embed Player with Anti-Ad Shield & No-Referrer Protection -->
-      <iframe id="embedPlayerIframe" class="embed-player-iframe hidden" allowfullscreen allow="autoplay; fullscreen; picture-in-picture; encrypted-media" referrerpolicy="no-referrer"></iframe>
+      <iframe id="embedPlayerIframe" class="embed-player-iframe hidden" allowfullscreen allow="autoplay; fullscreen; picture-in-picture; encrypted-media" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"></iframe>
 
       <!-- Center Big Splash Icon (on play/pause) -->
       <div class="player-center-icon hidden" id="playerCenterIcon">

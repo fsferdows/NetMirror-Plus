@@ -1574,28 +1574,28 @@ async function handleStreams(id, params) {
 
   if (imdbId) {
     if (isSeries || params.season) {
-      embedUrls.push({ name: "VidSrc Cloud (Fast)", url: `https://vidsrc.pm/embed/tv/${imdbId}/${season}/${episode}` });
-      embedUrls.push({ name: "VidSrc Pro (HD)", url: `https://vidsrc.to/embed/tv/${imdbId}/${season}/${episode}` });
-      embedUrls.push({ name: "AutoEmbed Stream", url: `https://autoembed.me/tv/imdb/${imdbId}-${season}-${episode}` });
-      embedUrls.push({ name: "MultiEmbed Stream", url: `https://multiembed.mov/?video_id=${imdbId}&s=${season}&e=${episode}` });
-      embedUrls.push({ name: "2Embed Stream", url: `https://www.2embed.cc/embedtv/${imdbId}&s=${season}&e=${episode}` });
+      embedUrls.push({ name: "VidLink Cloud (Ad-Free)", url: `https://vidlink.pro/tv/${imdbId}/${season}/${episode}?primaryColor=e50914` });
+      embedUrls.push({ name: "AutoEmbed Server (Fast)", url: `https://autoembed.me/tv/imdb/${imdbId}-${season}-${episode}` });
+      embedUrls.push({ name: "VidSrc Cloud (Ultra)", url: `https://vidsrc.pm/embed/tv/${imdbId}/${season}/${episode}` });
+      embedUrls.push({ name: "VidSrc Net (HD)", url: `https://vidsrc.net/embed/tv/${imdbId}/${season}/${episode}` });
+      embedUrls.push({ name: "VidSrc Pro (Backup)", url: `https://vidsrc.to/embed/tv/${imdbId}/${season}/${episode}` });
     } else {
-      embedUrls.push({ name: "VidSrc Cloud (Fast)", url: `https://vidsrc.pm/embed/movie/${imdbId}` });
-      embedUrls.push({ name: "VidSrc Pro (HD)", url: `https://vidsrc.to/embed/movie/${imdbId}` });
-      embedUrls.push({ name: "AutoEmbed Stream", url: `https://autoembed.me/movie/imdb/${imdbId}` });
-      embedUrls.push({ name: "MultiEmbed Stream", url: `https://multiembed.mov/?video_id=${imdbId}` });
-      embedUrls.push({ name: "2Embed Stream", url: `https://www.2embed.cc/embed/${imdbId}` });
+      embedUrls.push({ name: "VidLink Cloud (Ad-Free)", url: `https://vidlink.pro/movie/${imdbId}?primaryColor=e50914` });
+      embedUrls.push({ name: "AutoEmbed Server (Fast)", url: `https://autoembed.me/movie/imdb/${imdbId}` });
+      embedUrls.push({ name: "VidSrc Cloud (Ultra)", url: `https://vidsrc.pm/embed/movie/${imdbId}` });
+      embedUrls.push({ name: "VidSrc Net (HD)", url: `https://vidsrc.net/embed/movie/${imdbId}` });
+      embedUrls.push({ name: "VidSrc Pro (Backup)", url: `https://vidsrc.to/embed/movie/${imdbId}` });
     }
   } else {
     const cleanTitle = encodeURIComponent((title || id).replace(/\[.*?\]|\(.*?\)/g, "").trim());
     if (isSeries || params.season) {
       embedUrls.push({ name: "VidSrc Cloud (Fast)", url: `https://vidsrc.pm/embed/tv?title=${cleanTitle}&season=${season}&episode=${episode}` });
-      embedUrls.push({ name: "MultiEmbed Stream", url: `https://multiembed.mov/?video_id=${cleanTitle}&s=${season}&e=${episode}` });
-      embedUrls.push({ name: "2Embed Stream", url: `https://www.2embed.cc/embedtv/${cleanTitle}&s=${season}&e=${episode}` });
+      embedUrls.push({ name: "AutoEmbed Server (Fast)", url: `https://autoembed.me/tv?title=${cleanTitle}&season=${season}&episode=${episode}` });
+      embedUrls.push({ name: "VidSrc Net (HD)", url: `https://vidsrc.net/embed/tv?title=${cleanTitle}&season=${season}&episode=${episode}` });
     } else {
       embedUrls.push({ name: "VidSrc Cloud (Fast)", url: `https://vidsrc.pm/embed/movie?title=${cleanTitle}` });
-      embedUrls.push({ name: "MultiEmbed Stream", url: `https://multiembed.mov/?video_id=${cleanTitle}` });
-      embedUrls.push({ name: "2Embed Stream", url: `https://www.2embed.cc/embed/${cleanTitle}` });
+      embedUrls.push({ name: "AutoEmbed Server (Fast)", url: `https://autoembed.me/movie?title=${cleanTitle}` });
+      embedUrls.push({ name: "VidSrc Net (HD)", url: `https://vidsrc.net/embed/movie?title=${cleanTitle}` });
     }
   }
 

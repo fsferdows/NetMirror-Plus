@@ -520,27 +520,69 @@
   function initAdShield() {
     try {
       const nativeOpen = window.open;
+      const dummyWindow = {
+        location: { href: '', replace: () => {}, assign: () => {} },
+        focus: () => {},
+        close: () => {},
+        blur: () => {},
+        postMessage: () => {},
+        document: { write: () => {}, writeln: () => {}, open: () => {}, close: () => {} },
+      };
+
       window.open = function (url, target, features) {
-        if (typeof url === 'string') {
-          const lower = url.toLowerCase();
-          const isSafe =
-            url.startsWith('/') ||
-            lower.includes('nordvpn.com') ||
-            lower.includes('twitter.com') ||
-            lower.includes('facebook.com') ||
-            lower.includes('t.me') ||
-            lower.includes('wa.me') ||
-            lower.includes('github.com') ||
-            lower.includes('buymeacoffee.com') ||
-            lower.includes('ko-fi.com') ||
-            lower.includes('paypal.me');
-          if (!isSafe) {
-            console.warn('[AdShield] Blocked popup attempt:', url);
-            return null;
-          }
+        if (!url || typeof url !== 'string' || url === 'about:blank' || url === '') {
+          console.warn('[AdShield] Blocked blank popup window attempt');
+          return dummyWindow;
+        }
+        const lower = url.toLowerCase();
+        const isSafe =
+          url.startsWith('/') ||
+          lower.includes(window.location.hostname) ||
+          lower.includes('nordvpn.com') ||
+          lower.includes('twitter.com') ||
+          lower.includes('facebook.com') ||
+          lower.includes('t.me') ||
+          lower.includes('wa.me') ||
+          lower.includes('github.com') ||
+          lower.includes('buymeacoffee.com') ||
+          lower.includes('ko-fi.com') ||
+          lower.includes('paypal.me');
+        if (!isSafe) {
+          console.warn('[AdShield] Blocked unauthorized popup attempt:', url);
+          return dummyWindow;
         }
         return nativeOpen.call(window, url, target, features);
       };
+
+      // Intercept rogue external link clicks triggered while playing video
+      document.addEventListener('click', (e) => {
+        if (!state.isEmbedMode && (!el.playerOverlay || el.playerOverlay.classList.contains('hidden'))) {
+          return;
+        }
+        const link = e.target && e.target.closest ? e.target.closest('a') : null;
+        if (link && link.href) {
+          const href = link.getAttribute('href') || '';
+          const lower = href.toLowerCase();
+          if (href.startsWith('http://') || href.startsWith('https://')) {
+            const isSafe =
+              lower.includes(window.location.hostname) ||
+              lower.includes('nordvpn.com') ||
+              lower.includes('twitter.com') ||
+              lower.includes('facebook.com') ||
+              lower.includes('t.me') ||
+              lower.includes('wa.me') ||
+              lower.includes('github.com') ||
+              lower.includes('buymeacoffee.com') ||
+              lower.includes('ko-fi.com') ||
+              lower.includes('paypal.me');
+            if (!isSafe) {
+              e.preventDefault();
+              e.stopImmediatePropagation();
+              console.warn('[AdShield] Blocked rogue link click during video playback:', href);
+            }
+          }
+        }
+      }, true);
 
       // Anti-hijack: prevent rogue iframe ad scripts from redirecting the user away during video playback
       window.addEventListener('beforeunload', (e) => {
@@ -1617,8 +1659,9 @@
       el.playerControls.classList.add('hidden');
     }
     if (el.embedPlayerIframe) {
-      // Remove sandbox attribute so YouTube and modern video players load without sandbox restriction errors
-      el.embedPlayerIframe.removeAttribute('sandbox');
+      // Re-enforce sandbox with safe capabilities (scripts, same-origin, forms, presentation)
+      // Omit allow-top-navigation and allow-popups so rogue ad redirects and popups are blocked at browser engine level
+      el.embedPlayerIframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation');
       el.embedPlayerIframe.setAttribute('referrerpolicy', 'no-referrer');
       el.embedPlayerIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
       el.embedPlayerIframe.src = url;
@@ -1628,7 +1671,7 @@
     if (el.currentServerLabel) {
       el.currentServerLabel.textContent = serverName;
     }
-    showToast(`Streaming via ${serverName}`);
+    showToast(`Streaming via ${serverName} (AdShield Protected)`);
     populateServerMenu(state.currentStreams, state.embedUrls);
   }
 
@@ -2791,7 +2834,7 @@
     }
 
     if (el.embedPlayerIframe) {
-      el.embedPlayerIframe.removeAttribute('sandbox');
+      el.embedPlayerIframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation');
       el.embedPlayerIframe.setAttribute('referrerpolicy', 'no-referrer');
       el.embedPlayerIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
       el.embedPlayerIframe.src = streamUrl;

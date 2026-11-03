@@ -2538,6 +2538,40 @@
       return;
     }
 
+    // Auto-inject resilient fallback sports channels based on sport type
+    const lowerTitle = `${title || ''} ${subtitle || ''}`.toLowerCase();
+    const enrichedChannels = [...channels];
+    const addBackup = (chName) => {
+      if (!enrichedChannels.some(c => (c.name || '').toLowerCase() === chName.toLowerCase())) {
+        enrichedChannels.push({
+          name: chName,
+          url: `/api/sports-stream?name=${encodeURIComponent(chName)}`
+        });
+      }
+    };
+
+    if (lowerTitle.includes('cricket') || lowerTitle.includes('willow') || lowerTitle.includes('ipl') || lowerTitle.includes('t20') || lowerTitle.includes('bbl') || lowerTitle.includes('icc')) {
+      addBackup('Sky Sports Cricket FHD UK');
+      addBackup('Willow Cricket HD US');
+      addBackup('ASTRO CRICKET HD');
+      addBackup('FOX Sports 501 Cricket HD AU');
+    } else if (lowerTitle.includes('premier') || lowerTitle.includes('football') || lowerTitle.includes('soccer') || lowerTitle.includes('bundesliga') || lowerTitle.includes('laliga') || lowerTitle.includes('serie') || lowerTitle.includes('champions')) {
+      addBackup('Sky Sports Premier League FHD UK');
+      addBackup('Sky Sports Football FHD UK');
+      addBackup('TNT Sports 1 FHD UK');
+      addBackup('beIN Sports HD US');
+      addBackup('Canal+ Premier League HD FR');
+    } else {
+      addBackup('Sky Sports Main Event FHD UK');
+      addBackup('ESPN HD US');
+      addBackup('TNT Sports 1 FHD UK');
+    }
+
+    state.currentSportsTitle = title;
+    state.currentSportsSubtitle = subtitle;
+    state.currentSportsChannels = enrichedChannels;
+    state.currentSportsChannelIndex = initialIndex;
+
     // Stop native video player if running
     el.videoElement.pause();
     el.videoElement.src = '';
@@ -2553,7 +2587,7 @@
     el.playerMediaSubtitle.textContent = subtitle;
     el.nextEpisodeControlBtn.classList.add('hidden');
 
-    const activeChannel = channels[initialIndex] || channels[0];
+    const activeChannel = enrichedChannels[initialIndex] || enrichedChannels[0];
     let streamUrl = activeChannel.url || '';
     if (!streamUrl.startsWith('/api/sports-stream')) {
       streamUrl = `/api/sports-stream?name=${encodeURIComponent(activeChannel.name || title)}`;
@@ -2574,15 +2608,15 @@
       el.serverMenu.innerHTML = '';
       const header = document.createElement('div');
       header.style.cssText = 'padding:6px 10px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;';
-      header.textContent = `Live Broadcast Servers (${channels.length})`;
+      header.textContent = `Live Broadcast Servers (${enrichedChannels.length})`;
       el.serverMenu.appendChild(header);
 
-      channels.forEach((c, idx) => {
+      enrichedChannels.forEach((c, idx) => {
         const btn = document.createElement('button');
         btn.className = `menu-item ${idx === initialIndex ? 'active' : ''}`;
         btn.innerHTML = `🔴 <span>${c.name || 'Server ' + (idx + 1)}</span>`;
         btn.addEventListener('click', () => {
-          openSportsPlayer(title, subtitle, channels, idx);
+          openSportsPlayer(title, subtitle, enrichedChannels, idx);
           el.serverMenu.classList.add('hidden');
         });
         el.serverMenu.appendChild(btn);
@@ -2591,6 +2625,20 @@
 
     showToast(`Streaming ${title}`);
   }
+
+  // Auto-failover listener for sports streams
+  window.addEventListener('message', (ev) => {
+    if (ev.data && ev.data.type === 'stream_error') {
+      if (state.isEmbedMode && state.currentSportsChannels && state.currentSportsChannels.length > 1) {
+        const nextIdx = (state.currentSportsChannelIndex + 1) % state.currentSportsChannels.length;
+        if (nextIdx !== state.currentSportsChannelIndex) {
+          const nextChannel = state.currentSportsChannels[nextIdx];
+          showToast(`Switching to backup live feed: ${nextChannel.name}...`);
+          openSportsPlayer(state.currentSportsTitle, state.currentSportsSubtitle, state.currentSportsChannels, nextIdx);
+        }
+      }
+    }
+  });
 
   async function navigate(target) {
     state.currentNav = target;
@@ -3042,12 +3090,19 @@
       }
     });
 
-    // Scrubber click & drag
+    // Scrubber click & drag (Mouse & Touch responsive)
     let isDraggingScrubber = false;
+
+    function getPointerClientX(e) {
+      if (e.touches && e.touches.length > 0) return e.touches[0].clientX;
+      if (e.changedTouches && e.changedTouches.length > 0) return e.changedTouches[0].clientX;
+      return e.clientX;
+    }
 
     function handleScrubberSeek(e) {
       const rect = el.progressBarContainer.getBoundingClientRect();
-      const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      const clientX = getPointerClientX(e);
+      const pos = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
       if (video.duration) {
         video.currentTime = pos * video.duration;
       }
@@ -3057,6 +3112,11 @@
       isDraggingScrubber = true;
       handleScrubberSeek(e);
     });
+
+    el.progressBarContainer.addEventListener('touchstart', (e) => {
+      isDraggingScrubber = true;
+      handleScrubberSeek(e);
+    }, { passive: true });
 
     window.addEventListener('mousemove', (e) => {
       if (isDraggingScrubber) handleScrubberSeek(e);
@@ -3074,7 +3134,15 @@
       }
     });
 
+    window.addEventListener('touchmove', (e) => {
+      if (isDraggingScrubber) handleScrubberSeek(e);
+    }, { passive: true });
+
     window.addEventListener('mouseup', () => {
+      isDraggingScrubber = false;
+    });
+
+    window.addEventListener('touchend', () => {
       isDraggingScrubber = false;
     });
 

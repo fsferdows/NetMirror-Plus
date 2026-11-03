@@ -1594,51 +1594,148 @@ pub struct SportsStreamQuery {
     pub name: Option<String>,
 }
 
+fn resolve_channel_name(name: &str) -> String {
+    let lower = name.to_lowercase();
+    if lower.contains("cricket") || lower.contains("willow") {
+        if lower.contains("willow") {
+            "Willow Cricket HD US".to_string()
+        } else if lower.contains("astro") {
+            "ASTRO CRICKET HD".to_string()
+        } else if lower.contains("fox") {
+            "FOX Sports 501 Cricket HD AU".to_string()
+        } else {
+            "Sky Sports Cricket FHD UK".to_string()
+        }
+    } else if lower.contains("premier league") || lower.contains("premier") {
+        if lower.contains("canal") {
+            "Canal+ Premier League HD FR".to_string()
+        } else {
+            "Sky Sports Premier League FHD UK".to_string()
+        }
+    } else if lower.contains("football") || lower.contains("soccer") || lower.contains("bundesliga") {
+        if lower.contains("tnt") {
+            "TNT Sports 1 FHD UK".to_string()
+        } else if lower.contains("bein") {
+            "beIN Sports HD US".to_string()
+        } else if lower.contains("bundesliga") {
+            "Sky Sport Bundesliga 5 FHD DE".to_string()
+        } else {
+            "Sky Sports Football FHD UK".to_string()
+        }
+    } else if lower.contains("tnt") {
+        "TNT Sports 1 FHD UK".to_string()
+    } else if lower.contains("bein") {
+        "beIN Sports HD US".to_string()
+    } else if lower.contains("espn") {
+        "ESPN HD US".to_string()
+    } else if lower.contains("fox") {
+        "Fox Sports 1 FHD US".to_string()
+    } else if lower.contains("f1") || lower.contains("formula") {
+        "Sky Sports F1 FHD UK".to_string()
+    } else if lower.contains("tennis") {
+        "Sky Sports Tennis FHD UK".to_string()
+    } else if lower.contains("golf") {
+        "Sky Sports Golf FHD UK".to_string()
+    } else {
+        name.to_string()
+    }
+}
+
 fn extract_stream_url(html: &str) -> Option<String> {
     use base64::Engine;
-    let line = html.lines().find(|l| l.contains(";var ") && l.contains('(') && l.contains('+'))?;
-    let mut chunks = Vec::new();
-    let mut rest = line;
-    while let Some(start) = rest.find('\'') {
-        let after_start = &rest[start + 1..];
-        if let Some(end) = after_start.find('\'') {
-            chunks.push(&after_start[..end]);
-            rest = &after_start[end + 1..];
-        } else {
-            break;
-        }
-    }
-    if chunks.len() < 5 {
-        return None;
-    }
-    let mut decoded = String::new();
-    for chunk in chunks {
-        let mut s = chunk.replace('-', "+").replace('_', "/");
-        while s.len() % 4 != 0 {
-            s.push('=');
-        }
-        if let Ok(bytes) = base64::engine::general_purpose::STANDARD.decode(&s) {
-            if let Ok(text) = String::from_utf8(bytes) {
-                decoded.push_str(&text);
+    
+    // Method 1: Check for direct m3u8 in html
+    for line in html.lines() {
+        if let Some(start) = line.find("https://") {
+            let candidate = &line[start..];
+            if let Some(end) = candidate.find(".m3u8") {
+                let rest = &candidate[end + 5..];
+                let param_end = rest.find(['"', '\'', ' ', '<', '>']).unwrap_or(rest.len());
+                let full = &candidate[..end + 5 + param_end];
+                return Some(full.to_string());
             }
         }
     }
-    if decoded.starts_with("https://") && decoded.contains(".m3u8") {
-        Some(decoded)
-    } else {
-        None
+
+    // Method 2: Obfuscated base64 chunks
+    let target_lines: Vec<&str> = html
+        .lines()
+        .filter(|l| l.contains("var ") && (l.contains("nLax") || l.contains("atob") || (l.contains('(') && l.contains('+'))))
+        .collect();
+
+    for line in target_lines {
+        let mut chunks = Vec::new();
+        let mut rest = line;
+        while let Some(start) = rest.find('\'') {
+            let after_start = &rest[start + 1..];
+            if let Some(end) = after_start.find('\'') {
+                chunks.push(&after_start[..end]);
+                rest = &after_start[end + 1..];
+            } else {
+                break;
+            }
+        }
+        if chunks.len() >= 5 {
+            let mut decoded = String::new();
+            for chunk in chunks {
+                let mut s = chunk.replace('-', "+").replace('_', "/");
+                while s.len() % 4 != 0 {
+                    s.push('=');
+                }
+                if let Ok(bytes) = base64::engine::general_purpose::STANDARD.decode(&s) {
+                    if let Ok(text) = String::from_utf8(bytes) {
+                        decoded.push_str(&text);
+                    }
+                }
+            }
+            if decoded.starts_with("https://") && (decoded.contains(".m3u8") || decoded.contains("/playlist")) {
+                return Some(decoded);
+            }
+        }
     }
+
+    None
 }
 
 fn generate_clean_player_html(channel_name: &str, stream_url: Option<&str>) -> String {
     let url_str = stream_url.unwrap_or("");
+    let lower = channel_name.to_lowercase();
+    let is_cricket = lower.contains("cricket") || lower.contains("willow");
+    let is_football = lower.contains("premier") || lower.contains("football") || lower.contains("soccer") || lower.contains("bundesliga");
+
+    let pills_html = if is_cricket {
+        r#"<div class="alt-pills">
+            <span class="alt-label">Switch Live Server:</span>
+            <a href="/api/sports-stream?name=Sky%20Sports%20Cricket%20FHD%20UK" class="alt-btn active">🏏 Sky Cricket</a>
+            <a href="/api/sports-stream?name=Willow%20Cricket%20HD%20US" class="alt-btn">🏏 Willow HD</a>
+            <a href="/api/sports-stream?name=ASTRO%20CRICKET%20HD" class="alt-btn">🏏 Astro Cricket</a>
+            <a href="/api/sports-stream?name=FOX%20Sports%20501%20Cricket%20HD%20AU" class="alt-btn">🏏 Fox 501</a>
+           </div>"#
+    } else if is_football {
+        r#"<div class="alt-pills">
+            <span class="alt-label">Switch Live Server:</span>
+            <a href="/api/sports-stream?name=Sky%20Sports%20Premier%20League%20FHD%20UK" class="alt-btn active">⚽ Premier League</a>
+            <a href="/api/sports-stream?name=Sky%20Sports%20Football%20FHD%20UK" class="alt-btn">⚽ Sky Football</a>
+            <a href="/api/sports-stream?name=TNT%20Sports%201%20FHD%20UK" class="alt-btn">⚽ TNT Sports 1</a>
+            <a href="/api/sports-stream?name=Canal%2B%20Premier%20League%20HD%20FR" class="alt-btn">⚽ Canal+ PL</a>
+           </div>"#
+    } else {
+        r#"<div class="alt-pills">
+            <span class="alt-label">Switch Live Server:</span>
+            <a href="/api/sports-stream?name=Sky%20Sports%20Main%20Event%20FHD%20UK" class="alt-btn active">🔴 Main Event</a>
+            <a href="/api/sports-stream?name=ESPN%20HD%20US" class="alt-btn">🔴 ESPN HD</a>
+            <a href="/api/sports-stream?name=TNT%20Sports%201%20FHD%20UK" class="alt-btn">🔴 TNT Sports</a>
+            <a href="/api/sports-stream?name=Sky%20Sports%20Cricket%20FHD%20UK" class="alt-btn">🏏 Cricket HD</a>
+           </div>"#
+    };
+
     format!(
 r#"<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>{channel_name}</title>
+  <title>{channel_name} - NetMirror Live Sports</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <style>
     * {{ margin: 0; padding: 0; box-sizing: border-box; }}
@@ -1656,47 +1753,86 @@ r#"<!DOCTYPE html>
     .live-top-bar {{
       position: absolute; top: 12px; left: 14px; right: 14px;
       display: flex; align-items: center; justify-content: space-between;
-      pointer-events: none; z-index: 20;
+      pointer-events: none; z-index: 30; gap: 8px; flex-wrap: wrap;
     }}
     .live-pill {{
       display: inline-flex; align-items: center; gap: 7px;
-      background: rgba(14, 20, 36, 0.88); backdrop-filter: blur(10px);
-      padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(14, 20, 36, 0.92); backdrop-filter: blur(10px);
+      padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2);
       font-size: 12px; font-weight: 700; color: #fff;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+      pointer-events: auto;
     }}
     .live-dot {{
-      width: 7px; height: 7px; background: #ff2a2a; border-radius: 50%;
-      box-shadow: 0 0 8px #ff2a2a; animation: pulse 1.4s infinite;
+      width: 8px; height: 8px; background: #ff2a2a; border-radius: 50%;
+      box-shadow: 0 0 10px #ff2a2a; animation: pulse 1.4s infinite;
     }}
     @keyframes pulse {{ 0% {{ opacity: 1; transform: scale(1); }} 50% {{ opacity: 0.3; transform: scale(0.8); }} 100% {{ opacity: 1; transform: scale(1); }} }}
+
+    .alt-pills {{
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+      pointer-events: auto;
+    }}
+    .alt-label {{
+      font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;
+      display: none;
+    }}
+    @media (min-width: 600px) {{
+      .alt-label {{ display: inline-block; }}
+    }}
+    .alt-btn {{
+      display: inline-flex; align-items: center;
+      background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #e2e8f0; font-size: 11.5px; font-weight: 600;
+      padding: 5px 11px; border-radius: 16px; text-decoration: none;
+      transition: all 0.2s ease;
+    }}
+    .alt-btn:hover, .alt-btn.active {{
+      background: #e50914; border-color: #ff3344; color: #fff;
+      box-shadow: 0 0 12px rgba(229, 9, 20, 0.5);
+    }}
+
     .status-overlay {{
       position: absolute; inset: 0;
       background: rgba(6, 10, 18, 0.95);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      color: #fff; z-index: 10; text-align: center; padding: 20px;
+      color: #fff; z-index: 20; text-align: center; padding: 24px 16px;
       transition: opacity 0.3s ease;
     }}
     .status-overlay.hidden {{ opacity: 0; pointer-events: none; }}
     .spinner {{
-      width: 44px; height: 44px; border: 3.5px solid rgba(229, 9, 20, 0.2);
+      width: 46px; height: 46px; border: 3.5px solid rgba(229, 9, 20, 0.2);
       border-top-color: #e50914; border-radius: 50%;
       animation: spin 0.8s linear infinite; margin-bottom: 16px;
     }}
     @keyframes spin {{ to {{ transform: rotate(360deg); }} }}
-    .status-title {{ font-size: 17px; font-weight: 700; margin-bottom: 6px; }}
-    .status-desc {{ font-size: 13px; color: #8899a6; max-width: 360px; line-height: 1.4; }}
-    .reload-btn {{
-      margin-top: 16px; background: #e50914; color: #fff; border: none;
-      font-size: 13px; font-weight: 700; padding: 9px 22px; border-radius: 20px;
-      cursor: pointer; box-shadow: 0 4px 14px rgba(229, 9, 20, 0.4);
-      pointer-events: auto;
+    .status-title {{ font-size: 18px; font-weight: 700; margin-bottom: 8px; color: #fff; }}
+    .status-desc {{ font-size: 13.5px; color: #94a3b8; max-width: 420px; line-height: 1.5; margin-bottom: 20px; }}
+    .action-row {{
+      display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
     }}
+    .reload-btn {{
+      background: #e50914; color: #fff; border: none;
+      font-size: 13px; font-weight: 700; padding: 10px 24px; border-radius: 20px;
+      cursor: pointer; box-shadow: 0 4px 16px rgba(229, 9, 20, 0.5);
+      transition: background 0.2s;
+    }}
+    .reload-btn:hover {{ background: #b80710; }}
+    .alt-switch-btn {{
+      background: rgba(255, 255, 255, 0.12); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 13px; font-weight: 700; padding: 10px 20px; border-radius: 20px;
+      cursor: pointer; text-decoration: none;
+      transition: background 0.2s;
+    }}
+    .alt-switch-btn:hover {{ background: rgba(255, 255, 255, 0.22); }}
+
     @media (max-width: 600px) {{
       .live-top-bar {{ top: 8px; left: 8px; right: 8px; }}
       .live-pill {{ font-size: 11px; padding: 4px 10px; }}
-      .status-title {{ font-size: 15px; }}
-      .status-desc {{ font-size: 12px; }}
+      .alt-btn {{ font-size: 10.5px; padding: 4px 8px; }}
+      .status-title {{ font-size: 16px; }}
+      .status-desc {{ font-size: 12.5px; }}
     }}
   </style>
 </head>
@@ -1707,13 +1843,16 @@ r#"<!DOCTYPE html>
         <span class="live-dot"></span>
         <span>LIVE • {channel_name}</span>
       </div>
+      {pills_html}
     </div>
 
     <div class="status-overlay" id="statusOverlay">
       <div class="spinner" id="spinner"></div>
       <div class="status-title" id="statusTitle">Connecting Live Broadcast...</div>
       <div class="status-desc" id="statusDesc">Establishing direct HD sports feed</div>
-      <button class="reload-btn" id="reloadBtn" style="display:none;" onclick="location.reload()">Retry Stream</button>
+      <div class="action-row" id="actionRow" style="display:none;">
+        <button class="reload-btn" onclick="location.reload()">🔄 Retry Feed</button>
+      </div>
     </div>
 
     <video id="videoPlayer" controls autoplay playsinline preload="auto"></video>
@@ -1721,29 +1860,36 @@ r#"<!DOCTYPE html>
 
   <script>
     const streamUrl = "{url_str}";
+    const channelName = "{channel_name}";
     const video = document.getElementById('videoPlayer');
     const overlay = document.getElementById('statusOverlay');
     const spinner = document.getElementById('spinner');
     const statusTitle = document.getElementById('statusTitle');
     const statusDesc = document.getElementById('statusDesc');
-    const reloadBtn = document.getElementById('reloadBtn');
+    const actionRow = document.getElementById('actionRow');
 
     function showError(msg, sub) {{
       if (overlay) {{
         overlay.classList.remove('hidden');
         if (spinner) spinner.style.display = 'none';
         if (statusTitle) statusTitle.textContent = msg || 'Broadcast Unavailable';
-        if (statusDesc) statusDesc.textContent = sub || 'Stream is offline or reconnecting.';
-        if (reloadBtn) reloadBtn.style.display = 'inline-block';
+        if (statusDesc) statusDesc.textContent = sub || 'This stream is syncing. Switch to another live server above.';
+        if (actionRow) actionRow.style.display = 'flex';
       }}
+      try {{
+        window.parent.postMessage({{ type: 'stream_error', channel: channelName }}, '*');
+      }} catch (e) {{}}
     }}
 
     function hideOverlay() {{
       if (overlay) overlay.classList.add('hidden');
+      try {{
+        window.parent.postMessage({{ type: 'stream_playing', channel: channelName }}, '*');
+      }} catch (e) {{}}
     }}
 
     if (!streamUrl || streamUrl === 'null' || streamUrl.length < 10) {{
-      showError('Stream Currently Offline', 'This match/channel is preparing its feed. Please check back shortly.');
+      showError('🔴 Live Broadcast Reconnecting', 'This match channel is preparing its live feed. Switch to an active server above to watch instantly.');
     }} else if (Hls.isSupported()) {{
       const hls = new Hls({{
         enableWorker: true,
@@ -1766,11 +1912,17 @@ r#"<!DOCTYPE html>
         setTimeout(hideOverlay, 400);
       }});
 
+      let retryCount = 0;
       hls.on(Hls.Events.ERROR, function(event, data) {{
         if (data.fatal) {{
           switch (data.type) {{
             case Hls.ErrorTypes.NETWORK_ERROR:
-              hls.startLoad();
+              retryCount++;
+              if (retryCount <= 5) {{
+                setTimeout(function() {{ hls.startLoad(); }}, 1200);
+              }} else {{
+                showError('Broadcast Syncing', 'Network feed reconnecting. Please retry or choose another server above.');
+              }}
               break;
             case Hls.ErrorTypes.MEDIA_ERROR:
               hls.recoverMediaError();
@@ -1792,7 +1944,7 @@ r#"<!DOCTYPE html>
         hideOverlay();
       }});
       video.onerror = function() {{
-        showError('Stream Offline', 'Could not play stream on this device.');
+        showError('Stream Reconnecting', 'Unable to play stream on this device. Switch server above.');
       }};
     }}
 
@@ -1806,7 +1958,9 @@ r#"<!DOCTYPE html>
 pub async fn get_sports_stream(
     Query(query): Query<SportsStreamQuery>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
-    let channel_name = query.name.unwrap_or_else(|| "Sky Sports Cricket FHD UK".to_string());
+    let raw_name = query.name.unwrap_or_else(|| "Sky Sports Cricket FHD UK".to_string());
+    let channel_name = resolve_channel_name(&raw_name);
+
     let target = format!(
         "https://cdnlivetv.tv/api/v1/channels/player/?name={}&code=&user=cdnlivetv&plan=free",
         percent_encoding::utf8_percent_encode(&channel_name, percent_encoding::NON_ALPHANUMERIC)
@@ -1822,42 +1976,48 @@ pub async fn get_sports_stream(
         .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
         .header("Referer", "https://cdnlivetv.tv/")
         .send()
-        .await
-        .map_err(|e| (StatusCode::BAD_GATEWAY, e.to_string()))?;
+        .await;
 
-    if !res.status().is_success() {
-        let fallback = generate_clean_player_html(&channel_name, None);
-        return Ok((
-            StatusCode::OK,
-            [
-                ("Content-Type", "text/html; charset=utf-8"),
-                ("Access-Control-Allow-Origin", "*"),
-                ("Cache-Control", "no-cache, no-store, must-revalidate"),
-            ],
-            fallback,
-        ));
+    let mut stream_url = None;
+
+    if let Ok(response) = res {
+        if response.status().is_success() {
+            let html = response.text().await.unwrap_or_default();
+            stream_url = extract_stream_url(&html);
+        }
     }
 
-    let html = res.text().await.unwrap_or_default();
-    let stream_url = extract_stream_url(&html);
+    // If stream URL was not found on this channel, attempt fallback to primary online channel for this sport
+    if stream_url.is_none() {
+        let fallback_channel = if channel_name.to_lowercase().contains("cricket") || channel_name.to_lowercase().contains("willow") {
+            "Willow Cricket HD US"
+        } else if channel_name.to_lowercase().contains("premier") || channel_name.to_lowercase().contains("football") {
+            "Sky Sports Premier League FHD UK"
+        } else {
+            "Sky Sports Main Event FHD UK"
+        };
 
-    let output_html = if let Some(ref url) = stream_url {
-        generate_clean_player_html(&channel_name, Some(url))
-    } else {
-        // Fallback: bypass sandbox and _head check in original player if stream extraction didn't find chunks
-        let mut safe_html = html;
-        if let Some(start) = safe_html.find("// Sandbox iframe detection") {
-            if let Some(end) = safe_html[start..].find("})();") {
-                safe_html.replace_range(start..=start + end + 4, "/* sandbox bypassed */");
+        if fallback_channel != channel_name {
+            let fb_target = format!(
+                "https://cdnlivetv.tv/api/v1/channels/player/?name={}&code=&user=cdnlivetv&plan=free",
+                percent_encoding::utf8_percent_encode(fallback_channel, percent_encoding::NON_ALPHANUMERIC)
+            );
+            if let Ok(fb_res) = client
+                .get(&fb_target)
+                .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                .header("Referer", "https://cdnlivetv.tv/")
+                .send()
+                .await
+            {
+                if fb_res.status().is_success() {
+                    let fb_html = fb_res.text().await.unwrap_or_default();
+                    stream_url = extract_stream_url(&fb_html);
+                }
             }
         }
-        if let Some(start) = safe_html.find("function _head(u){") {
-            if let Some(end) = safe_html[start..].find("}") {
-                safe_html.replace_range(start..=start + end, "function _head(u){return Promise.resolve(200);}");
-            }
-        }
-        safe_html
-    };
+    }
+
+    let output_html = generate_clean_player_html(&channel_name, stream_url.as_deref());
 
     Ok((
         StatusCode::OK,

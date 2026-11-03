@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#e50914" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#e50914" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141c30"/>
+      <stop offset="100%" stop-color="#060a14"/>
+    </linearGradient>
+    <linearGradient id="badgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff2a3a"/>
+      <stop offset="100%" stop-color="#b80710"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- Ambient Glow -->
+  <circle cx="256" cy="256" r="240" fill="url(#glow)" opacity="0.35"/>
+
+  <!-- Base Card -->
+  <rect x="32" y="32" width="448" height="448" rx="100" fill="url(#bgGrad)" stroke="#e50914" stroke-width="8" filter="url(#shadow)"/>
+
+  <!-- Inner Red Emblem -->
+  <rect x="88" y="88" width="336" height="336" rx="72" fill="url(#badgeGrad)" stroke="#ff6b6b" stroke-width="4"/>
+
+  <!-- Signature Stylized 'N' -->
+  <!-- Left Column -->
+  <rect x="160" y="148" width="46" height="216" rx="8" fill="#ffffff"/>
+  <!-- Diagonal Bar -->
+  <path d="M160 148 L206 148 L352 364 L306 364 Z" fill="#ffffff"/>
+  <!-- Right Column -->
+  <rect x="306" y="148" width="46" height="216" rx="8" fill="#ffffff"/>
+
+  <!-- Gold PLUS Badge -->
+  <circle cx="376" cy="116" r="46" fill="#eab308" stroke="#ffffff" stroke-width="5" filter="url(#shadow)"/>
+  <rect x="368" y="94" width="16" height="44" rx="4" fill="#060a14"/>
+  <rect x="354" y="108" width="44" height="16" rx="4" fill="#060a14"/>
+</svg>

@@ -239,6 +239,19 @@
     playNextNowBtn: document.getElementById('playNextNowBtn'),
     cancelNextBtn: document.getElementById('cancelNextBtn'),
 
+    // Modern Watch View & Series Episode Selector Elements
+    watchCloseBtn: document.getElementById('watchCloseBtn'),
+    serverPillsList: document.getElementById('serverPillsList'),
+    watchEpisodesColumn: document.getElementById('watchEpisodesColumn'),
+    watchSeasonsRow: document.getElementById('watchSeasonsRow'),
+    watchEpisodesGrid: document.getElementById('watchEpisodesGrid'),
+    watchSelectedEpCard: document.getElementById('watchSelectedEpCard'),
+    howToDownloadBtn: document.getElementById('howToDownloadBtn'),
+    watchDownloadBtn: document.getElementById('watchDownloadBtn'),
+    downloadGuideModal: document.getElementById('downloadGuideModal'),
+    closeDownloadGuideBtn: document.getElementById('closeDownloadGuideBtn'),
+    gotItDownloadGuideBtn: document.getElementById('gotItDownloadGuideBtn'),
+
     // Shortcuts & Toasts
     shortcutsModal: document.getElementById('shortcutsModal'),
     shortcutsCloseBtn: document.getElementById('shortcutsCloseBtn'),
@@ -1535,7 +1548,7 @@
 
     // Set Header Info
     el.playerMediaTitle.textContent = media.title;
-    const isSeries = media.media_type === 'series' || s > 0 || ep > 0;
+    const isSeries = media.media_type === 'series' || s > 0 || ep > 0 || (state.currentDetails && state.currentDetails.media_type === 'series');
     if (isSeries && s > 0) {
       el.playerMediaSubtitle.textContent = `Season ${s} • Episode ${ep || 1}`;
       el.nextEpisodeControlBtn.classList.remove('hidden');
@@ -1546,8 +1559,15 @@
 
     state.currentSeason = s;
     state.currentEpisode = ep;
-    state.isEmbedMode = false;
     state.currentStreamIndex = 0;
+
+    // Series Episode Selection Panel (matching reference interface)
+    if (isSeries) {
+      if (el.watchEpisodesColumn) el.watchEpisodesColumn.classList.remove('hidden');
+      setupWatchEpisodesPanel(media, s, ep);
+    } else {
+      if (el.watchEpisodesColumn) el.watchEpisodesColumn.classList.add('hidden');
+    }
 
     // Update Browser URL so every watch stream has its own unique, shareable watch URL
     updateWatchUrl(media.id.value, s, ep, media.title, true);
@@ -1559,11 +1579,13 @@
       };
     }
 
-    if (el.embedPlayerIframe) {
-      el.embedPlayerIframe.classList.add('hidden');
-      el.embedPlayerIframe.src = '';
+    if (!state.isEmbedMode) {
+      if (el.embedPlayerIframe) {
+        el.embedPlayerIframe.classList.add('hidden');
+        el.embedPlayerIframe.src = '';
+      }
+      el.videoElement.classList.remove('hidden');
     }
-    el.videoElement.classList.remove('hidden');
 
     try {
       const titleParam = encodeURIComponent(media.title || '');
@@ -1593,10 +1615,15 @@
       );
       const resumeTime = historyItem ? historyItem.currentTime : 0;
 
-      // Populate Server Menu
+      // Populate Server Menu & Top Server Pills Bar
       populateServerMenu(state.currentStreams, state.embedUrls);
 
-      if (state.currentStreams.length > 0) {
+      if (state.isEmbedMode && state.embedUrls.length > 0) {
+        // If user already chose an embed provider, stay on that mirror for the new episode!
+        const matchingEmbed = state.embedUrls.find(e => e.name === state.currentEmbedServerName) || state.embedUrls[state.currentEmbedIndex] || state.embedUrls[0];
+        playEmbedUrl(matchingEmbed.url, matchingEmbed.name);
+      } else if (state.currentStreams.length > 0) {
+        state.isEmbedMode = false;
         const defaultStream = state.currentStreams[0];
         state.currentQuality = defaultStream.quality;
         el.currentQualityLabel.textContent = defaultStream.quality;
@@ -1634,6 +1661,132 @@
         showToast('Could not load stream: ' + err.message);
       }
     }
+  }
+
+  async function setupWatchEpisodesPanel(media, activeSeason, activeEpisode) {
+    let details = state.currentDetails;
+    const mediaIdVal = media && media.id ? media.id.value : (typeof media === 'string' ? media : '');
+    const hasValidSeasons = details && details.seasons && details.seasons.length > 0;
+    const isMatchingId = details && details.id && details.id.value === mediaIdVal;
+
+    if (!hasValidSeasons || !isMatchingId) {
+      try {
+        const titleParam = media && media.title ? `&title=${encodeURIComponent(media.title)}` : '';
+        const providerParam = media && media.id && media.id.provider ? `&provider=${media.id.provider}` : '';
+        const res = await fetch(`/api/details/${mediaIdVal}?type=tv${titleParam}${providerParam}`);
+        if (res.ok) {
+          details = await res.json();
+          state.currentDetails = details;
+        }
+      } catch (err) {
+        console.warn('Could not fetch series seasons:', err);
+      }
+    }
+
+    renderWatchEpisodes(details || media, activeSeason, activeEpisode);
+  }
+
+  function renderWatchEpisodes(details, curSeason, curEpisode) {
+    if (!el.watchEpisodesColumn || !el.watchEpisodesGrid || !el.watchSeasonsRow) return;
+
+    let seasons = (details && details.seasons) ? details.seasons : [];
+    if (!seasons || seasons.length === 0) {
+      seasons = [{
+        number: 1,
+        season_number: 1,
+        episodes: Array.from({ length: 10 }, (_, i) => ({
+          number: i + 1,
+          episode_number: i + 1,
+          title: `Episode ${i + 1}`,
+        })),
+      }];
+    }
+
+    let sNum = parseInt(curSeason, 10) || 1;
+    let activeSeasonObj = seasons.find((s) => (s.number ?? s.season_number) === sNum) || seasons[0];
+    sNum = activeSeasonObj ? (activeSeasonObj.number ?? activeSeasonObj.season_number ?? 1) : 1;
+    state.currentSeason = sNum;
+
+    let epNumActive = parseInt(curEpisode, 10) || 1;
+    state.currentEpisode = epNumActive;
+
+    // Render Season Badges (SE1, SE2...)
+    el.watchSeasonsRow.innerHTML = '';
+    seasons.forEach((sObj, idx) => {
+      const sn = parseInt(sObj.number ?? sObj.season_number ?? (idx + 1), 10) || (idx + 1);
+      const sBtn = document.createElement('button');
+      sBtn.className = `watch-season-pill ${sn === sNum ? 'active' : ''}`;
+      sBtn.textContent = `SE${sn}`;
+      sBtn.addEventListener('click', () => {
+        state.currentSeason = sn;
+        state.currentEpisode = 1;
+        renderWatchEpisodes(details, sn, 1);
+        startPlayback(details || state.currentDetails, sn, 1);
+      });
+      el.watchSeasonsRow.appendChild(sBtn);
+    });
+
+    // Render Episode Buttons Grid (1, 2, 3, 4, 5, 6, 7...)
+    el.watchEpisodesGrid.innerHTML = '';
+    const epList = activeSeasonObj.episodes || [];
+    epList.forEach((ep, idx) => {
+      const epNum = parseInt(ep.number ?? ep.episode_number ?? (idx + 1), 10) || (idx + 1);
+      const isSelected = epNum === epNumActive;
+      const epBtn = document.createElement('button');
+      epBtn.className = `watch-ep-btn ${isSelected ? 'active' : ''}`;
+      if (isSelected) {
+        epBtn.innerHTML = `${epNum} <span class="ep-live-signal"><span class="bar b1"></span><span class="bar b2"></span><span class="bar b3"></span></span>`;
+      } else {
+        epBtn.textContent = String(epNum);
+      }
+      epBtn.title = ep.title || `Episode ${epNum}`;
+
+      epBtn.addEventListener('click', () => {
+        state.currentEpisode = epNum;
+        if (el.watchSelectedEpCard) {
+          el.watchSelectedEpCard.textContent = `Season ${sNum} Selected Episode: ${epNum}`;
+        }
+        renderWatchEpisodes(details, sNum, epNum);
+        startPlayback(details || state.currentDetails, sNum, epNum);
+      });
+      el.watchEpisodesGrid.appendChild(epBtn);
+    });
+
+    // Update Selected Episode Card (matching screenshot format)
+    if (el.watchSelectedEpCard) {
+      el.watchSelectedEpCard.textContent = `Season ${sNum} Selected Episode: ${epNumActive}`;
+    }
+  }
+
+  function handleDownloadClick() {
+    const s = state.currentSeason || 1;
+    const ep = state.currentEpisode || 1;
+    const isSeries = state.currentDetails?.media_type === 'series' || s > 0;
+    const rawTitle = state.currentDetails?.title || 'Video';
+    const cleanTitle = rawTitle.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const fileName = isSeries ? `${cleanTitle}_S${s}E${ep}.mp4` : `${cleanTitle}.mp4`;
+
+    if (state.currentStreams && state.currentStreams.length > 0) {
+      const stream = state.currentStreams[state.currentStreamIndex] || state.currentStreams[0];
+      const a = document.createElement('a');
+      a.href = stream.proxy_url;
+      a.download = fileName;
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast(`Starting direct download for ${fileName}...`);
+    } else {
+      openDownloadGuide();
+    }
+  }
+
+  function openDownloadGuide() {
+    if (el.downloadGuideModal) el.downloadGuideModal.classList.remove('hidden');
+  }
+
+  function closeDownloadGuide() {
+    if (el.downloadGuideModal) el.downloadGuideModal.classList.add('hidden');
   }
 
   function playStreamUrl(url, seekTime = 0) {
@@ -1678,6 +1831,10 @@
 
   function playEmbedUrl(url, serverName = 'Embed Player') {
     state.isEmbedMode = true;
+    state.currentEmbedServerName = serverName;
+    state.currentEmbedIndex = (state.embedUrls || []).findIndex((e) => e.name === serverName || e.url === url);
+    if (state.currentEmbedIndex < 0) state.currentEmbedIndex = 0;
+
     el.videoElement.pause();
     el.videoElement.classList.add('hidden');
     if (el.playerControls) {
@@ -1700,6 +1857,80 @@
   }
 
   function populateServerMenu(streams, embeds) {
+    // 1. Populate Top Bar Pills (matching reference interface)
+    if (el.serverPillsList) {
+      el.serverPillsList.innerHTML = '';
+
+      // Direct streams
+      if (streams && streams.length > 0) {
+        streams.forEach((stream, idx) => {
+          const pill = document.createElement('button');
+          const isActive = idx === state.currentStreamIndex && !state.isEmbedMode;
+          pill.className = `server-pill-btn ${isActive ? 'active' : ''}`;
+          const label = stream.server || `Server ${idx + 1}`;
+          if (isActive) {
+            pill.innerHTML = `<span class="live-signal-bars"><span class="bar b1"></span><span class="bar b2"></span><span class="bar b3"></span></span> ${label} (${stream.quality})`;
+          } else {
+            pill.textContent = `${label} (${stream.quality})`;
+          }
+
+          pill.addEventListener('click', () => {
+            state.currentStreamIndex = idx;
+            state.isEmbedMode = false;
+            if (el.embedPlayerIframe) {
+              el.embedPlayerIframe.classList.add('hidden');
+              el.embedPlayerIframe.src = '';
+            }
+            el.videoElement.classList.remove('hidden');
+            if (el.playerControls) {
+              el.playerControls.classList.remove('hidden');
+            }
+            switchStream(stream, el.videoElement.currentTime || 0);
+            populateServerMenu(state.currentStreams, state.embedUrls);
+          });
+          el.serverPillsList.appendChild(pill);
+        });
+      }
+
+      // Embed cloud servers
+      if (embeds && embeds.length > 0) {
+        embeds.forEach((emb, idx) => {
+          const pill = document.createElement('button');
+          const isActive = state.isEmbedMode && el.embedPlayerIframe && (el.embedPlayerIframe.src === emb.url || state.currentEmbedServerName === emb.name);
+          pill.className = `server-pill-btn ${isActive ? 'active' : ''}`;
+
+          let displayName = emb.name || `Server ${idx + 1}`;
+          if (idx === 0) {
+            displayName = 'Multi-Lang Server';
+          } else if (displayName.includes('AutoEmbed')) {
+            displayName = 'Server 1';
+          } else if (displayName.includes('VidSrc Cloud')) {
+            displayName = 'Server 2';
+          } else if (displayName.includes('VidSrc Server')) {
+            displayName = 'Server 3';
+          } else if (displayName.includes('SmashyStream')) {
+            displayName = 'Server 4';
+          } else if (displayName.includes('Mirror')) {
+            displayName = 'Server 5';
+          }
+
+          if (isActive) {
+            pill.innerHTML = `<span class="live-signal-bars"><span class="bar b1"></span><span class="bar b2"></span><span class="bar b3"></span></span> ${displayName}`;
+          } else {
+            pill.textContent = displayName;
+          }
+
+          pill.title = emb.name;
+          pill.addEventListener('click', () => {
+            playEmbedUrl(emb.url, emb.name);
+            populateServerMenu(state.currentStreams, state.embedUrls);
+          });
+          el.serverPillsList.appendChild(pill);
+        });
+      }
+    }
+
+    // 2. Also populate legacy dropdown menu for compatibility
     if (!el.serverMenu) return;
     el.serverMenu.innerHTML = '';
 
@@ -3390,6 +3621,16 @@
     const video = el.videoElement;
 
     el.playerBackBtn.addEventListener('click', closePlayer);
+    if (el.watchCloseBtn) el.watchCloseBtn.addEventListener('click', closePlayer);
+    if (el.howToDownloadBtn) el.howToDownloadBtn.addEventListener('click', openDownloadGuide);
+    if (el.watchDownloadBtn) el.watchDownloadBtn.addEventListener('click', handleDownloadClick);
+    if (el.closeDownloadGuideBtn) el.closeDownloadGuideBtn.addEventListener('click', closeDownloadGuide);
+    if (el.gotItDownloadGuideBtn) el.gotItDownloadGuideBtn.addEventListener('click', closeDownloadGuide);
+    if (el.downloadGuideModal) {
+      el.downloadGuideModal.addEventListener('click', (e) => {
+        if (e.target === el.downloadGuideModal) closeDownloadGuide();
+      });
+    }
 
     // Play / Pause
     el.playPauseBtn.addEventListener('click', togglePlayPause);

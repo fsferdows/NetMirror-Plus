@@ -784,54 +784,68 @@
     </div>
   </div>
 
-  <!-- In-Browser Video Player Overlay -->
+  <!-- In-Browser Video Player & Watch View Overlay -->
   <div class="player-overlay hidden" id="playerOverlay">
-    <div class="player-container" id="playerContainer">
-      <!-- Player Header Bar -->
-      <div class="player-header" id="playerHeader">
-        <button class="player-back-btn" id="playerBackBtn">
-          <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          <span>Back to Browse</span>
-        </button>
-        <div class="player-title-info">
-          <span class="player-title" id="playerMediaTitle">Movie Title</span>
-          <span class="player-subtitle" id="playerMediaSubtitle"></span>
+    <div class="watch-view-wrapper" id="watchViewWrapper">
+
+      <!-- 1. Watch Top Bar: Breadcrumb + Header actions -->
+      <div class="watch-top-bar" id="playerHeader">
+        <div class="watch-breadcrumb" id="watchBreadcrumb">
+          <button class="breadcrumb-link" id="playerBackBtn">Home</button>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current" id="playerMediaTitle">Movie Title</span>
+          <span class="breadcrumb-sub" id="playerMediaSubtitle"></span>
         </div>
-        <div class="player-header-actions">
+        <div class="watch-top-actions">
           <!-- Player AdShield Protection Badge -->
           <div class="player-adshield-pill" id="playerAdShieldPill" title="AdShield Active: Rogue popups and redirects are blocked">
             <span class="adshield-dot"></span>
             <span>🛡️ AdShield</span>
           </div>
 
-          <!-- In-Player VPN Sponsor Pill (Hidden to ensure 100% ad-free experience) -->
-          <a href="https://nordvpn.com" target="_blank" rel="noopener noreferrer" class="player-sponsor-pill hidden" id="playerSponsorPill" title="Ultra-Fast Buffer-Free Streaming VPN">
-            <span>🛡️ 4K VPN Boost</span>
-          </a>
-
-          <!-- Server / Source Picker -->
-          <div class="player-menu-wrapper" id="serverMenuWrapper">
-            <button class="player-btn player-text-btn" id="serverMenuBtn" title="Streaming Server">
-              <svg viewBox="0 0 24 24" class="server-icon"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
-              <span id="currentServerLabel">Server</span>
-              <svg viewBox="0 0 24 24" style="width:12px;height:12px;margin-left:4px;stroke:currentColor;fill:none;stroke-width:2;"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </button>
-            <div class="player-menu hidden" id="serverMenu"></div>
-          </div>
+          <!-- Share Button -->
           <button class="player-icon-btn" id="playerShareBtn" title="Share Movie URL">
             <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
           </button>
+
+          <!-- Shortcuts Info Button -->
           <button class="player-icon-btn" id="playerInfoBtn" title="Shortcuts (?)">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           </button>
+
+          <!-- Close / Exit Watch Button -->
+          <button class="watch-close-btn" id="watchCloseBtn" title="Back to Browse">✕</button>
         </div>
       </div>
 
-      <!-- Loading / Buffering Spinner -->
-      <div class="player-spinner" id="playerSpinner">
-        <div class="spinner-ring"></div>
-        <span class="spinner-text" id="spinnerText">Loading stream...</span>
+      <!-- 2. Server Selector Pills Bar (Directly Above Video Player) -->
+      <div class="watch-servers-bar" id="watchServersBar">
+        <div class="server-pills-scroll" id="serverPillsList"></div>
+        <!-- Hidden server menu for compatibility -->
+        <div class="player-menu-wrapper hidden" id="serverMenuWrapper">
+          <button class="player-btn player-text-btn" id="serverMenuBtn" title="Streaming Server">
+            <svg viewBox="0 0 24 24" class="server-icon"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+            <span id="currentServerLabel">Server</span>
+          </button>
+          <div class="player-menu hidden" id="serverMenu"></div>
+        </div>
       </div>
+
+      <!-- 3. Main Watch Layout: 2 Columns on Desktop (Video Left, Episodes Right) -->
+      <div class="watch-main-layout" id="watchMainLayout">
+        <!-- Left / Video Column -->
+        <div class="watch-video-column" id="watchVideoColumn">
+          <div class="player-container" id="playerContainer">
+            <!-- Floating How To Download Button (top right inside player area) -->
+            <button class="how-to-download-btn" id="howToDownloadBtn" title="How to download movies and series">
+              How To Download
+            </button>
+
+            <!-- Loading / Buffering Spinner -->
+            <div class="player-spinner" id="playerSpinner">
+              <div class="spinner-ring"></div>
+              <span class="spinner-text" id="spinnerText">Loading stream...</span>
+            </div>
 
       <!-- Native HTML5 Video Element -->
       <video id="videoElement" class="video-element" playsinline crossorigin="anonymous"></video>
@@ -1041,8 +1055,58 @@
           </div>
         </div>
       </div>
+
+      <!-- Video Below Helpers: Ads Note & Download Button (Matching Reference) -->
+      <div class="watch-video-footer" id="watchVideoFooter">
+        <p class="watch-ads-note">Ads will stop when the video is in full screen.</p>
+        <div class="watch-footer-actions">
+          <button class="btn btn-danger watch-download-btn" id="watchDownloadBtn">
+            <svg viewBox="0 0 24 24" class="btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Download</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right / Series Episodes Column -->
+    <div class="watch-episodes-column hidden" id="watchEpisodesColumn">
+      <!-- Season Badges Row (SE1, SE2...) -->
+      <div class="watch-seasons-row" id="watchSeasonsRow"></div>
+
+      <!-- Episode Numbers Grid (1, 2, 3, 4, 5, 6, 7...) -->
+      <div class="watch-episodes-grid" id="watchEpisodesGrid"></div>
+
+      <!-- Selected Episode Status Card -->
+      <div class="watch-selected-ep-card" id="watchSelectedEpCard">
+        Season 1 Selected Episode: 1
+      </div>
     </div>
   </div>
+
+</div>
+</div>
+
+<!-- How To Download Modal -->
+<div class="modal-backdrop hidden" id="downloadGuideModal">
+  <div class="modal-card" style="max-width: 480px;">
+    <div class="modal-header">
+      <h3 class="modal-title" style="display:flex;align-items:center;gap:8px;">
+        <span>📥 How To Download</span>
+      </h3>
+      <button class="modal-close-btn" id="closeDownloadGuideBtn">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px 20px;color:var(--text-secondary);font-size:14px;line-height:1.6;">
+      <ol style="padding-left:20px;display:flex;flex-direction:column;gap:10px;">
+        <li><strong>Direct Stream:</strong> Click the red <em>Download</em> button below the video player.</li>
+        <li><strong>Choose Best Server:</strong> Select <em>Direct CDN (Server 1 / 4K)</em> from the server bar above for maximum download speed.</li>
+        <li><strong>Embed Cloud Mirrors:</strong> If watching on an embed server, enter full screen or right-click inside the player to save, or use browser tools like <em>IDM</em> or <em>Video DownloadHelper</em>.</li>
+      </ol>
+    </div>
+    <div class="modal-footer" style="padding:12px 20px;display:flex;justify-content:flex-end;">
+      <button class="btn btn-primary btn-sm" id="gotItDownloadGuideBtn">Got It</button>
+    </div>
+  </div>
+</div>
 
   <!-- VIP Access & Monetization Modal -->
   <div class="modal-backdrop hidden" id="vipModal">

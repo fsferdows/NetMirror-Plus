@@ -2034,7 +2034,7 @@ body {
 }
 
 /* ==========================================================================
-   IN-BROWSER VIDEO PLAYER
+   IN-BROWSER VIDEO PLAYER & MODERN WATCH VIEW (MATCHING NETMIRROR EXPERIENCE)
    ========================================================================== */
 .player-overlay {
   position: fixed;
@@ -2042,17 +2042,386 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: #000;
+  background: #07101e;
   z-index: 5000;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.watch-view-wrapper {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 18px 24px 48px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* 1. Breadcrumb Top Bar */
+.watch-top-bar,
+.player-header {
+  position: static !important;
+  background: transparent !important;
+  padding: 0 0 14px 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  z-index: 20;
+}
+
+.watch-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  flex-wrap: wrap;
+}
+
+.breadcrumb-link {
+  background: none;
+  border: none;
+  color: #60a5fa;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.breadcrumb-link:hover {
+  color: #93c5fd;
+  text-decoration: underline;
+}
+
+.breadcrumb-sep {
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.breadcrumb-current {
+  color: #f1f5f9;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.breadcrumb-sub {
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.watch-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.watch-close-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #cbd5e1;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.watch-close-btn:hover {
+  background: #e50914;
+  color: #fff;
+  border-color: #e50914;
+}
+
+/* 2. Server Selector Pills Bar */
+.watch-servers-bar {
+  margin-bottom: 16px;
+}
+
+.server-pills-scroll {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px 8px;
+  scrollbar-width: thin;
+}
+
+.server-pill-btn {
+  background: #1e293b;
+  color: #cbd5e1;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.server-pill-btn:hover {
+  background: #334155;
+  color: #fff;
+  border-color: #475569;
+}
+
+.server-pill-btn.active {
+  background: #1e293b;
+  border-color: #22c55e;
+  color: #22c55e;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.25);
+}
+
+/* Live Equalizer Signal Waves */
+.live-signal-bars,
+.ep-live-signal {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+
+.live-signal-bars .bar,
+.ep-live-signal .bar {
+  width: 2.5px;
+  background-color: #22c55e;
+  border-radius: 1px;
+  animation: signalBounce 1.1s infinite ease-in-out;
+}
+
+.live-signal-bars .b1, .ep-live-signal .b1 { height: 6px; animation-delay: 0.1s; }
+.live-signal-bars .b2, .ep-live-signal .b2 { height: 12px; animation-delay: 0.3s; }
+.live-signal-bars .b3, .ep-live-signal .b3 { height: 8px; animation-delay: 0.2s; }
+
+@keyframes signalBounce {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+
+/* 3. Main Watch Layout: 2 Columns on Desktop */
+.watch-main-layout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.watch-video-column {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .player-container {
   position: relative;
   width: 100%;
-  height: 100%;
+  aspect-ratio: 16 / 9;
   background: #000;
+  border-radius: 8px;
   overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
   user-select: none;
+}
+
+/* Native Fullscreen mode override */
+:fullscreen .player-container,
+:-webkit-full-screen .player-container,
+.player-container:fullscreen,
+.player-container:-webkit-full-screen {
+  aspect-ratio: unset !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  border-radius: 0 !important;
+}
+
+/* Floating How To Download Button */
+.how-to-download-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 15;
+  background: #e50914;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(229, 9, 20, 0.4);
+  transition: transform 0.2s, background 0.2s;
+}
+
+.how-to-download-btn:hover {
+  background: #b80710;
+  transform: translateY(-1px);
+}
+
+/* Video Below Helpers: Ads Note & Download Button */
+.watch-video-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 0 8px;
+}
+
+.watch-ads-note {
+  color: #94a3b8;
+  font-size: 13.5px;
+  text-align: center;
+  margin: 0 0 10px;
+}
+
+.watch-download-btn {
+  background: #e50914;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 36px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(229, 9, 20, 0.4);
+  transition: all 0.2s;
+}
+
+.watch-download-btn:hover {
+  background: #b80710;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(229, 9, 20, 0.5);
+}
+
+/* Right / Series Episodes Column */
+.watch-episodes-column {
+  width: 320px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Season Badges Row */
+.watch-seasons-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.watch-season-pill {
+  background: #1e293b;
+  color: #94a3b8;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 5px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.watch-season-pill:hover {
+  background: #334155;
+  color: #fff;
+}
+
+.watch-season-pill.active {
+  background: #1e293b;
+  color: #f59e0b;
+  border-color: #f59e0b;
+}
+
+/* Episode Buttons Grid */
+.watch-episodes-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.watch-ep-btn {
+  background: #1e293b;
+  color: #cbd5e1;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.watch-ep-btn:hover {
+  background: #334155;
+  border-color: #475569;
+  color: #fff;
+}
+
+.watch-ep-btn.active {
+  background: #052e16;
+  border-color: #22c55e;
+  color: #4ade80;
+  font-weight: 700;
+}
+
+/* Selected Episode Status Card */
+.watch-selected-ep-card {
+  border: 1px solid #38bdf8;
+  border-radius: 6px;
+  padding: 9px 14px;
+  text-align: center;
+  color: #f8fafc;
+  font-size: 13.5px;
+  font-weight: 600;
+  background: rgba(56, 189, 248, 0.06);
+}
+
+/* Responsive adjustments */
+@media (max-width: 980px) {
+  .watch-main-layout {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .watch-episodes-column {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .watch-view-wrapper {
+    padding: 12px 14px 32px;
+  }
+  .watch-episodes-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+  }
+  .watch-ep-btn {
+    height: 38px;
+    font-size: 13.5px;
+  }
 }
 
 .video-element {

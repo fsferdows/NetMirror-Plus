@@ -1392,12 +1392,14 @@ async function handleDetails(id, params = {}) {
               const episodes = [];
               for (let ep = 1; ep <= 10; ep++) {
                 episodes.push({
+                  season: s,
+                  number: ep,
                   episode_number: ep,
                   title: `Episode ${ep}`,
                   duration: "45 min",
                 });
               }
-              seasons.push({ season_number: s, episodes });
+              seasons.push({ number: s, season_number: s, episodes });
             }
           }
 
@@ -1429,7 +1431,8 @@ async function handleDetails(id, params = {}) {
   }
 
   // 2. Moviebox numeric ID lookup
-  for (const mtype of ["movie", "tv"]) {
+  const preferredTypes = (params.type === "tv" || /S\d+/i.test(params.title || "")) ? ["tv", "movie"] : ["tv", "movie"];
+  for (const mtype of preferredTypes) {
     const url = `https://api2.imdb3.shop/api/${mtype}/${id}`;
     try {
       const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
@@ -1437,7 +1440,7 @@ async function handleDetails(id, params = {}) {
         const json = await res.json();
         const first = json.results?.[0];
         if (first && first.title) {
-          const isSeries = mtype === "tv";
+          const isSeries = mtype === "tv" || first.media_type === "tv" || Array.isArray(first.season);
           const title = (first.title || "Untitled").trim();
           let year = "2026";
           if (first.release_date) {
@@ -1456,19 +1459,39 @@ async function handleDetails(id, params = {}) {
 
           // Build season & episode list if series
           const seasons = [];
-          if (isSeries && first.season) {
-            const sCount = parseInt(first.season, 10) || 1;
-            for (let s = 1; s <= sCount; s++) {
-              const episodes = [];
-              const epCount = 10;
-              for (let ep = 1; ep <= epCount; ep++) {
-                episodes.push({
-                  episode_number: ep,
-                  title: `Episode ${ep}`,
-                  duration: null,
-                });
+          if (isSeries) {
+            const sList = Array.isArray(first.season) ? first.season : [];
+            if (sList.length > 0) {
+              sList.forEach((sObj, idx) => {
+                const sNum = parseInt(sObj.se || sObj.season || (idx + 1), 10) || (idx + 1);
+                const epTotal = parseInt(sObj.ep || sObj.episodes || 10, 10) || 10;
+                const episodes = [];
+                for (let ep = 1; ep <= epTotal; ep++) {
+                  episodes.push({
+                    season: sNum,
+                    number: ep,
+                    episode_number: ep,
+                    title: `Episode ${ep}`,
+                    duration: null,
+                  });
+                }
+                seasons.push({ number: sNum, season_number: sNum, episodes });
+              });
+            } else {
+              const sCount = parseInt(first.season, 10) || 1;
+              for (let s = 1; s <= sCount; s++) {
+                const episodes = [];
+                for (let ep = 1; ep <= 10; ep++) {
+                  episodes.push({
+                    season: s,
+                    number: ep,
+                    episode_number: ep,
+                    title: `Episode ${ep}`,
+                    duration: null,
+                  });
+                }
+                seasons.push({ number: s, season_number: s, episodes });
               }
-              seasons.push({ season_number: s, episodes });
             }
           }
 
@@ -1540,13 +1563,16 @@ async function handleDetails(id, params = {}) {
 async function handleStreams(id, params) {
   let title = params.title || "";
   let yearHint = null;
-  let isSeries = false;
+  const reqSeason = parseInt(params.season || "0", 10) || 0;
+  const reqEpisode = parseInt(params.episode || "0", 10) || 0;
+  let isSeries = params.type === "tv" || reqSeason > 0 || reqEpisode > 0 || /S\d+/i.test(title);
 
   let imdbId = id.startsWith("tt") ? id : null;
 
   if (!imdbId) {
     // Fetch title from Moviebox if not provided
-    for (const mtype of ["movie", "tv"]) {
+    const checkTypes = isSeries ? ["tv", "movie"] : ["tv", "movie"];
+    for (const mtype of checkTypes) {
       try {
         const res = await fetch(`https://api2.imdb3.shop/api/${mtype}/${id}`, { headers: { "User-Agent": USER_AGENT } });
         if (res.ok) {
@@ -1554,7 +1580,9 @@ async function handleStreams(id, params) {
           const first = json.results?.[0];
           if (first && first.title) {
             title = first.title;
-            isSeries = mtype === "tv" || !!params.season;
+            if (mtype === "tv" || first.media_type === "tv" || Array.isArray(first.season)) {
+              isSeries = true;
+            }
             if (first.release_date) {
               const raw = String(first.release_date);
               yearHint = raw.length === 10 ? String(new Date(parseInt(raw, 10) * 1000).getFullYear()) : raw.slice(0, 4);
@@ -1567,13 +1595,14 @@ async function handleStreams(id, params) {
     imdbId = await resolveImdbId(title, yearHint);
   }
 
-  const season = parseInt(params.season || "1", 10);
-  const episode = parseInt(params.episode || "1", 10);
+  const season = reqSeason > 0 ? reqSeason : 1;
+  const episode = reqEpisode > 0 ? reqEpisode : 1;
+  const isSeriesMode = isSeries || reqSeason > 0 || reqEpisode > 0;
 
   const embedUrls = [];
 
   if (imdbId) {
-    if (isSeries || params.season) {
+    if (isSeriesMode) {
       embedUrls.push({ name: "AutoEmbed Server (Fast)", url: `https://autoembed.me/tv/imdb/${imdbId}-${season}-${episode}` });
       embedUrls.push({ name: "VidSrc Cloud (Ultra)", url: `https://vidsrc.pm/embed/tv/${imdbId}/${season}/${episode}` });
       embedUrls.push({ name: "VidSrc Server (HD)", url: `https://vidsrc.me/embed/tv?imdb=${imdbId}&season=${season}&episode=${episode}` });
@@ -1587,8 +1616,8 @@ async function handleStreams(id, params) {
       embedUrls.push({ name: "AutoEmbed Mirror (Backup)", url: `https://autoembed.co/movie/imdb/${imdbId}` });
     }
   } else {
-    const cleanTitle = encodeURIComponent((title || id).replace(/\[.*?\]|\(.*?\)/g, "").trim());
-    if (isSeries || params.season) {
+    const cleanTitle = encodeURIComponent((title || id).replace(/\[.*?\]|\(.*?\)|S\d+(-S\d+)?/gi, "").trim());
+    if (isSeriesMode) {
       embedUrls.push({ name: "AutoEmbed Server (Fast)", url: `https://autoembed.me/tv?title=${cleanTitle}&season=${season}&episode=${episode}` });
       embedUrls.push({ name: "VidSrc Cloud (Fast)", url: `https://vidsrc.pm/embed/tv?title=${cleanTitle}&season=${season}&episode=${episode}` });
       embedUrls.push({ name: "AutoEmbed Mirror (Backup)", url: `https://autoembed.co/tv?title=${cleanTitle}&season=${season}&episode=${episode}` });

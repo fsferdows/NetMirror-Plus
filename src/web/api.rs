@@ -1214,7 +1214,7 @@ pub async fn get_streams(
 
     // Fetch details to accurately inspect media_type, dubs, and title
     let details_opt = state.service.details_typed(provider_hint.unwrap_or(ProviderKind::MovieBox), &target_id).await.ok();
-    let is_series = details_opt.as_ref().map(|d| d.is_series()).unwrap_or(req_season > 0 || req_episode > 0);
+    let is_series = req_season > 0 || req_episode > 0 || details_opt.as_ref().map(|d| d.is_series()).unwrap_or(false);
     let resolved_title = params.title.clone()
         .or_else(|| fallback_title)
         .or_else(|| details_opt.as_ref().map(|d| d.title.clone()))

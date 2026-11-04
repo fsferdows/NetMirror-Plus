@@ -1133,7 +1133,9 @@
       // TV Series Episodes
       const isSeries = details.media_type === 'series' || (details.seasons && details.seasons.length > 0);
       if (isSeries && details.seasons && details.seasons.length > 0) {
-        state.currentSeason = details.seasons[0].number || 1;
+        const s0 = details.seasons[0];
+        const s0Num = parseInt(s0.number ?? s0.season_number ?? 1, 10) || 1;
+        state.currentSeason = s0Num;
         state.currentEpisode = 1;
         el.modalSeriesSection.classList.remove('hidden');
         populateSeasonSelector(details.seasons);
@@ -1151,8 +1153,8 @@
       // Play Button Handler
       el.modalPlayBtn.onclick = () => {
         closeDetailsModal();
-        const s = isSeries ? (state.currentSeason || 1) : 0;
-        const e = isSeries ? (state.currentEpisode || 1) : 0;
+        const s = isSeries ? (parseInt(state.currentSeason, 10) || 1) : 0;
+        const e = isSeries ? (parseInt(state.currentEpisode, 10) || 1) : 0;
         startPlayback(details, s, e);
       };
 
@@ -1165,20 +1167,24 @@
 
   function populateSeasonSelector(seasons) {
     el.seasonSelect.innerHTML = '';
-    seasons.forEach((season) => {
+    seasons.forEach((season, idx) => {
+      const sNum = parseInt(season.number ?? season.season_number ?? (idx + 1), 10) || (idx + 1);
+      const eps = season.episodes || [];
       const opt = document.createElement('option');
-      opt.value = season.number;
-      opt.textContent = `Season ${season.number} (${season.episodes.length} Episodes)`;
+      opt.value = sNum;
+      opt.textContent = `Season ${sNum} (${eps.length} Episodes)`;
       el.seasonSelect.appendChild(opt);
     });
 
-    state.currentSeason = seasons[0].number;
-    renderEpisodes(seasons[0].episodes);
+    const firstSeason = seasons[0];
+    const firstSNum = parseInt(firstSeason ? (firstSeason.number ?? firstSeason.season_number ?? 1) : 1, 10) || 1;
+    state.currentSeason = firstSNum;
+    renderEpisodes(firstSeason ? firstSeason.episodes : []);
 
     el.seasonSelect.onchange = (e) => {
       const sNum = parseInt(e.target.value, 10);
       state.currentSeason = sNum;
-      const found = seasons.find((s) => s.number === sNum);
+      const found = seasons.find((s, idx) => (parseInt(s.number ?? s.season_number ?? (idx + 1), 10) === sNum));
       if (found) {
         renderEpisodes(found.episodes);
       }
@@ -1186,11 +1192,12 @@
 
     el.episodeSearchInput.oninput = (e) => {
       const q = e.target.value.toLowerCase().trim();
-      const currentSeasonData = seasons.find((s) => s.number === state.currentSeason);
+      const currentSeasonData = seasons.find((s, idx) => (parseInt(s.number ?? s.season_number ?? (idx + 1), 10) === state.currentSeason));
       if (currentSeasonData) {
-        const filtered = currentSeasonData.episodes.filter(
-          (ep) => (ep.title && ep.title.toLowerCase().includes(q)) || String(ep.number).includes(q)
-        );
+        const filtered = (currentSeasonData.episodes || []).filter((ep, idx) => {
+          const epNum = parseInt(ep.number ?? ep.episode_number ?? (idx + 1), 10) || (idx + 1);
+          return (ep.title && ep.title.toLowerCase().includes(q)) || String(epNum).includes(q);
+        });
         renderEpisodes(filtered);
       }
     };
@@ -1203,15 +1210,16 @@
       return;
     }
 
-    episodes.forEach((ep) => {
+    episodes.forEach((ep, idx) => {
+      const epNum = parseInt(ep.number ?? ep.episode_number ?? (idx + 1), 10) || (idx + 1);
       const epCard = document.createElement('div');
       epCard.className = 'episode-card';
       const poster = state.currentDetails.poster_url || fallbackPoster(state.currentDetails.title);
-      const epTitle = ep.title || `Episode ${ep.number}`;
-      const epOverview = ep.overview || `Watch Season ${state.currentSeason} Episode ${ep.number}.`;
+      const epTitle = ep.title || `Episode ${epNum}`;
+      const epOverview = ep.overview || `Watch Season ${state.currentSeason} Episode ${epNum}.`;
 
       epCard.innerHTML = `
-        <div class="ep-num">${String(ep.number).padStart(2, '0')}</div>
+        <div class="ep-num">${String(epNum).padStart(2, '0')}</div>
         <div class="ep-thumb-wrap">
           <img src="${poster}" alt="${epTitle}" class="ep-thumb" />
           <div class="ep-play-icon">
@@ -1226,8 +1234,11 @@
 
       epCard.addEventListener('click', () => {
         closeDetailsModal();
-        state.currentEpisode = ep.number;
-        startPlayback(state.currentDetails, state.currentSeason, ep.number);
+        const s = parseInt(state.currentSeason, 10) || 1;
+        const e = parseInt(epNum, 10) || 1;
+        state.currentSeason = s;
+        state.currentEpisode = e;
+        startPlayback(state.currentDetails, s, e);
       });
 
       el.episodesGrid.appendChild(epCard);
@@ -1519,29 +1530,32 @@
     el.playerSpinner.classList.remove('hidden');
     el.spinnerText.textContent = 'Resolving video streams...';
 
+    const s = parseInt(season, 10) || 0;
+    const ep = parseInt(episode, 10) || 0;
+
     // Set Header Info
     el.playerMediaTitle.textContent = media.title;
-    const isSeries = media.media_type === 'series' || season > 0 || episode > 0;
-    if (isSeries && season > 0) {
-      el.playerMediaSubtitle.textContent = `Season ${season} • Episode ${episode}`;
+    const isSeries = media.media_type === 'series' || s > 0 || ep > 0;
+    if (isSeries && s > 0) {
+      el.playerMediaSubtitle.textContent = `Season ${s} • Episode ${ep || 1}`;
       el.nextEpisodeControlBtn.classList.remove('hidden');
     } else {
       el.playerMediaSubtitle.textContent = media.year || 'Movie';
       el.nextEpisodeControlBtn.classList.add('hidden');
     }
 
-    state.currentSeason = season;
-    state.currentEpisode = episode;
+    state.currentSeason = s;
+    state.currentEpisode = ep;
     state.isEmbedMode = false;
     state.currentStreamIndex = 0;
 
     // Update Browser URL so every watch stream has its own unique, shareable watch URL
-    updateWatchUrl(media.id.value, season, episode, media.title, true);
+    updateWatchUrl(media.id.value, s, ep, media.title, true);
 
     // Wire Share Stream URL button
     if (el.playerShareBtn) {
       el.playerShareBtn.onclick = () => {
-        shareMovieLink(media.id.value, media.title, '', media.poster_url || '', true, season, episode);
+        shareMovieLink(media.id.value, media.title, '', media.poster_url || '', true, s, ep);
       };
     }
 
@@ -1554,7 +1568,8 @@
     try {
       const titleParam = encodeURIComponent(media.title || '');
       const providerParam = media.id && media.id.provider ? `&provider=${media.id.provider}` : '';
-      const res = await fetch(`/api/streams/${media.id.value}?season=${season}&episode=${episode}&title=${titleParam}${providerParam}`);
+      const typeParam = isSeries ? '&type=tv' : '';
+      const res = await fetch(`/api/streams/${media.id.value}?season=${s}&episode=${ep}&title=${titleParam}${providerParam}${typeParam}`);
       if (!res.ok) throw new Error('No streams found');
       const data = await res.json();
 
@@ -1960,8 +1975,10 @@
   }
 
   function playNextEpisode() {
-    state.currentEpisode += 1;
-    startPlayback(state.currentDetails, state.currentSeason, state.currentEpisode);
+    const nextEp = (parseInt(state.currentEpisode, 10) || 1) + 1;
+    const curSeason = parseInt(state.currentSeason, 10) || 1;
+    state.currentEpisode = nextEp;
+    startPlayback(state.currentDetails, curSeason, nextEp);
   }
 
   // ==========================================================================

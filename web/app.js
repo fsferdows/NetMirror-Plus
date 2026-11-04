@@ -589,7 +589,17 @@
         if (state.isEmbedMode) {
           // If in active playback, protect tab from unauthorized background navigation
           e.preventDefault();
-          e.returnValue = '';
+          e.returnValue = 'Active video playback in progress.';
+          return e.returnValue;
+        }
+      });
+
+      // Auto-refocus: if a rogue popup steals focus, pull focus back to the player immediately
+      window.addEventListener('blur', () => {
+        if (state.isEmbedMode) {
+          setTimeout(() => {
+            window.focus();
+          }, 150);
         }
       });
     } catch (_) {}
@@ -1659,9 +1669,8 @@
       el.playerControls.classList.add('hidden');
     }
     if (el.embedPlayerIframe) {
-      // Re-enforce sandbox with safe capabilities (scripts, same-origin, forms, presentation)
-      // Omit allow-top-navigation and allow-popups so rogue ad redirects and popups are blocked at browser engine level
-      el.embedPlayerIframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation');
+      // Remove sandbox attribute so video players load smoothly without "Playback blocked" errors
+      el.embedPlayerIframe.removeAttribute('sandbox');
       el.embedPlayerIframe.setAttribute('referrerpolicy', 'no-referrer');
       el.embedPlayerIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
       el.embedPlayerIframe.src = url;
@@ -2834,7 +2843,7 @@
     }
 
     if (el.embedPlayerIframe) {
-      el.embedPlayerIframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation');
+      el.embedPlayerIframe.removeAttribute('sandbox');
       el.embedPlayerIframe.setAttribute('referrerpolicy', 'no-referrer');
       el.embedPlayerIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
       el.embedPlayerIframe.src = streamUrl;

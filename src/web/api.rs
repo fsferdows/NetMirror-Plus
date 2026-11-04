@@ -1151,10 +1151,6 @@ pub async fn get_streams(
         let mut embed_urls = Vec::new();
         if is_series {
             embed_urls.push(EmbedSource {
-                name: "VidLink Cloud (Ad-Free)".to_string(),
-                url: format!("https://vidlink.pro/tv/{id}/{s}/{ep}?primaryColor=e50914"),
-            });
-            embed_urls.push(EmbedSource {
                 name: "AutoEmbed Server (Fast)".to_string(),
                 url: format!("https://autoembed.me/tv/imdb/{id}-{s}-{ep}"),
             });
@@ -1163,18 +1159,18 @@ pub async fn get_streams(
                 url: format!("https://vidsrc.pm/embed/tv/{id}/{s}/{ep}"),
             });
             embed_urls.push(EmbedSource {
-                name: "VidSrc Net (HD)".to_string(),
-                url: format!("https://vidsrc.net/embed/tv/{id}/{s}/{ep}"),
+                name: "VidSrc Server (HD)".to_string(),
+                url: format!("https://vidsrc.me/embed/tv?imdb={id}&season={s}&episode={ep}"),
             });
             embed_urls.push(EmbedSource {
-                name: "VidSrc Pro (Backup)".to_string(),
-                url: format!("https://vidsrc.to/embed/tv/{id}/{s}/{ep}"),
+                name: "SmashyStream (Cinema)".to_string(),
+                url: format!("https://embed.smashystream.com/playere.php?imdb={id}&season={s}&episode={ep}"),
+            });
+            embed_urls.push(EmbedSource {
+                name: "AutoEmbed Mirror (Backup)".to_string(),
+                url: format!("https://autoembed.co/tv/imdb/{id}-{s}-{ep}"),
             });
         } else {
-            embed_urls.push(EmbedSource {
-                name: "VidLink Cloud (Ad-Free)".to_string(),
-                url: format!("https://vidlink.pro/movie/{id}?primaryColor=e50914"),
-            });
             embed_urls.push(EmbedSource {
                 name: "AutoEmbed Server (Fast)".to_string(),
                 url: format!("https://autoembed.me/movie/imdb/{id}"),
@@ -1184,12 +1180,16 @@ pub async fn get_streams(
                 url: format!("https://vidsrc.pm/embed/movie/{id}"),
             });
             embed_urls.push(EmbedSource {
-                name: "VidSrc Net (HD)".to_string(),
-                url: format!("https://vidsrc.net/embed/movie/{id}"),
+                name: "VidSrc Server (HD)".to_string(),
+                url: format!("https://vidsrc.me/embed/movie?imdb={id}"),
             });
             embed_urls.push(EmbedSource {
-                name: "VidSrc Pro (Backup)".to_string(),
-                url: format!("https://vidsrc.to/embed/movie/{id}"),
+                name: "SmashyStream (Cinema)".to_string(),
+                url: format!("https://embed.smashystream.com/playere.php?imdb={id}"),
+            });
+            embed_urls.push(EmbedSource {
+                name: "AutoEmbed Mirror (Backup)".to_string(),
+                url: format!("https://autoembed.co/movie/imdb/{id}"),
             });
         }
         return Ok(Json(StreamsResponse {
@@ -1392,10 +1392,6 @@ pub async fn get_streams(
     if let Some(imdb_id) = imdb_id_opt {
         if is_series {
             embed_urls.push(EmbedSource {
-                name: "VidLink Cloud (Ad-Free)".to_string(),
-                url: format!("https://vidlink.pro/tv/{imdb_id}/{season}/{episode}?primaryColor=e50914"),
-            });
-            embed_urls.push(EmbedSource {
                 name: "AutoEmbed Server (Fast)".to_string(),
                 url: format!("https://autoembed.me/tv/imdb/{imdb_id}-{season}-{episode}"),
             });
@@ -1404,18 +1400,18 @@ pub async fn get_streams(
                 url: format!("https://vidsrc.pm/embed/tv/{imdb_id}/{season}/{episode}"),
             });
             embed_urls.push(EmbedSource {
-                name: "VidSrc Net (HD)".to_string(),
-                url: format!("https://vidsrc.net/embed/tv/{imdb_id}/{season}/{episode}"),
+                name: "VidSrc Server (HD)".to_string(),
+                url: format!("https://vidsrc.me/embed/tv?imdb={imdb_id}&season={season}&episode={episode}"),
             });
             embed_urls.push(EmbedSource {
-                name: "VidSrc Pro (Backup)".to_string(),
-                url: format!("https://vidsrc.to/embed/tv/{imdb_id}/{season}/{episode}"),
+                name: "SmashyStream (Cinema)".to_string(),
+                url: format!("https://embed.smashystream.com/playere.php?imdb={imdb_id}&season={season}&episode={episode}"),
+            });
+            embed_urls.push(EmbedSource {
+                name: "AutoEmbed Mirror (Backup)".to_string(),
+                url: format!("https://autoembed.co/tv/imdb/{imdb_id}-{season}-{episode}"),
             });
         } else {
-            embed_urls.push(EmbedSource {
-                name: "VidLink Cloud (Ad-Free)".to_string(),
-                url: format!("https://vidlink.pro/movie/{imdb_id}?primaryColor=e50914"),
-            });
             embed_urls.push(EmbedSource {
                 name: "AutoEmbed Server (Fast)".to_string(),
                 url: format!("https://autoembed.me/movie/imdb/{imdb_id}"),
@@ -1425,12 +1421,16 @@ pub async fn get_streams(
                 url: format!("https://vidsrc.pm/embed/movie/{imdb_id}"),
             });
             embed_urls.push(EmbedSource {
-                name: "VidSrc Net (HD)".to_string(),
-                url: format!("https://vidsrc.net/embed/movie/{imdb_id}"),
+                name: "VidSrc Server (HD)".to_string(),
+                url: format!("https://vidsrc.me/embed/movie?imdb={imdb_id}"),
             });
             embed_urls.push(EmbedSource {
-                name: "VidSrc Pro (Backup)".to_string(),
-                url: format!("https://vidsrc.to/embed/movie/{imdb_id}"),
+                name: "SmashyStream (Cinema)".to_string(),
+                url: format!("https://embed.smashystream.com/playere.php?imdb={imdb_id}"),
+            });
+            embed_urls.push(EmbedSource {
+                name: "AutoEmbed Mirror (Backup)".to_string(),
+                url: format!("https://autoembed.co/movie/imdb/{imdb_id}"),
             });
         }
     } else {
@@ -1444,8 +1444,8 @@ pub async fn get_streams(
                 url: format!("https://vidsrc.pm/embed/tv?title={encoded_title}&season={season}&episode={episode}"),
             });
             embed_urls.push(EmbedSource {
-                name: "VidSrc Net (HD)".to_string(),
-                url: format!("https://vidsrc.net/embed/tv?title={encoded_title}&season={season}&episode={episode}"),
+                name: "AutoEmbed Mirror (Backup)".to_string(),
+                url: format!("https://autoembed.co/tv?title={encoded_title}&season={season}&episode={episode}"),
             });
         } else {
             embed_urls.push(EmbedSource {
@@ -1457,8 +1457,8 @@ pub async fn get_streams(
                 url: format!("https://vidsrc.pm/embed/movie?title={encoded_title}"),
             });
             embed_urls.push(EmbedSource {
-                name: "VidSrc Net (HD)".to_string(),
-                url: format!("https://vidsrc.net/embed/movie?title={encoded_title}"),
+                name: "AutoEmbed Mirror (Backup)".to_string(),
+                url: format!("https://autoembed.co/movie?title={encoded_title}"),
             });
         }
     }

@@ -1018,6 +1018,26 @@
     const platform = urlParams.get('platform') || hashParams.get('platform');
 
     if (watchId) {
+      let s = season;
+      let ep = episode;
+      try {
+        const titleParam = title ? `&title=${encodeURIComponent(title)}` : '';
+        const res = await fetch(`/api/details/${watchId}?${titleParam}`);
+        if (res.ok) {
+          const details = await res.json();
+          state.currentDetails = details;
+          const isSeries = details.media_type === 'series' || (details.seasons && details.seasons.length > 0) || s > 0 || ep > 0;
+          if (isSeries) {
+            if (s <= 0) s = 1;
+            if (ep <= 0) ep = 1;
+          }
+          startPlayback(details, s, ep);
+          return;
+        }
+      } catch (e) {
+        console.warn('Deep link details fetch error:', e);
+      }
+
       const mediaItem = {
         id: { provider: 'moviebox', value: watchId },
         title: decodeURIComponent(title) || 'Movie',
@@ -1543,14 +1563,16 @@
     el.playerSpinner.classList.remove('hidden');
     el.spinnerText.textContent = 'Resolving video streams...';
 
-    const s = parseInt(season, 10) || 0;
-    const ep = parseInt(episode, 10) || 0;
+    let s = parseInt(season, 10) || 0;
+    let ep = parseInt(episode, 10) || 0;
 
     // Set Header Info
     el.playerMediaTitle.textContent = media.title;
-    const isSeries = media.media_type === 'series' || s > 0 || ep > 0 || (state.currentDetails && state.currentDetails.media_type === 'series');
-    if (isSeries && s > 0) {
-      el.playerMediaSubtitle.textContent = `Season ${s} • Episode ${ep || 1}`;
+    const isSeries = media.media_type === 'series' || s > 0 || ep > 0 || (state.currentDetails && state.currentDetails.media_type === 'series') || (state.currentDetails && state.currentDetails.seasons && state.currentDetails.seasons.length > 0);
+    if (isSeries) {
+      if (s <= 0) s = 1;
+      if (ep <= 0) ep = 1;
+      el.playerMediaSubtitle.textContent = `Season ${s} • Episode ${ep}`;
       el.nextEpisodeControlBtn.classList.remove('hidden');
     } else {
       el.playerMediaSubtitle.textContent = media.year || 'Movie';

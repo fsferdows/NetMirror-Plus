@@ -1954,7 +1954,7 @@
     if (el.currentServerLabel) {
       el.currentServerLabel.textContent = serverName;
     }
-    showToast(`Streaming via ${serverName} (AdShield Protected)`);
+    showToast(`Streaming via ${serverName} • Switch server pill if unavailable`);
     populateServerMenu(state.currentStreams, state.embedUrls);
   }
 
@@ -2003,20 +2003,7 @@
           const isActive = state.isEmbedMode && (state.currentEmbedServerName === emb.name || (el.embedPlayerIframe && el.embedPlayerIframe.src === emb.url));
           pill.className = `server-pill-btn ${isActive ? 'active' : ''}`;
 
-          let displayName = emb.name || `Server ${idx + 1}`;
-          if (idx === 0) {
-            displayName = 'Multi-Lang Server';
-          } else if (displayName.includes('VidSrc Cloud')) {
-            displayName = 'Server 2';
-          } else if (displayName.includes('VidSrc Server')) {
-            displayName = 'Server 3';
-          } else if (displayName.includes('SmashyStream')) {
-            displayName = 'Server 4';
-          } else if (displayName.includes('Mirror') || displayName.includes('Backup')) {
-            displayName = 'Server 5';
-          } else if (displayName.includes('AutoEmbed')) {
-            displayName = 'Server 1';
-          }
+          const displayName = idx === 0 ? 'Multi-Lang Server' : `Server ${idx}`;
 
           if (isActive) {
             pill.innerHTML = `<span class="live-signal-bars"><span class="bar b1"></span><span class="bar b2"></span><span class="bar b3"></span></span> ${displayName}`;

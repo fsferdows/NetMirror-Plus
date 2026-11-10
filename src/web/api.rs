@@ -1071,6 +1071,8 @@ pub struct StreamsQuery {
     pub episode: Option<usize>,
     pub title: Option<String>,
     pub provider: Option<String>,
+    #[serde(rename = "type")]
+    pub media_type: Option<String>,
 }
 
 #[derive(Serialize, Clone, Debug)]
@@ -1152,6 +1154,178 @@ async fn resolve_imdb_id(title: &str, year_hint: Option<&str>) -> Option<String>
         .map(|s| s.to_string())
 }
 
+async fn resolve_cinemeta_meta(imdb_id: &str, prefer_series: bool) -> (Option<String>, bool) {
+    if !imdb_id.starts_with("tt") {
+        return (None, prefer_series);
+    }
+    let Ok(client) = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_millis(2200))
+        .build()
+    else {
+        return (None, prefer_series);
+    };
+
+    let order = if prefer_series {
+        ["series", "movie"]
+    } else {
+        ["movie", "series"]
+    };
+    let mut fallback: Option<(Option<String>, bool)> = None;
+
+    for kind in order {
+        let url = format!("https://v3-cinemeta.strem.io/meta/{kind}/{imdb_id}.json");
+        let Ok(res) = client
+            .get(&url)
+            .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)")
+            .send()
+            .await
+        else {
+            continue;
+        };
+        if !res.status().is_success() {
+            continue;
+        }
+        let Ok(json) = res.json::<serde_json::Value>().await else {
+            continue;
+        };
+        let Some(meta) = json.get("meta") else {
+            continue;
+        };
+        let tmdb_id = meta.get("moviedb_id").and_then(|v| {
+            v.as_i64()
+                .map(|n| n.to_string())
+                .or_else(|| v.as_str().map(|s| s.to_string()))
+        });
+        let has_videos = meta
+            .get("videos")
+            .and_then(|v| v.as_array())
+            .map(|arr| !arr.is_empty())
+            .unwrap_or(false);
+        let is_series = meta
+            .get("type")
+            .and_then(|v| v.as_str())
+            .map(|t| t == "series")
+            .unwrap_or(false)
+            || has_videos;
+
+        if tmdb_id.is_some() || has_videos {
+            return (tmdb_id, is_series);
+        }
+        if fallback.is_none() {
+            fallback = Some((tmdb_id, is_series));
+        }
+    }
+
+    fallback.unwrap_or((None, prefer_series))
+}
+
+fn build_embed_urls(
+    imdb_id: Option<&str>,
+    tmdb_id: Option<&str>,
+    clean_title: &str,
+    is_series: bool,
+    season: usize,
+    episode: usize,
+) -> Vec<EmbedSource> {
+    let s = season.max(1);
+    let ep = episode.max(1);
+    let mut embed_urls = Vec::new();
+
+    if let Some(tid) = tmdb_id {
+        embed_urls.push(EmbedSource {
+            name: "VidLink Cloud (4K)".to_string(),
+            url: if is_series {
+                format!("https://vidlink.pro/tv/{tid}/{s}/{ep}")
+            } else {
+                format!("https://vidlink.pro/movie/{tid}")
+            },
+        });
+    }
+
+    if let Some(iid) = imdb_id {
+        embed_urls.push(EmbedSource {
+            name: "2Embed Cloud (HD)".to_string(),
+            url: if is_series {
+                format!("https://www.2embed.cc/embedtv/{iid}&s={s}&e={ep}")
+            } else {
+                format!("https://www.2embed.cc/embed/{iid}")
+            },
+        });
+    }
+
+    if let Some(tid) = tmdb_id {
+        embed_urls.push(EmbedSource {
+            name: "AutoEmbed Server (Fast)".to_string(),
+            url: if is_series {
+                format!("https://player.autoembed.me/embed/tv/{tid}/{s}/{ep}/")
+            } else {
+                format!("https://player.autoembed.me/embed/movie/{tid}/")
+            },
+        });
+    } else if let Some(iid) = imdb_id {
+        embed_urls.push(EmbedSource {
+            name: "AutoEmbed Server (Fast)".to_string(),
+            url: if is_series {
+                format!("https://autoembed.me/tv/imdb/{iid}-{s}-{ep}")
+            } else {
+                format!("https://autoembed.me/movie/imdb/{iid}")
+            },
+        });
+    }
+
+    if let Some(vidsrc_id) = imdb_id.or(tmdb_id) {
+        embed_urls.push(EmbedSource {
+            name: "VidSrc.to (HD)".to_string(),
+            url: if is_series {
+                format!("https://vidsrc.to/embed/tv/{vidsrc_id}/{s}/{ep}")
+            } else {
+                format!("https://vidsrc.to/embed/movie/{vidsrc_id}")
+            },
+        });
+    }
+
+    if let Some(iid) = imdb_id {
+        embed_urls.push(EmbedSource {
+            name: "SmashyStream (Cinema)".to_string(),
+            url: if is_series {
+                format!("https://embed.smashystream.com/playere.php?imdb={iid}&season={s}&episode={ep}")
+            } else {
+                format!("https://embed.smashystream.com/playere.php?imdb={iid}")
+            },
+        });
+        embed_urls.push(EmbedSource {
+            name: "VidSrc Cloud (Backup)".to_string(),
+            url: if is_series {
+                format!("https://vidsrc.pm/embed/tv/{iid}/{s}/{ep}")
+            } else {
+                format!("https://vidsrc.pm/embed/movie/{iid}")
+            },
+        });
+    } else if tmdb_id.is_none() {
+        let encoded_title =
+            percent_encoding::utf8_percent_encode(clean_title, percent_encoding::NON_ALPHANUMERIC)
+                .to_string();
+        embed_urls.push(EmbedSource {
+            name: "AutoEmbed Server (Fast)".to_string(),
+            url: if is_series {
+                format!("https://autoembed.me/tv?title={encoded_title}&season={s}&episode={ep}")
+            } else {
+                format!("https://autoembed.me/movie?title={encoded_title}")
+            },
+        });
+        embed_urls.push(EmbedSource {
+            name: "VidSrc Cloud (Backup)".to_string(),
+            url: if is_series {
+                format!("https://vidsrc.pm/embed/tv?title={encoded_title}&season={s}&episode={ep}")
+            } else {
+                format!("https://vidsrc.pm/embed/movie?title={encoded_title}")
+            },
+        });
+    }
+
+    embed_urls
+}
+
 pub async fn get_streams(
     State(state): State<AppState>,
     Path(id): Path<String>,
@@ -1159,57 +1333,23 @@ pub async fn get_streams(
 ) -> Result<Json<StreamsResponse>, (StatusCode, String)> {
     let req_season = params.season.unwrap_or(0);
     let req_episode = params.episode.unwrap_or(0);
+    let type_is_tv = params.media_type.as_deref() == Some("tv");
     let provider_hint = params.provider.as_deref().and_then(ProviderKind::parse);
 
-    // If ID is an IMDb ID directly (starts with "tt"), generate instant verified embed mirrors!
+    // If ID is an IMDb ID directly (starts with "tt"), resolve TMDB ID via Cinemeta and generate verified embed mirrors!
     if id.starts_with("tt") {
-        let is_series = req_season > 0 || req_episode > 0;
-        let s = req_season.max(1);
-        let ep = req_episode.max(1);
-        let mut embed_urls = Vec::new();
-        if is_series {
-            embed_urls.push(EmbedSource {
-                name: "AutoEmbed Server (Fast)".to_string(),
-                url: format!("https://autoembed.me/tv/imdb/{id}-{s}-{ep}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "VidSrc Cloud (Ultra)".to_string(),
-                url: format!("https://vidsrc.pm/embed/tv/{id}/{s}/{ep}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "VidSrc Server (HD)".to_string(),
-                url: format!("https://vidsrc.me/embed/tv?imdb={id}&season={s}&episode={ep}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "SmashyStream (Cinema)".to_string(),
-                url: format!("https://embed.smashystream.com/playere.php?imdb={id}&season={s}&episode={ep}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "AutoEmbed Mirror (Backup)".to_string(),
-                url: format!("https://autoembed.co/tv/imdb/{id}-{s}-{ep}"),
-            });
-        } else {
-            embed_urls.push(EmbedSource {
-                name: "AutoEmbed Server (Fast)".to_string(),
-                url: format!("https://autoembed.me/movie/imdb/{id}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "VidSrc Cloud (Ultra)".to_string(),
-                url: format!("https://vidsrc.pm/embed/movie/{id}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "VidSrc Server (HD)".to_string(),
-                url: format!("https://vidsrc.me/embed/movie?imdb={id}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "SmashyStream (Cinema)".to_string(),
-                url: format!("https://embed.smashystream.com/playere.php?imdb={id}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "AutoEmbed Mirror (Backup)".to_string(),
-                url: format!("https://autoembed.co/movie/imdb/{id}"),
-            });
-        }
+        let prefer_series = type_is_tv || req_season > 0 || req_episode > 0;
+        let (tmdb_id_opt, cm_is_series) = resolve_cinemeta_meta(&id, prefer_series).await;
+        let is_series = prefer_series || cm_is_series;
+        let clean = params.title.as_deref().unwrap_or("Movie");
+        let embed_urls = build_embed_urls(
+            Some(&id),
+            tmdb_id_opt.as_deref(),
+            clean,
+            is_series,
+            req_season.max(1),
+            req_episode.max(1),
+        );
         return Ok(Json(StreamsResponse {
             releases: vec![],
             streams: vec![],
@@ -1219,20 +1359,25 @@ pub async fn get_streams(
         }));
     }
 
-    // If ID is a NetMirror platform ID (e.g. "100985" or "4807"), resolve to subjectid & title
-    let (target_id, fallback_title) = if id.len() <= 10 && id.chars().all(|c| c.is_ascii_digit()) {
-        if let Some((subjectid, title, _, _, _)) = resolve_netmirror_subject(&id).await {
-            (subjectid, title)
+    // If ID is a NetMirror platform ID (e.g. "100985" or "4807"), resolve to subjectid, title, and TMDB ID
+    let (target_id, fallback_title, netmirror_tm_id, netmirror_is_tv) =
+        if id.len() <= 10 && id.chars().all(|c| c.is_ascii_digit()) {
+            if let Some((subjectid, title, tm_id, _, is_tv)) = resolve_netmirror_subject(&id).await {
+                (subjectid, title, tm_id, is_tv)
+            } else {
+                (id.clone(), None, None, false)
+            }
         } else {
-            (id.clone(), None)
-        }
-    } else {
-        (id.clone(), None)
-    };
+            (id.clone(), None, None, false)
+        };
 
     // Fetch details to accurately inspect media_type, dubs, and title
     let details_opt = state.service.details_typed(provider_hint.unwrap_or(ProviderKind::MovieBox), &target_id).await.ok();
-    let is_series = req_season > 0 || req_episode > 0 || details_opt.as_ref().map(|d| d.is_series()).unwrap_or(false);
+    let is_series = type_is_tv
+        || netmirror_is_tv
+        || req_season > 0
+        || req_episode > 0
+        || details_opt.as_ref().map(|d| d.is_series()).unwrap_or(false);
     let resolved_title = params.title.clone()
         .or_else(|| fallback_title)
         .or_else(|| details_opt.as_ref().map(|d| d.title.clone()))
@@ -1390,7 +1535,7 @@ pub async fn get_streams(
         }
     }
 
-    // 5. Universal Cloud Embed Players (backed by IMDb ID lookup; NO broken watch21.shop)
+    // 5. Universal Cloud Embed Players (backed by IMDb + TMDB lookup)
     let imdb_id_opt = if id.starts_with("tt") {
         Some(id.clone())
     } else {
@@ -1398,88 +1543,28 @@ pub async fn get_streams(
         resolve_imdb_id(&resolved_title, year_hint).await
     };
 
+    let fallback_tm_id = netmirror_tm_id.filter(|s| !s.trim().is_empty());
+    let cm_tmdb = if let Some(iid) = imdb_id_opt.as_deref() {
+        resolve_cinemeta_meta(iid, is_series).await.0
+    } else {
+        None
+    };
+    let tmdb_id_opt = cm_tmdb.or(fallback_tm_id);
+
     let clean_title = if !resolved_title.is_empty() {
         clean_moviebox_title(&resolved_title)
     } else {
         "Movie"
     };
-    let encoded_title = percent_encoding::utf8_percent_encode(clean_title, percent_encoding::NON_ALPHANUMERIC).to_string();
 
-    let mut embed_urls = Vec::new();
-
-    if let Some(imdb_id) = imdb_id_opt {
-        if is_series {
-            embed_urls.push(EmbedSource {
-                name: "AutoEmbed Server (Fast)".to_string(),
-                url: format!("https://autoembed.me/tv/imdb/{imdb_id}-{season}-{episode}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "VidSrc Cloud (Ultra)".to_string(),
-                url: format!("https://vidsrc.pm/embed/tv/{imdb_id}/{season}/{episode}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "VidSrc Server (HD)".to_string(),
-                url: format!("https://vidsrc.me/embed/tv?imdb={imdb_id}&season={season}&episode={episode}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "SmashyStream (Cinema)".to_string(),
-                url: format!("https://embed.smashystream.com/playere.php?imdb={imdb_id}&season={season}&episode={episode}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "AutoEmbed Mirror (Backup)".to_string(),
-                url: format!("https://autoembed.co/tv/imdb/{imdb_id}-{season}-{episode}"),
-            });
-        } else {
-            embed_urls.push(EmbedSource {
-                name: "AutoEmbed Server (Fast)".to_string(),
-                url: format!("https://autoembed.me/movie/imdb/{imdb_id}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "VidSrc Cloud (Ultra)".to_string(),
-                url: format!("https://vidsrc.pm/embed/movie/{imdb_id}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "VidSrc Server (HD)".to_string(),
-                url: format!("https://vidsrc.me/embed/movie?imdb={imdb_id}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "SmashyStream (Cinema)".to_string(),
-                url: format!("https://embed.smashystream.com/playere.php?imdb={imdb_id}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "AutoEmbed Mirror (Backup)".to_string(),
-                url: format!("https://autoembed.co/movie/imdb/{imdb_id}"),
-            });
-        }
-    } else {
-        if is_series {
-            embed_urls.push(EmbedSource {
-                name: "AutoEmbed Server (Fast)".to_string(),
-                url: format!("https://autoembed.me/tv?title={encoded_title}&season={season}&episode={episode}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "VidSrc Cloud (Fast)".to_string(),
-                url: format!("https://vidsrc.pm/embed/tv?title={encoded_title}&season={season}&episode={episode}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "AutoEmbed Mirror (Backup)".to_string(),
-                url: format!("https://autoembed.co/tv?title={encoded_title}&season={season}&episode={episode}"),
-            });
-        } else {
-            embed_urls.push(EmbedSource {
-                name: "AutoEmbed Server (Fast)".to_string(),
-                url: format!("https://autoembed.me/movie?title={encoded_title}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "VidSrc Cloud (Fast)".to_string(),
-                url: format!("https://vidsrc.pm/embed/movie?title={encoded_title}"),
-            });
-            embed_urls.push(EmbedSource {
-                name: "AutoEmbed Mirror (Backup)".to_string(),
-                url: format!("https://autoembed.co/movie?title={encoded_title}"),
-            });
-        }
-    }
+    let embed_urls = build_embed_urls(
+        imdb_id_opt.as_deref(),
+        tmdb_id_opt.as_deref(),
+        clean_title,
+        is_series,
+        season,
+        episode,
+    );
 
     let default_stream_url = streams.first().map(|s| s.proxy_url.clone());
 

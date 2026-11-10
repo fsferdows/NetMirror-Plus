@@ -361,6 +361,146 @@ async function resolveImdbId(title, yearHint, preferSeries = false) {
   }
 }
 
+async function resolveCinemetaMeta(imdbId, preferSeries = false) {
+  if (!imdbId || !imdbId.startsWith("tt")) return null;
+  const order = preferSeries ? ["series", "movie"] : ["movie", "series"];
+  let fallback = null;
+  for (const kind of order) {
+    try {
+      const res = await fetch(`https://v3-cinemeta.strem.io/meta/${kind}/${imdbId}.json`, {
+        headers: { "User-Agent": USER_AGENT },
+        signal: AbortSignal.timeout(2200),
+      });
+      if (!res.ok) continue;
+      const json = await res.json();
+      const meta = json?.meta;
+      if (!meta) continue;
+      const tmdbId = meta.moviedb_id ? String(meta.moviedb_id) : null;
+      const videos = Array.isArray(meta.videos) ? meta.videos : [];
+      const parsed = {
+        tmdbId,
+        isSeries: meta.type === "series" || videos.length > 0,
+        videos,
+        name: meta.name || null,
+      };
+      if (tmdbId || videos.length > 0) {
+        return parsed;
+      }
+      if (!fallback) fallback = parsed;
+    } catch {}
+  }
+  return fallback;
+}
+
+function buildSeasonsFromVideos(videos) {
+  if (!Array.isArray(videos) || videos.length === 0) return [];
+  const bySeason = new Map();
+  for (const v of videos) {
+    const sNum = parseInt(v?.season || 0, 10);
+    const eNum = parseInt(v?.episode || v?.number || 0, 10);
+    if (sNum <= 0 || eNum <= 0) continue;
+    if (!bySeason.has(sNum)) bySeason.set(sNum, []);
+    bySeason.get(sNum).push({
+      id: `${sNum}-${eNum}`,
+      number: eNum,
+      episode_number: eNum,
+      title: v.title || v.name || `Episode ${eNum}`,
+      air_date: v.released ? String(v.released).slice(0, 10) : null,
+      duration: null,
+    });
+  }
+  return Array.from(bySeason.keys())
+    .sort((a, b) => a - b)
+    .map(sNum => ({
+      number: sNum,
+      season_number: sNum,
+      episodes: bySeason.get(sNum).sort((a, b) => a.number - b.number),
+    }));
+}
+
+function buildEmbedUrls({ imdbId, tmdbId, title, id, isSeries, season, episode }) {
+  const s = season > 0 ? season : 1;
+  const ep = episode > 0 ? episode : 1;
+  const embedUrls = [];
+
+  if (tmdbId) {
+    embedUrls.push({
+      name: "VidLink Cloud (4K)",
+      url: isSeries
+        ? `https://vidlink.pro/tv/${tmdbId}/${s}/${ep}`
+        : `https://vidlink.pro/movie/${tmdbId}`,
+    });
+  }
+
+  if (imdbId) {
+    embedUrls.push({
+      name: "2Embed Cloud (HD)",
+      url: isSeries
+        ? `https://www.2embed.cc/embedtv/${imdbId}&s=${s}&e=${ep}`
+        : `https://www.2embed.cc/embed/${imdbId}`,
+    });
+  }
+
+  if (tmdbId) {
+    embedUrls.push({
+      name: "AutoEmbed Server (Fast)",
+      url: isSeries
+        ? `https://player.autoembed.me/embed/tv/${tmdbId}/${s}/${ep}/`
+        : `https://player.autoembed.me/embed/movie/${tmdbId}/`,
+    });
+  } else if (imdbId) {
+    embedUrls.push({
+      name: "AutoEmbed Server (Fast)",
+      url: isSeries
+        ? `https://autoembed.me/tv/imdb/${imdbId}-${s}-${ep}`
+        : `https://autoembed.me/movie/imdb/${imdbId}`,
+    });
+  }
+
+  if (imdbId || tmdbId) {
+    const vidsrcId = imdbId || tmdbId;
+    embedUrls.push({
+      name: "VidSrc.to (HD)",
+      url: isSeries
+        ? `https://vidsrc.to/embed/tv/${vidsrcId}/${s}/${ep}`
+        : `https://vidsrc.to/embed/movie/${vidsrcId}`,
+    });
+  }
+
+  if (imdbId) {
+    embedUrls.push({
+      name: "SmashyStream (Cinema)",
+      url: isSeries
+        ? `https://embed.smashystream.com/playere.php?imdb=${imdbId}&season=${s}&episode=${ep}`
+        : `https://embed.smashystream.com/playere.php?imdb=${imdbId}`,
+    });
+    embedUrls.push({
+      name: "VidSrc Cloud (Backup)",
+      url: isSeries
+        ? `https://vidsrc.pm/embed/tv/${imdbId}/${s}/${ep}`
+        : `https://vidsrc.pm/embed/movie/${imdbId}`,
+    });
+  } else if (!tmdbId) {
+    const cleanTitleStr = encodeURIComponent(
+      (title || id || "").replace(/\[.*?\]|\(.*?\)|S\d+(-S\d+)?/gi, "").trim()
+    );
+    embedUrls.push({
+      name: "AutoEmbed Server (Fast)",
+      url: isSeries
+        ? `https://autoembed.me/tv?title=${cleanTitleStr}&season=${s}&episode=${ep}`
+        : `https://autoembed.me/movie?title=${cleanTitleStr}`,
+    });
+    embedUrls.push({
+      name: "VidSrc Cloud (Backup)",
+      url: isSeries
+        ? `https://vidsrc.pm/embed/tv?title=${cleanTitleStr}&season=${s}&episode=${ep}`
+        : `https://vidsrc.pm/embed/movie?title=${cleanTitleStr}`,
+    });
+  }
+
+  return embedUrls;
+}
+
 let sportsCache = null;
 let sportsCacheTime = 0;
 
@@ -1487,7 +1627,9 @@ async function handleDetails(id, params = {}) {
           if (tvMazeData && tvMazeData.seasons && tvMazeData.seasons.length > 0) {
             seasons = tvMazeData.seasons;
           } else {
-            seasons = buildDefaultSeasons(isMiniSeries ? 1 : 3, 10);
+            const cmMeta = await resolveCinemetaMeta(id, true);
+            const cmSeasons = cmMeta ? buildSeasonsFromVideos(cmMeta.videos) : [];
+            seasons = cmSeasons.length > 0 ? cmSeasons : buildDefaultSeasons(isMiniSeries ? 1 : 3, 10);
           }
         }
 
@@ -1650,9 +1792,10 @@ async function handleStreams(id, params) {
   let isSeries = params.type === "tv" || reqSeason > 0 || reqEpisode > 0 || /\bS\d+/i.test(title);
 
   let imdbId = id.startsWith("tt") ? id : null;
+  let tmdbId = null;
 
   if (!imdbId) {
-    // Fetch title & real media_type from Moviebox
+    // Fetch title, real media_type, and TMDB ID (tm_id) from Moviebox
     const checkTypes = isSeries ? ["tv", "movie"] : ["movie", "tv"];
     for (const mtype of checkTypes) {
       try {
@@ -1666,6 +1809,9 @@ async function handleStreams(id, params) {
             if (first.media_type === "tv" || first.media_type === "series" || hasValidSeasons) {
               isSeries = true;
             }
+            if (first.tm_id) {
+              tmdbId = String(first.tm_id).trim() || null;
+            }
             if (first.release_date) {
               yearHint = extractYear(first.release_date);
             }
@@ -1677,38 +1823,18 @@ async function handleStreams(id, params) {
     imdbId = await resolveImdbId(title, yearHint, isSeries);
   }
 
+  if (imdbId) {
+    const cmMeta = await resolveCinemetaMeta(imdbId, isSeries);
+    if (cmMeta) {
+      if (cmMeta.tmdbId) tmdbId = cmMeta.tmdbId;
+      if (!isSeries && cmMeta.isSeries) isSeries = true;
+    }
+  }
+
   const season = reqSeason > 0 ? reqSeason : 1;
   const episode = reqEpisode > 0 ? reqEpisode : 1;
   const isSeriesMode = isSeries || reqSeason > 0 || reqEpisode > 0;
-
-  const embedUrls = [];
-
-  if (imdbId) {
-    if (isSeriesMode) {
-      embedUrls.push({ name: "AutoEmbed Server (Fast)", url: `https://autoembed.me/tv/imdb/${imdbId}-${season}-${episode}` });
-      embedUrls.push({ name: "VidSrc Cloud (Ultra)", url: `https://vidsrc.pm/embed/tv/${imdbId}/${season}/${episode}` });
-      embedUrls.push({ name: "VidSrc Server (HD)", url: `https://vidsrc.me/embed/tv?imdb=${imdbId}&season=${season}&episode=${episode}` });
-      embedUrls.push({ name: "SmashyStream (Cinema)", url: `https://embed.smashystream.com/playere.php?imdb=${imdbId}&season=${season}&episode=${episode}` });
-      embedUrls.push({ name: "AutoEmbed Mirror (Backup)", url: `https://autoembed.co/tv/imdb/${imdbId}-${season}-${episode}` });
-    } else {
-      embedUrls.push({ name: "AutoEmbed Server (Fast)", url: `https://autoembed.me/movie/imdb/${imdbId}` });
-      embedUrls.push({ name: "VidSrc Cloud (Ultra)", url: `https://vidsrc.pm/embed/movie/${imdbId}` });
-      embedUrls.push({ name: "VidSrc Server (HD)", url: `https://vidsrc.me/embed/movie?imdb=${imdbId}` });
-      embedUrls.push({ name: "SmashyStream (Cinema)", url: `https://embed.smashystream.com/playere.php?imdb=${imdbId}` });
-      embedUrls.push({ name: "AutoEmbed Mirror (Backup)", url: `https://autoembed.co/movie/imdb/${imdbId}` });
-    }
-  } else {
-    const cleanTitle = encodeURIComponent((title || id).replace(/\[.*?\]|\(.*?\)|S\d+(-S\d+)?/gi, "").trim());
-    if (isSeriesMode) {
-      embedUrls.push({ name: "AutoEmbed Server (Fast)", url: `https://autoembed.me/tv?title=${cleanTitle}&season=${season}&episode=${episode}` });
-      embedUrls.push({ name: "VidSrc Cloud (Fast)", url: `https://vidsrc.pm/embed/tv?title=${cleanTitle}&season=${season}&episode=${episode}` });
-      embedUrls.push({ name: "AutoEmbed Mirror (Backup)", url: `https://autoembed.co/tv?title=${cleanTitle}&season=${season}&episode=${episode}` });
-    } else {
-      embedUrls.push({ name: "AutoEmbed Server (Fast)", url: `https://autoembed.me/movie?title=${cleanTitle}` });
-      embedUrls.push({ name: "VidSrc Cloud (Fast)", url: `https://vidsrc.pm/embed/movie?title=${cleanTitle}` });
-      embedUrls.push({ name: "AutoEmbed Mirror (Backup)", url: `https://autoembed.co/movie?title=${cleanTitle}` });
-    }
-  }
+  const embedUrls = buildEmbedUrls({ imdbId, tmdbId, title, id, isSeries: isSeriesMode, season, episode });
 
   return {
     statusCode: 200,

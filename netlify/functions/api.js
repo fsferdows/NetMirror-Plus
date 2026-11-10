@@ -331,7 +331,10 @@ function mapItem(item) {
 
 async function resolveImdbId(title, yearHint, preferSeries = false) {
   if (!title) return null;
-  const clean = title.replace(/\[.*?\]|\(.*?\)|\bS\d+(-S\d+)?\b/gi, "").trim();
+  const clean = title
+    .replace(/\[.*?\]|\(.*?\)|\bSeason\s*\d+(?:\s*-\s*\d+)?|\bS\d+(?:-S?\d+)?\b/gi, "")
+    .trim();
+  const cleanNorm = clean.toLowerCase().replace(/[^a-z0-9]/g, "");
   const term = clean.toLowerCase().replace(/[^a-z0-9]/g, "_").replace(/_+/g, "_").replace(/^_|_$/g, "");
   if (!term) return null;
 
@@ -341,21 +344,52 @@ async function resolveImdbId(title, yearHint, preferSeries = false) {
     const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
     if (!res.ok) return null;
     const json = await res.json();
-    const list = json.d || [];
-    const candidates = preferSeries
-      ? list.filter(x => x && x.id && (x.qid === "tvSeries" || x.qid === "tvMiniSeries"))
-      : list.filter(x => x && x.id && (x.qid === "movie" || x.qid === "tvMovie"));
-    const pool = candidates.length > 0 ? candidates : list.filter(x => x && x.id);
+    const list = (json.d || []).filter(x => x && typeof x.id === "string" && x.id.startsWith("tt"));
+    if (list.length === 0) return null;
 
-    if (yearHint) {
-      const y = parseInt(yearHint, 10);
-      if (y) {
-        for (const item of pool) {
-          if (item.y && Math.abs(item.y - y) <= 1 && item.id) return item.id;
+    const yearNum = yearHint ? parseInt(yearHint, 10) : 0;
+    const currentYear = new Date().getFullYear();
+
+    let bestId = list[0].id;
+    let bestScore = -1e9;
+
+    for (const item of list) {
+      let score = 0;
+      const qid = item.qid || "";
+      const isTv = qid === "tvSeries" || qid === "tvMiniSeries";
+      const isMov = qid === "movie" || qid === "tvMovie";
+
+      if (preferSeries ? isTv : isMov) score += 100;
+      else if (preferSeries ? isMov : isTv) score -= 40;
+
+      const itemNorm = (item.l || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+      if (itemNorm === cleanNorm) score += 80;
+      else if (itemNorm.includes(cleanNorm) || cleanNorm.includes(itemNorm)) score += 20;
+
+      const iy = parseInt(item.y || 0, 10);
+      if (iy > currentYear) {
+        score -= 150;
+      } else if (yearNum > 0 && iy > 0) {
+        if (iy === yearNum) {
+          score += 60;
+        } else if (!preferSeries) {
+          score += Math.abs(iy - yearNum) <= 1 ? 45 : -Math.min(30, Math.abs(iy - yearNum));
+        } else if (iy <= yearNum) {
+          score += Math.max(10, 40 - Math.min(30, yearNum - iy));
+        } else {
+          score -= 50;
         }
       }
+
+      const rk = parseInt(item.rank || 0, 10);
+      if (rk > 0) score += Math.max(0, 20 - Math.log10(rk) * 4);
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestId = item.id;
+      }
     }
-    return pool[0]?.id || list[0]?.id || null;
+    return bestId;
   } catch {
     return null;
   }
@@ -1437,6 +1471,53 @@ async function handleBrowse() {
   };
 }
 
+async function handleHomepage(params) {
+  const tab = String(params.tab || "2");
+  const page = Math.max(1, parseInt(params.page || "1", 10) || 1);
+  const apiPage = page - 1;
+  const urls = [];
+  if (tab === "1") {
+    urls.push(`https://api2.imdb3.shop/api/movies/list/filter?page=${apiPage}&type=1&items_per_page=30`);
+  } else if (tab === "3") {
+    urls.push(`https://api2.imdb3.shop/api/movies/list/filter?page=${apiPage}&type=2&items_per_page=30`);
+  } else {
+    urls.push(`https://api2.imdb3.shop/api/tranding?id=44&items_per_page=18&page=${apiPage * 2}`);
+    urls.push(`https://api2.imdb3.shop/api/tranding?id=44&items_per_page=18&page=${apiPage * 2 + 1}`);
+  }
+
+  let items = [];
+  try {
+    const pages = await Promise.all(
+      urls.map(u => fetch(u, { headers: { "User-Agent": USER_AGENT } }).then(r => (r.ok ? r.json() : {})).catch(() => ({})))
+    );
+    const seen = new Set();
+    for (const json of pages) {
+      for (const raw of json.results || []) {
+        if (!raw || !raw.id || !raw.title) continue;
+        const canon = getCanonical(raw.title);
+        if (!canon || seen.has(canon)) continue;
+        seen.add(canon);
+        const mapped = mapItem(raw);
+        if (mapped) items.push(mapped);
+      }
+    }
+  } catch {}
+
+  if (items.length === 0 && browseCache) {
+    items = tab === "1" ? (browseCache.movies || []) : tab === "3" ? (browseCache.series || []) : (browseCache.trending || []);
+  }
+
+  return {
+    statusCode: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "public, max-age=180, s-maxage=600"
+    },
+    body: JSON.stringify({ tab, page, items }),
+  };
+}
+
 async function resolveMultiLanguageTerms(rawQuery) {
   const q = (rawQuery || "").trim();
   if (!q) return [];
@@ -1891,8 +1972,11 @@ exports.handler = async (event) => {
   if (cleanPath === "/sports-stream" || cleanPath === "/sports-player") {
     return handleSportsStream(params);
   }
-  if (cleanPath === "/browse" || cleanPath === "/homepage") {
+  if (cleanPath === "/browse") {
     return handleBrowse();
+  }
+  if (cleanPath === "/homepage") {
+    return handleHomepage(params);
   }
   if (cleanPath === "/search") {
     return handleSearch(params);

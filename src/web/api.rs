@@ -1282,8 +1282,13 @@ pub struct StreamsResponse {
     pub embed_urls: Vec<EmbedSource>,
 }
 
-async fn resolve_imdb_id(title: &str, year_hint: Option<&str>) -> Option<String> {
+async fn resolve_imdb_id(title: &str, year_hint: Option<&str>, prefer_series: bool) -> Option<String> {
     let clean = clean_moviebox_title(title);
+    let clean_norm: String = clean
+        .chars()
+        .filter(|c| c.is_alphanumeric())
+        .map(|c| c.to_ascii_lowercase())
+        .collect();
     let mut search_term = String::new();
     for c in clean.chars() {
         if c.is_alphanumeric() {
@@ -1314,25 +1319,68 @@ async fn resolve_imdb_id(title: &str, year_hint: Option<&str>) -> Option<String>
 
     let json: serde_json::Value = res.json().await.ok()?;
     let list = json.get("d")?.as_array()?;
+    let year_num = year_hint.and_then(|s| s.parse::<i64>().ok()).unwrap_or(0);
+    let current_year = 2026_i64;
 
-    if let Some(y_str) = year_hint {
-        if let Ok(y) = y_str.parse::<i64>() {
-            for item in list {
-                if let Some(item_y) = item.get("y").and_then(|v| v.as_i64()) {
-                    if (item_y - y).abs() <= 1 {
-                        if let Some(id) = item.get("id").and_then(|v| v.as_str()) {
-                            return Some(id.to_string());
-                        }
-                    }
+    let mut best_id: Option<String> = None;
+    let mut best_score = i64::MIN;
+
+    for item in list {
+        let Some(id) = item.get("id").and_then(|v| v.as_str()) else {
+            continue;
+        };
+        if !id.starts_with("tt") {
+            continue;
+        }
+        let mut score: i64 = 0;
+        let qid = item.get("qid").and_then(|v| v.as_str()).unwrap_or("");
+        let is_tv = qid == "tvSeries" || qid == "tvMiniSeries";
+        let is_mov = qid == "movie" || qid == "tvMovie";
+
+        if if prefer_series { is_tv } else { is_mov } {
+            score += 100;
+        } else if if prefer_series { is_mov } else { is_tv } {
+            score -= 40;
+        }
+
+        let item_norm: String = item
+            .get("l")
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .chars()
+            .filter(|c| c.is_alphanumeric())
+            .map(|c| c.to_ascii_lowercase())
+            .collect();
+        if item_norm == clean_norm {
+            score += 80;
+        } else if item_norm.contains(&clean_norm) || clean_norm.contains(&item_norm) {
+            score += 20;
+        }
+
+        if let Some(iy) = item.get("y").and_then(|v| v.as_i64()) {
+            if iy > current_year {
+                score -= 150;
+            } else if year_num > 0 {
+                if iy == year_num {
+                    score += 60;
+                } else if !prefer_series {
+                    let diff = (iy - year_num).abs();
+                    score += if diff <= 1 { 45 } else { -diff.min(30) };
+                } else if iy <= year_num {
+                    score += (40 - (year_num - iy).min(30)).max(10);
+                } else {
+                    score -= 50;
                 }
             }
         }
+
+        if score > best_score {
+            best_score = score;
+            best_id = Some(id.to_string());
+        }
     }
 
-    list.first()
-        .and_then(|item| item.get("id"))
-        .and_then(|v| v.as_str())
-        .map(|s| s.to_string())
+    best_id
 }
 
 async fn resolve_cinemeta_meta(imdb_id: &str, prefer_series: bool) -> (Option<String>, bool) {
@@ -1718,7 +1766,7 @@ pub async fn get_streams(
         Some(id.clone())
     } else {
         let year_hint = details_opt.as_ref().and_then(|d| d.year.as_deref());
-        resolve_imdb_id(&resolved_title, year_hint).await
+        resolve_imdb_id(&resolved_title, year_hint, is_series).await
     };
 
     let fallback_tm_id = netmirror_tm_id.filter(|s| !s.trim().is_empty());

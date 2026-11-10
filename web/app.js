@@ -22,6 +22,9 @@
     currentStreamIndex: 0,
     embedUrls: [],
     isEmbedMode: false,
+    currentEmbedIndex: 0,
+    currentEmbedServerName: '',
+    playbackRequestSeq: 0,
     currentNav: 'home',
     activeFilter: 'all',
     gridItems: [],
@@ -1165,7 +1168,20 @@
 
       // TV Series Episodes
       const isSeries = details.media_type === 'series' || (details.seasons && details.seasons.length > 0);
-      if (isSeries && details.seasons && details.seasons.length > 0) {
+      if (isSeries) {
+        if (!details.seasons || details.seasons.length === 0) {
+          details.seasons = [{
+            number: 1,
+            season_number: 1,
+            episodes: Array.from({ length: 10 }, (_, i) => ({
+              season: 1,
+              number: i + 1,
+              episode_number: i + 1,
+              title: `Episode ${i + 1}`,
+              duration: '45 min',
+            })),
+          }];
+        }
         const s0 = details.seasons[0];
         const s0Num = parseInt(s0.number ?? s0.season_number ?? 1, 10) || 1;
         state.currentSeason = s0Num;
@@ -1215,9 +1231,10 @@
     renderEpisodes(firstSeason ? firstSeason.episodes : []);
 
     el.seasonSelect.onchange = (e) => {
-      const sNum = parseInt(e.target.value, 10);
+      const sNum = parseInt(e.target.value, 10) || 1;
       state.currentSeason = sNum;
-      const found = seasons.find((s, idx) => (parseInt(s.number ?? s.season_number ?? (idx + 1), 10) === sNum));
+      state.currentEpisode = 1;
+      const found = seasons.find((s, idx) => ((parseInt(s.number ?? s.season_number ?? (idx + 1), 10) || (idx + 1)) === sNum));
       if (found) {
         renderEpisodes(found.episodes);
       }
@@ -1225,7 +1242,7 @@
 
     el.episodeSearchInput.oninput = (e) => {
       const q = e.target.value.toLowerCase().trim();
-      const currentSeasonData = seasons.find((s, idx) => (parseInt(s.number ?? s.season_number ?? (idx + 1), 10) === state.currentSeason));
+      const currentSeasonData = seasons.find((s, idx) => ((parseInt(s.number ?? s.season_number ?? (idx + 1), 10) || (idx + 1)) === state.currentSeason));
       if (currentSeasonData) {
         const filtered = (currentSeasonData.episodes || []).filter((ep, idx) => {
           const epNum = parseInt(ep.number ?? ep.episode_number ?? (idx + 1), 10) || (idx + 1);
@@ -1243,13 +1260,14 @@
       return;
     }
 
+    const activeEp = parseInt(state.currentEpisode, 10) || 1;
     episodes.forEach((ep, idx) => {
       const epNum = parseInt(ep.number ?? ep.episode_number ?? (idx + 1), 10) || (idx + 1);
       const epCard = document.createElement('div');
-      epCard.className = 'episode-card';
-      const poster = state.currentDetails.poster_url || fallbackPoster(state.currentDetails.title);
+      epCard.className = `episode-card${epNum === activeEp ? ' active' : ''}`;
+      const poster = (state.currentDetails && state.currentDetails.poster_url) || fallbackPoster((state.currentDetails && state.currentDetails.title) || 'Episode');
       const epTitle = ep.title || `Episode ${epNum}`;
-      const epOverview = ep.overview || `Watch Season ${state.currentSeason} Episode ${epNum}.`;
+      const epOverview = ep.overview || `Watch Season ${state.currentSeason || 1} Episode ${epNum}.`;
 
       epCard.innerHTML = `
         <div class="ep-num">${String(epNum).padStart(2, '0')}</div>
@@ -1287,7 +1305,7 @@
   }
 
   function openPlayerDirect(item) {
-    const isSeries = item.media_type === 'series';
+    const isSeries = item.media_type === 'series' || /\bS\d+(-S\d+)?\b/i.test(item.title || '') || /\bSeason\s*\d+\b/i.test(item.title || '');
     const s = isSeries ? 1 : 0;
     const e = isSeries ? 1 : 0;
     startPlayback(item, s, e);
@@ -1558,6 +1576,7 @@
   // IN-BROWSER VIDEO PLAYER
   // ==========================================================================
   async function startPlayback(media, season = 0, episode = 0) {
+    const reqId = ++state.playbackRequestSeq;
     el.playerOverlay.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     el.playerSpinner.classList.remove('hidden');
@@ -1566,9 +1585,18 @@
     let s = parseInt(season, 10) || 0;
     let ep = parseInt(episode, 10) || 0;
 
+    const mediaIdVal = media && media.id ? media.id.value : String(media || '');
+    const hasMatchingDetails = state.currentDetails && state.currentDetails.id && state.currentDetails.id.value === mediaIdVal;
+    const titleLooksSeries = /\bS\d+(-S\d+)?\b/i.test(media.title || '') || /\bSeason\s*\d+\b/i.test(media.title || '');
+    const isSeries = media.media_type === 'series'
+      || s > 0
+      || ep > 0
+      || titleLooksSeries
+      || (media.seasons && media.seasons.length > 0)
+      || (hasMatchingDetails && (state.currentDetails.media_type === 'series' || (state.currentDetails.seasons && state.currentDetails.seasons.length > 0)));
+
     // Set Header Info
     el.playerMediaTitle.textContent = media.title;
-    const isSeries = media.media_type === 'series' || s > 0 || ep > 0 || (state.currentDetails && state.currentDetails.media_type === 'series') || (state.currentDetails && state.currentDetails.seasons && state.currentDetails.seasons.length > 0);
     if (isSeries) {
       if (s <= 0) s = 1;
       if (ep <= 0) ep = 1;
@@ -1583,21 +1611,24 @@
     state.currentEpisode = ep;
     state.currentStreamIndex = 0;
 
-    // Series Episode Selection Panel (matching reference interface)
+    // Configure Series Episode Selection Panel (and verify series metadata asynchronously if needed)
     if (isSeries) {
       if (el.watchEpisodesColumn) el.watchEpisodesColumn.classList.remove('hidden');
-      setupWatchEpisodesPanel(media, s, ep);
+      setupWatchEpisodesPanel(media, s, ep, true, reqId);
     } else {
       if (el.watchEpisodesColumn) el.watchEpisodesColumn.classList.add('hidden');
+      if (!hasMatchingDetails) {
+        setupWatchEpisodesPanel(media, s, ep, false, reqId);
+      }
     }
 
     // Update Browser URL so every watch stream has its own unique, shareable watch URL
-    updateWatchUrl(media.id.value, s, ep, media.title, true);
+    updateWatchUrl(mediaIdVal, s, ep, media.title, true);
 
     // Wire Share Stream URL button
     if (el.playerShareBtn) {
       el.playerShareBtn.onclick = () => {
-        shareMovieLink(media.id.value, media.title, '', media.poster_url || '', true, s, ep);
+        shareMovieLink(mediaIdVal, media.title, '', media.poster_url || '', true, s, ep);
       };
     }
 
@@ -1613,18 +1644,20 @@
       const titleParam = encodeURIComponent(media.title || '');
       const providerParam = media.id && media.id.provider ? `&provider=${media.id.provider}` : '';
       const typeParam = isSeries ? '&type=tv' : '';
-      const res = await fetch(`/api/streams/${media.id.value}?season=${s}&episode=${ep}&title=${titleParam}${providerParam}${typeParam}`);
+      const res = await fetch(`/api/streams/${mediaIdVal}?season=${s}&episode=${ep}&title=${titleParam}${providerParam}${typeParam}`);
+      if (reqId !== state.playbackRequestSeq) return;
       if (!res.ok) throw new Error('No streams found');
       const data = await res.json();
+      if (reqId !== state.playbackRequestSeq) return;
 
       // Sort streams so highest quality (4K, 1080p, FHD, high-bitrate) is always prioritized!
       const qualityScore = (q) => {
-        const s = String(q || '').toLowerCase();
-        if (s.includes('4k') || s.includes('2160') || s.includes('ultra')) return 4000;
-        if (s.includes('1080') || s.includes('fhd')) return 1080;
-        if (s.includes('720') || s.includes('hd')) return 720;
-        if (s.includes('480')) return 480;
-        if (s.includes('auto')) return 500;
+        const str = String(q || '').toLowerCase();
+        if (str.includes('4k') || str.includes('2160') || str.includes('ultra')) return 4000;
+        if (str.includes('1080') || str.includes('fhd')) return 1080;
+        if (str.includes('720') || str.includes('hd')) return 720;
+        if (str.includes('480')) return 480;
+        if (str.includes('auto')) return 500;
         return 100;
       };
       state.currentStreams = (data.streams || []).sort((a, b) => qualityScore(b.quality) - qualityScore(a.quality));
@@ -1633,7 +1666,7 @@
 
       // Check Saved Timestamp
       const historyItem = state.history.find(
-        (h) => h.id.value === media.id.value && h.season === season && h.episode === episode
+        (h) => h.id.value === mediaIdVal && h.season === s && h.episode === ep
       );
       const resumeTime = historyItem ? historyItem.currentTime : 0;
 
@@ -1658,7 +1691,7 @@
 
         // Load Subtitles
         if (data.resource_id) {
-          loadSubtitles(media.id.value, data.resource_id, season, episode);
+          loadSubtitles(mediaIdVal, data.resource_id, s, ep);
         }
 
         // Play video
@@ -1671,9 +1704,10 @@
       }
 
       // Record to history
-      saveToHistory(media, season, episode);
+      saveToHistory(media, s, ep);
 
     } catch (err) {
+      if (reqId !== state.playbackRequestSeq) return;
       console.error(err);
       if (state.embedUrls && state.embedUrls.length > 0) {
         showToast('Direct stream unavailable, falling back to Cloud Player...');
@@ -1685,34 +1719,55 @@
     }
   }
 
-  async function setupWatchEpisodesPanel(media, activeSeason, activeEpisode) {
-    let details = state.currentDetails;
+  async function setupWatchEpisodesPanel(media, activeSeason, activeEpisode, knownSeries = true, reqId = state.playbackRequestSeq) {
     const mediaIdVal = media && media.id ? media.id.value : (typeof media === 'string' ? media : '');
-    const hasValidSeasons = details && details.seasons && details.seasons.length > 0;
+    let details = (media && media.seasons && media.seasons.length > 0) ? media : state.currentDetails;
     const isMatchingId = details && details.id && details.id.value === mediaIdVal;
+    const hasValidSeasons = isMatchingId && details.seasons && details.seasons.length > 0;
 
-    if (!hasValidSeasons || !isMatchingId) {
+    // Immediately render with whatever seasons we already have so the UI responds right away
+    if (knownSeries) {
+      renderWatchEpisodes(hasValidSeasons ? details : media, activeSeason, activeEpisode);
+    }
+
+    if (!hasValidSeasons) {
       try {
         const titleParam = media && media.title ? `&title=${encodeURIComponent(media.title)}` : '';
         const providerParam = media && media.id && media.id.provider ? `&provider=${media.id.provider}` : '';
-        const res = await fetch(`/api/details/${mediaIdVal}?type=tv${titleParam}${providerParam}`);
+        const typeParam = knownSeries ? 'type=tv' : '';
+        const res = await fetch(`/api/details/${mediaIdVal}?${typeParam}${titleParam}${providerParam}`);
+        if (reqId !== state.playbackRequestSeq) return;
         if (res.ok) {
           details = await res.json();
+          if (reqId !== state.playbackRequestSeq) return;
           state.currentDetails = details;
+
+          const detectedSeries = details.media_type === 'series' || (details.seasons && details.seasons.length > 0);
+          if (!knownSeries && detectedSeries) {
+            if (el.watchEpisodesColumn) el.watchEpisodesColumn.classList.remove('hidden');
+            renderWatchEpisodes(details, 1, 1);
+            // Reload playback as Season 1 Episode 1 TV stream
+            startPlayback(details, 1, 1);
+            return;
+          }
         }
       } catch (err) {
         console.warn('Could not fetch series seasons:', err);
       }
     }
 
-    renderWatchEpisodes(details || media, activeSeason, activeEpisode);
+    if (reqId !== state.playbackRequestSeq) return;
+    if (knownSeries || (details && (details.media_type === 'series' || (details.seasons && details.seasons.length > 0)))) {
+      if (el.watchEpisodesColumn) el.watchEpisodesColumn.classList.remove('hidden');
+      renderWatchEpisodes(details || media, activeSeason, activeEpisode);
+    }
   }
 
   function renderWatchEpisodes(details, curSeason, curEpisode) {
     if (!el.watchEpisodesColumn || !el.watchEpisodesGrid || !el.watchSeasonsRow) return;
 
-    let seasons = (details && details.seasons) ? details.seasons : [];
-    if (!seasons || seasons.length === 0) {
+    let seasons = (details && details.seasons && details.seasons.length > 0) ? details.seasons : null;
+    if (!seasons) {
       seasons = [{
         number: 1,
         season_number: 1,
@@ -1725,8 +1780,8 @@
     }
 
     let sNum = parseInt(curSeason, 10) || 1;
-    let activeSeasonObj = seasons.find((s) => (s.number ?? s.season_number) === sNum) || seasons[0];
-    sNum = activeSeasonObj ? (activeSeasonObj.number ?? activeSeasonObj.season_number ?? 1) : 1;
+    let activeSeasonObj = seasons.find((s, idx) => (parseInt(s.number ?? s.season_number ?? (idx + 1), 10) || (idx + 1)) === sNum) || seasons[0];
+    sNum = activeSeasonObj ? (parseInt(activeSeasonObj.number ?? activeSeasonObj.season_number ?? 1, 10) || 1) : 1;
     state.currentSeason = sNum;
 
     let epNumActive = parseInt(curEpisode, 10) || 1;
@@ -1737,42 +1792,56 @@
     seasons.forEach((sObj, idx) => {
       const sn = parseInt(sObj.number ?? sObj.season_number ?? (idx + 1), 10) || (idx + 1);
       const sBtn = document.createElement('button');
+      sBtn.type = 'button';
       sBtn.className = `watch-season-pill ${sn === sNum ? 'active' : ''}`;
       sBtn.textContent = `SE${sn}`;
       sBtn.addEventListener('click', () => {
         state.currentSeason = sn;
         state.currentEpisode = 1;
-        renderWatchEpisodes(details, sn, 1);
-        startPlayback(details || state.currentDetails, sn, 1);
+        const targetDetails = (details && details.seasons && details.seasons.length > 0) ? details : (state.currentDetails || details);
+        renderWatchEpisodes(targetDetails, sn, 1);
+        startPlayback(targetDetails, sn, 1);
       });
       el.watchSeasonsRow.appendChild(sBtn);
     });
 
     // Render Episode Buttons Grid (1, 2, 3, 4, 5, 6, 7...)
     el.watchEpisodesGrid.innerHTML = '';
-    const epList = activeSeasonObj.episodes || [];
+    const epList = (activeSeasonObj && activeSeasonObj.episodes && activeSeasonObj.episodes.length > 0)
+      ? activeSeasonObj.episodes
+      : Array.from({ length: 10 }, (_, i) => ({ number: i + 1, episode_number: i + 1, title: `Episode ${i + 1}` }));
+
+    let activeBtnEl = null;
     epList.forEach((ep, idx) => {
       const epNum = parseInt(ep.number ?? ep.episode_number ?? (idx + 1), 10) || (idx + 1);
       const isSelected = epNum === epNumActive;
       const epBtn = document.createElement('button');
+      epBtn.type = 'button';
       epBtn.className = `watch-ep-btn ${isSelected ? 'active' : ''}`;
       if (isSelected) {
         epBtn.innerHTML = `${epNum} <span class="ep-live-signal"><span class="bar b1"></span><span class="bar b2"></span><span class="bar b3"></span></span>`;
+        activeBtnEl = epBtn;
       } else {
         epBtn.textContent = String(epNum);
       }
       epBtn.title = ep.title || `Episode ${epNum}`;
 
       epBtn.addEventListener('click', () => {
+        state.currentSeason = sNum;
         state.currentEpisode = epNum;
         if (el.watchSelectedEpCard) {
           el.watchSelectedEpCard.textContent = `Season ${sNum} Selected Episode: ${epNum}`;
         }
-        renderWatchEpisodes(details, sNum, epNum);
-        startPlayback(details || state.currentDetails, sNum, epNum);
+        const targetDetails = (details && details.seasons && details.seasons.length > 0) ? details : (state.currentDetails || details);
+        renderWatchEpisodes(targetDetails, sNum, epNum);
+        startPlayback(targetDetails, sNum, epNum);
       });
       el.watchEpisodesGrid.appendChild(epBtn);
     });
+
+    if (activeBtnEl) {
+      activeBtnEl.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
 
     // Update Selected Episode Card (matching screenshot format)
     if (el.watchSelectedEpCard) {
@@ -1867,8 +1936,19 @@
       el.embedPlayerIframe.removeAttribute('sandbox');
       el.embedPlayerIframe.setAttribute('referrerpolicy', 'no-referrer');
       el.embedPlayerIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
-      el.embedPlayerIframe.src = url;
       el.embedPlayerIframe.classList.remove('hidden');
+
+      const prevSrc = el.embedPlayerIframe.getAttribute('src') || '';
+      if (prevSrc && prevSrc !== 'about:blank') {
+        el.embedPlayerIframe.src = 'about:blank';
+        setTimeout(() => {
+          if (el.embedPlayerIframe && state.isEmbedMode && state.currentEmbedServerName === serverName) {
+            el.embedPlayerIframe.src = url;
+          }
+        }, 30);
+      } else {
+        el.embedPlayerIframe.src = url;
+      }
     }
     el.playerSpinner.classList.add('hidden');
     if (el.currentServerLabel) {
@@ -1887,6 +1967,7 @@
       if (streams && streams.length > 0) {
         streams.forEach((stream, idx) => {
           const pill = document.createElement('button');
+          pill.type = 'button';
           const isActive = idx === state.currentStreamIndex && !state.isEmbedMode;
           pill.className = `server-pill-btn ${isActive ? 'active' : ''}`;
           const label = stream.server || `Server ${idx + 1}`;
@@ -1918,22 +1999,23 @@
       if (embeds && embeds.length > 0) {
         embeds.forEach((emb, idx) => {
           const pill = document.createElement('button');
-          const isActive = state.isEmbedMode && el.embedPlayerIframe && (el.embedPlayerIframe.src === emb.url || state.currentEmbedServerName === emb.name);
+          pill.type = 'button';
+          const isActive = state.isEmbedMode && (state.currentEmbedServerName === emb.name || (el.embedPlayerIframe && el.embedPlayerIframe.src === emb.url));
           pill.className = `server-pill-btn ${isActive ? 'active' : ''}`;
 
           let displayName = emb.name || `Server ${idx + 1}`;
           if (idx === 0) {
             displayName = 'Multi-Lang Server';
-          } else if (displayName.includes('AutoEmbed')) {
-            displayName = 'Server 1';
           } else if (displayName.includes('VidSrc Cloud')) {
             displayName = 'Server 2';
           } else if (displayName.includes('VidSrc Server')) {
             displayName = 'Server 3';
           } else if (displayName.includes('SmashyStream')) {
             displayName = 'Server 4';
-          } else if (displayName.includes('Mirror')) {
+          } else if (displayName.includes('Mirror') || displayName.includes('Backup')) {
             displayName = 'Server 5';
+          } else if (displayName.includes('AutoEmbed')) {
+            displayName = 'Server 1';
           }
 
           if (isActive) {
@@ -2146,6 +2228,7 @@
   }
 
   function closePlayer() {
+    state.playbackRequestSeq += 1;
     const video = el.videoElement;
     video.pause();
     video.src = '';
@@ -2155,6 +2238,9 @@
     }
     el.videoElement.classList.remove('hidden');
     state.isEmbedMode = false;
+    state.currentEmbedServerName = '';
+    state.currentEmbedIndex = 0;
+    if (el.watchEpisodesColumn) el.watchEpisodesColumn.classList.add('hidden');
     el.playerOverlay.classList.add('hidden');
     document.body.style.overflow = 'auto';
     revertUrlToBase();
@@ -2228,10 +2314,24 @@
   }
 
   function playNextEpisode() {
-    const nextEp = (parseInt(state.currentEpisode, 10) || 1) + 1;
-    const curSeason = parseInt(state.currentSeason, 10) || 1;
+    let nextEp = (parseInt(state.currentEpisode, 10) || 1) + 1;
+    let curSeason = parseInt(state.currentSeason, 10) || 1;
+    const details = state.currentDetails;
+    if (details && details.seasons && details.seasons.length > 0) {
+      const sObj = details.seasons.find((s, idx) => (parseInt(s.number ?? s.season_number ?? (idx + 1), 10) || (idx + 1)) === curSeason);
+      if (sObj && sObj.episodes && nextEp > sObj.episodes.length) {
+        const nextSeasonObj = details.seasons.find((s, idx) => (parseInt(s.number ?? s.season_number ?? (idx + 1), 10) || (idx + 1)) === curSeason + 1);
+        if (nextSeasonObj) {
+          curSeason += 1;
+          nextEp = 1;
+        }
+      }
+    }
+    state.currentSeason = curSeason;
     state.currentEpisode = nextEp;
-    startPlayback(state.currentDetails, curSeason, nextEp);
+    if (details) {
+      startPlayback(details, curSeason, nextEp);
+    }
   }
 
   // ==========================================================================
@@ -3977,7 +4077,9 @@
         if (!state.isEmbedMode && el.playerControls) {
           el.playerControls.classList.add('controls-hidden');
         }
-        el.playerHeader.classList.add('controls-hidden');
+        if (el.playerHeader && !el.playerHeader.classList.contains('watch-top-bar')) {
+          el.playerHeader.classList.add('controls-hidden');
+        }
         el.qualityMenu.classList.add('hidden');
         el.subtitlesMenu.classList.add('hidden');
         el.speedMenu.classList.add('hidden');

@@ -989,8 +989,25 @@ pub async fn get_details(
         (id.clone(), None)
     };
 
+    let make_default_seasons = || -> Vec<Season> {
+        let episodes = (1..=10)
+            .map(|ep| Episode {
+                season: 1,
+                number: ep,
+                title: Some(format!("Episode {ep}")),
+                overview: None,
+            })
+            .collect();
+        vec![Season { number: 1, episodes }]
+    };
+
     match state.service.details_typed(provider, &target_id).await {
-        Ok(details) => Ok(Json(details)),
+        Ok(mut details) => {
+            if details.is_series() && details.seasons.is_empty() {
+                details.seasons = make_default_seasons();
+            }
+            Ok(Json(details))
+        }
         Err(err) => {
             if let Some((Some(title), _tm_id, desc, is_tv)) = fallback_meta {
                 let media_type = if is_tv { MediaType::Series } else { MediaType::Movie };
@@ -1009,7 +1026,7 @@ pub async fn get_details(
                     poster_url: None,
                     duration: None,
                     genres: vec![],
-                    seasons: vec![],
+                    seasons: if is_tv { make_default_seasons() } else { vec![] },
                     dubs: vec![],
                 }));
             }
@@ -1018,6 +1035,7 @@ pub async fn get_details(
             if let Some(ref title_hint) = params.title {
                 let imdb_items = search_imdb_global(title_hint).await;
                 if let Some(top) = imdb_items.first() {
+                    let is_ser = top.media_type == MediaType::Series;
                     return Ok(Json(MediaDetails {
                         id: ProviderMediaId { provider: ProviderKind::MovieBox, value: top.id.value.clone() },
                         title: top.title.clone(),
@@ -1031,9 +1049,9 @@ pub async fn get_details(
                         prints: None,
                         audios: None,
                         poster_url: top.poster_url.clone(),
-                        duration: if top.media_type == MediaType::Series { Some("45 min/ep".to_string()) } else { Some("118 min".to_string()) },
+                        duration: if is_ser { Some("45 min/ep".to_string()) } else { Some("118 min".to_string()) },
                         genres: vec!["Cinema".to_string()],
-                        seasons: vec![],
+                        seasons: if is_ser { make_default_seasons() } else { vec![] },
                         dubs: vec![],
                     }));
                 }

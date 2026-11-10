@@ -1960,6 +1960,16 @@ body {
   border-color: rgba(229, 9, 20, 0.5);
 }
 
+.episode-card.active {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: #22c55e;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.2);
+}
+
+.episode-card.active .ep-num {
+  color: #4ade80;
+}
+
 .ep-num {
   font-size: 16px;
   font-weight: 800;
@@ -2231,6 +2241,7 @@ body {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
+  max-height: 75vh;
   background: #000;
   border-radius: 8px;
   overflow: hidden;
@@ -2313,11 +2324,15 @@ body {
 
 /* Right / Series Episodes Column */
 .watch-episodes-column {
-  width: 320px;
+  width: 330px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 10px;
+  padding: 14px;
 }
 
 /* Season Badges Row */
@@ -2346,8 +2361,8 @@ body {
 }
 
 .watch-season-pill.active {
-  background: #1e293b;
-  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.14);
+  color: #fbbf24;
   border-color: #f59e0b;
 }
 
@@ -2356,6 +2371,9 @@ body {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 8px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .watch-ep-btn {
@@ -2381,22 +2399,29 @@ body {
 }
 
 .watch-ep-btn.active {
-  background: #052e16;
+  background: #064e3b;
   border-color: #22c55e;
   color: #4ade80;
   font-weight: 700;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.35);
 }
 
 /* Selected Episode Status Card */
 .watch-selected-ep-card {
   border: 1px solid #38bdf8;
   border-radius: 6px;
-  padding: 9px 14px;
+  padding: 10px 14px;
   text-align: center;
   color: #f8fafc;
-  font-size: 13.5px;
-  font-weight: 600;
-  background: rgba(56, 189, 248, 0.06);
+  font-size: 14px;
+  font-weight: 700;
+  background: rgba(56, 189, 248, 0.1);
+}
+
+/* Keep Watch Top Bar visible even if player controls timeout fires */
+.watch-top-bar.controls-hidden {
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
 /* Responsive adjustments */
@@ -2419,7 +2444,7 @@ body {
     gap: 6px;
   }
   .watch-ep-btn {
-    height: 38px;
+    height: 40px;
     font-size: 13.5px;
   }
 }
@@ -2462,21 +2487,6 @@ body {
   line-height: 1.4;
   border-radius: 4px;
   padding: 2px 6px;
-}
-
-/* Player Header */
-.player-header {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  padding: 24px 32px;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.85) 0%, transparent 100%);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  z-index: 10;
-  transition: opacity var(--transition-normal);
 }
 
 .player-back-btn {
@@ -5793,69 +5803,18 @@ kbd {
     justify-content: center !important;
   }
 
-  /* Video Player Overlay on Mobile */
+  /* Video Player & Watch View Overlay on Mobile */
+  .watch-top-bar,
   .player-header {
-    height: 54px !important;
-    padding: calc(6px + env(safe-area-inset-top, 0px)) 12px 6px !important;
-  }
-
-  /* Persistent Back Button - Always accessible even in embed mode */
-  .player-back-btn {
-    min-width: 42px !important;
-    min-height: 42px !important;
-    padding: 6px 10px !important;
-    border-radius: 50% !important;
-    background: rgba(0, 0, 0, 0.75) !important;
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
-    z-index: 50 !important;
+    height: auto !important;
+    min-height: 44px !important;
+    padding: calc(4px + env(safe-area-inset-top, 0px)) 0 10px !important;
+    opacity: 1 !important;
     pointer-events: auto !important;
-  }
-
-  .player-back-btn span {
-    display: none !important;
-  }
-
-  .player-title-info {
-    max-width: 170px !important;
-  }
-
-  .player-title {
-    font-size: 13px !important;
-    font-weight: 700 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-
-  .player-subtitle {
-    font-size: 11px !important;
-  }
-
-  .player-header-actions {
-    display: flex !important;
-    align-items: center !important;
-    gap: 6px !important;
   }
 
   .player-sponsor-pill,
   #pipBtn {
-    display: none !important;
-  }
-
-  /* When controls timeout, keep back button accessible at 80% opacity */
-  .player-header.controls-hidden {
-    opacity: 0.3 !important;
-    pointer-events: none !important;
-  }
-
-  .player-header.controls-hidden .player-back-btn {
-    pointer-events: auto !important;
-    opacity: 0.8 !important;
-  }
-
-  .player-header.controls-hidden .player-title-info,
-  .player-header.controls-hidden .player-header-actions {
     display: none !important;
   }
 

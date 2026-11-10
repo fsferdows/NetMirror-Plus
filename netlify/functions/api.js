@@ -223,23 +223,96 @@ function getCanonical(title) {
     .replace(/[^a-z0-9]/g, "");
 }
 
+function extractYear(rawDate) {
+  if (!rawDate) return "2026";
+  const raw = String(rawDate).trim();
+  if (raw.length === 10 && /^\d+$/.test(raw)) {
+    const ts = parseInt(raw, 10);
+    return String(new Date(ts * 1000).getFullYear());
+  }
+  const m = raw.match(/\b(19\d{2}|20\d{2})\b/);
+  if (m) return m[1];
+  return raw.length >= 4 ? raw.slice(0, 4) : "2026";
+}
+
+function buildDefaultSeasons(seasonCount = 1, epPerSeason = 10) {
+  const seasons = [];
+  for (let s = 1; s <= seasonCount; s++) {
+    const episodes = [];
+    for (let ep = 1; ep <= epPerSeason; ep++) {
+      episodes.push({
+        season: s,
+        number: ep,
+        episode_number: ep,
+        title: `Episode ${ep}`,
+        duration: "45 min",
+      });
+    }
+    seasons.push({ number: s, season_number: s, episodes });
+  }
+  return seasons;
+}
+
+async function fetchTvMazeSeasons(imdbId) {
+  if (!imdbId || !imdbId.startsWith("tt")) return null;
+  try {
+    const showRes = await fetch(`https://api.tvmaze.com/lookup/shows?imdb=${encodeURIComponent(imdbId)}`, {
+      headers: { "User-Agent": USER_AGENT },
+      signal: AbortSignal.timeout(2500),
+    });
+    if (!showRes.ok) return null;
+    const show = await showRes.json();
+    if (!show || !show.id) return null;
+
+    const epRes = await fetch(`https://api.tvmaze.com/shows/${show.id}/episodes`, {
+      headers: { "User-Agent": USER_AGENT },
+      signal: AbortSignal.timeout(2500),
+    });
+    if (!epRes.ok) return null;
+    const rawEps = await epRes.json();
+    if (!Array.isArray(rawEps) || rawEps.length === 0) return null;
+
+    const bySeason = new Map();
+    for (const ep of rawEps) {
+      if (!ep || typeof ep.season !== "number" || ep.season <= 0) continue;
+      const sNum = ep.season;
+      const epNum = (typeof ep.number === "number" && ep.number > 0) ? ep.number : ((bySeason.get(sNum)?.length || 0) + 1);
+      if (!bySeason.has(sNum)) bySeason.set(sNum, []);
+      bySeason.get(sNum).push({
+        season: sNum,
+        number: epNum,
+        episode_number: epNum,
+        title: ep.name || `Episode ${epNum}`,
+        overview: ep.summary ? ep.summary.replace(/<[^>]+>/g, "").trim() : null,
+        duration: ep.runtime ? `${ep.runtime} min` : "45 min",
+        poster_url: ep.image?.medium || ep.image?.original || null,
+      });
+    }
+
+    const seasons = Array.from(bySeason.entries())
+      .sort((a, b) => a[0] - b[0])
+      .map(([sNum, episodes]) => ({
+        number: sNum,
+        season_number: sNum,
+        episodes,
+      }));
+
+    if (seasons.length === 0) return null;
+    return { seasons, show };
+  } catch {
+    return null;
+  }
+}
+
 function mapItem(item) {
   if (!item || !item.id) return null;
   const idStr = String(item.id);
   const rawTitle = (item.title || "Untitled").trim();
   const title = cleanTitle(rawTitle);
-  const mediaType = item.media_type === "tv" || item.type === "TV series" || item.type === "tv" ? "series" : "movie";
+  const isTitleSeries = /\bS\d+(-S\d+)?\b/i.test(rawTitle) || /\bSeason\s*\d+\b/i.test(rawTitle);
+  const mediaType = (item.media_type === "tv" || item.media_type === "series" || item.type === "TV series" || item.type === "tv" || isTitleSeries) ? "series" : "movie";
 
-  let year = "2026";
-  if (item.release_date) {
-    const raw = String(item.release_date);
-    if (raw.length === 10 && /^\d+$/.test(raw)) {
-      const ts = parseInt(raw, 10);
-      year = String(new Date(ts * 1000).getFullYear());
-    } else if (raw.length >= 4) {
-      year = raw.slice(0, 4);
-    }
-  }
+  const year = extractYear(item.release_date);
 
   let posterUrl = item.backdrop_path || item.poster_path || item.cover || null;
   if (posterUrl && !posterUrl.startsWith("http")) {
@@ -256,9 +329,9 @@ function mapItem(item) {
   };
 }
 
-async function resolveImdbId(title, yearHint) {
+async function resolveImdbId(title, yearHint, preferSeries = false) {
   if (!title) return null;
-  const clean = title.replace(/\[.*?\]|\(.*?\)|S\d+(-S\d+)?/gi, "").trim();
+  const clean = title.replace(/\[.*?\]|\(.*?\)|\bS\d+(-S\d+)?\b/gi, "").trim();
   const term = clean.toLowerCase().replace(/[^a-z0-9]/g, "_").replace(/_+/g, "_").replace(/^_|_$/g, "");
   if (!term) return null;
 
@@ -269,13 +342,20 @@ async function resolveImdbId(title, yearHint) {
     if (!res.ok) return null;
     const json = await res.json();
     const list = json.d || [];
+    const candidates = preferSeries
+      ? list.filter(x => x && x.id && (x.qid === "tvSeries" || x.qid === "tvMiniSeries"))
+      : list.filter(x => x && x.id && (x.qid === "movie" || x.qid === "tvMovie"));
+    const pool = candidates.length > 0 ? candidates : list.filter(x => x && x.id);
+
     if (yearHint) {
       const y = parseInt(yearHint, 10);
-      for (const item of list) {
-        if (item.y && Math.abs(item.y - y) <= 1 && item.id) return item.id;
+      if (y) {
+        for (const item of pool) {
+          if (item.y && Math.abs(item.y - y) <= 1 && item.id) return item.id;
+        }
       }
     }
-    return list[0]?.id || null;
+    return pool[0]?.id || list[0]?.id || null;
   } catch {
     return null;
   }
@@ -1374,64 +1454,71 @@ async function handleDetails(id, params = {}) {
   // 1. If ID is an IMDb ID (starts with "tt")
   if (id.startsWith("tt")) {
     try {
-      const url = `https://v3.sg.media-imdb.com/suggestion/t/${id}.json`;
-      const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
-      if (res.ok) {
-        const json = await res.json();
-        const item = (json.d || []).find(x => x.id === id) || (json.d || [])[0];
-        if (item) {
-          const isSeries = item.qid === "tvSeries" || item.qid === "tvMiniSeries";
-          const title = cleanTitle(item.l || "Untitled");
-          const year = String(item.y || "2026");
-          const posterUrl = item.i?.imageUrl || null;
-          const stars = item.s || null;
+      const imdbUrl = `https://v3.sg.media-imdb.com/suggestion/t/${id}.json`;
+      const [imdbRes, tvMazeData] = await Promise.all([
+        fetch(imdbUrl, { headers: { "User-Agent": USER_AGENT } }).catch(() => null),
+        fetchTvMazeSeasons(id),
+      ]);
 
-          const seasons = [];
-          if (isSeries) {
-            for (let s = 1; s <= 5; s++) {
-              const episodes = [];
-              for (let ep = 1; ep <= 10; ep++) {
-                episodes.push({
-                  season: s,
-                  number: ep,
-                  episode_number: ep,
-                  title: `Episode ${ep}`,
-                  duration: "45 min",
-                });
-              }
-              seasons.push({ number: s, season_number: s, episodes });
-            }
+      let item = null;
+      if (imdbRes && imdbRes.ok) {
+        const json = await imdbRes.json();
+        item = (json.d || []).find(x => x.id === id) || (json.d || [])[0] || null;
+      }
+
+      if (item || tvMazeData) {
+        const qid = item?.qid || "";
+        const isMiniSeries = qid === "tvMiniSeries" || /mini/i.test(item?.q || "");
+        const isSeries = Boolean(tvMazeData) || qid === "tvSeries" || qid === "tvMiniSeries" || params.type === "tv" || /series/i.test(item?.q || "");
+        const title = cleanTitle(item?.l || tvMazeData?.show?.name || params.title || "Untitled");
+        const year = item?.y ? String(item.y) : extractYear(tvMazeData?.show?.premiered);
+        const posterUrl = item?.i?.imageUrl || tvMazeData?.show?.image?.original || tvMazeData?.show?.image?.medium || null;
+        const stars = item?.s || null;
+        const rating = tvMazeData?.show?.rating?.average ? String(tvMazeData.show.rating.average) : "8.6";
+        const desc = tvMazeData?.show?.summary
+          ? tvMazeData.show.summary.replace(/<[^>]+>/g, "").trim()
+          : `Stream ${title} (${year}) in high definition with multi-audio and subtitles.`;
+        const genres = (tvMazeData?.show?.genres && tvMazeData.show.genres.length > 0)
+          ? tvMazeData.show.genres
+          : (isSeries ? ["TV Series", "Drama"] : ["Movie", "Cinema"]);
+
+        let seasons = [];
+        if (isSeries) {
+          if (tvMazeData && tvMazeData.seasons && tvMazeData.seasons.length > 0) {
+            seasons = tvMazeData.seasons;
+          } else {
+            seasons = buildDefaultSeasons(isMiniSeries ? 1 : 3, 10);
           }
-
-          return {
-            statusCode: 200,
-            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-            body: JSON.stringify({
-              id: { provider: "moviebox", value: id },
-              title,
-              media_type: isSeries ? "series" : "movie",
-              year,
-              description: `Stream ${title} (${year}) in high definition with multi-audio and subtitles.`,
-              tagline: null,
-              imdb_rating: "8.6",
-              director: null,
-              stars,
-              prints: null,
-              audios: null,
-              poster_url: posterUrl,
-              duration: isSeries ? "45 min/ep" : "118 min",
-              genres: isSeries ? ["TV Series", "Drama"] : ["Movie", "Cinema"],
-              seasons,
-              dubs: [],
-            }),
-          };
         }
+
+        return {
+          statusCode: 200,
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+          body: JSON.stringify({
+            id: { provider: "moviebox", value: id },
+            title,
+            media_type: isSeries ? "series" : "movie",
+            year,
+            description: desc,
+            tagline: null,
+            imdb_rating: rating,
+            director: null,
+            stars,
+            prints: null,
+            audios: null,
+            poster_url: posterUrl,
+            duration: isSeries ? "45 min/ep" : "118 min",
+            genres,
+            seasons,
+            dubs: [],
+          }),
+        };
       }
     } catch {}
   }
 
   // 2. Moviebox numeric ID lookup
-  const preferredTypes = (params.type === "tv" || /S\d+/i.test(params.title || "")) ? ["tv", "movie"] : ["tv", "movie"];
+  const preferredTypes = (params.type === "tv" || /\bS\d+/i.test(params.title || "")) ? ["tv", "movie"] : ["movie", "tv"];
   for (const mtype of preferredTypes) {
     const url = `https://api2.imdb3.shop/api/${mtype}/${id}`;
     try {
@@ -1440,17 +1527,16 @@ async function handleDetails(id, params = {}) {
         const json = await res.json();
         const first = json.results?.[0];
         if (first && first.title) {
-          const isSeries = mtype === "tv" || first.media_type === "tv" || Array.isArray(first.season);
+          const validSeasonEntries = Array.isArray(first.season)
+            ? first.season.filter(s => (parseInt(s.se || s.season || 0, 10) > 0) && (parseInt(s.ep || s.episodes || 0, 10) > 0))
+            : [];
+          const hasValidSeasons = validSeasonEntries.length > 0;
+          const isSeries = first.media_type === "tv"
+            || first.media_type === "series"
+            || hasValidSeasons
+            || (params.type === "tv" && /\bS\d+/i.test(first.title || ""));
           const title = (first.title || "Untitled").trim();
-          let year = "2026";
-          if (first.release_date) {
-            const raw = String(first.release_date);
-            if (raw.length === 10 && /^\d+$/.test(raw)) {
-              year = String(new Date(parseInt(raw, 10) * 1000).getFullYear());
-            } else if (raw.length >= 4) {
-              year = raw.slice(0, 4);
-            }
-          }
+          const year = extractYear(first.release_date);
 
           let posterUrl = first.backdrop_path || first.poster_path || null;
           if (posterUrl && !posterUrl.startsWith("http")) {
@@ -1458,11 +1544,10 @@ async function handleDetails(id, params = {}) {
           }
 
           // Build season & episode list if series
-          const seasons = [];
+          let seasons = [];
           if (isSeries) {
-            const sList = Array.isArray(first.season) ? first.season : [];
-            if (sList.length > 0) {
-              sList.forEach((sObj, idx) => {
+            if (validSeasonEntries.length > 0) {
+              validSeasonEntries.forEach((sObj, idx) => {
                 const sNum = parseInt(sObj.se || sObj.season || (idx + 1), 10) || (idx + 1);
                 const epTotal = parseInt(sObj.ep || sObj.episodes || 10, 10) || 10;
                 const episodes = [];
@@ -1478,20 +1563,8 @@ async function handleDetails(id, params = {}) {
                 seasons.push({ number: sNum, season_number: sNum, episodes });
               });
             } else {
-              const sCount = parseInt(first.season, 10) || 1;
-              for (let s = 1; s <= sCount; s++) {
-                const episodes = [];
-                for (let ep = 1; ep <= 10; ep++) {
-                  episodes.push({
-                    season: s,
-                    number: ep,
-                    episode_number: ep,
-                    title: `Episode ${ep}`,
-                    duration: null,
-                  });
-                }
-                seasons.push({ number: s, season_number: s, episodes });
-              }
+              const sCount = Math.max(1, parseInt(first.season, 10) || 1);
+              seasons = buildDefaultSeasons(sCount, 10);
             }
           }
 
@@ -1524,17 +1597,26 @@ async function handleDetails(id, params = {}) {
 
   // 3. Fallback: If numeric ID was not found in imdb3.shop, resolve via title hint or search
   if (params.title) {
-    const clean = params.title.replace(/\[.*?\]|\(.*?\)/g, "").trim();
+    const clean = params.title.replace(/\[.*?\]|\(.*?\)|\bS\d+(-S\d+)?\b/gi, "").trim();
     const imdbItems = await searchIMDb(clean);
     if (imdbItems.length > 0) {
-      const top = imdbItems[0];
+      const preferSeries = params.type === "tv" || /\bS\d+/i.test(params.title || "");
+      const top = (preferSeries ? imdbItems.find(x => x.media_type === "series") : null) || imdbItems[0];
+      const isSeries = top.media_type === "series" || preferSeries;
+      let seasons = [];
+      if (isSeries) {
+        const tvMazeData = await fetchTvMazeSeasons(top.id.value);
+        seasons = (tvMazeData && tvMazeData.seasons && tvMazeData.seasons.length > 0)
+          ? tvMazeData.seasons
+          : buildDefaultSeasons(1, 10);
+      }
       return {
         statusCode: 200,
         headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
         body: JSON.stringify({
           id: { provider: "moviebox", value: top.id.value },
           title: top.title,
-          media_type: top.media_type,
+          media_type: isSeries ? "series" : "movie",
           year: top.year,
           description: `Stream ${top.title} in high definition with multi-audio and subtitles.`,
           tagline: null,
@@ -1544,9 +1626,9 @@ async function handleDetails(id, params = {}) {
           prints: null,
           audios: null,
           poster_url: top.poster_url,
-          duration: top.media_type === "series" ? "45 min/ep" : "118 min",
+          duration: isSeries ? "45 min/ep" : "118 min",
           genres: ["Cinema"],
-          seasons: [],
+          seasons,
           dubs: [],
         }),
       };
@@ -1565,13 +1647,13 @@ async function handleStreams(id, params) {
   let yearHint = null;
   const reqSeason = parseInt(params.season || "0", 10) || 0;
   const reqEpisode = parseInt(params.episode || "0", 10) || 0;
-  let isSeries = params.type === "tv" || reqSeason > 0 || reqEpisode > 0 || /S\d+/i.test(title);
+  let isSeries = params.type === "tv" || reqSeason > 0 || reqEpisode > 0 || /\bS\d+/i.test(title);
 
   let imdbId = id.startsWith("tt") ? id : null;
 
   if (!imdbId) {
-    // Fetch title from Moviebox if not provided
-    const checkTypes = isSeries ? ["tv", "movie"] : ["tv", "movie"];
+    // Fetch title & real media_type from Moviebox
+    const checkTypes = isSeries ? ["tv", "movie"] : ["movie", "tv"];
     for (const mtype of checkTypes) {
       try {
         const res = await fetch(`https://api2.imdb3.shop/api/${mtype}/${id}`, { headers: { "User-Agent": USER_AGENT } });
@@ -1580,19 +1662,19 @@ async function handleStreams(id, params) {
           const first = json.results?.[0];
           if (first && first.title) {
             title = first.title;
-            if (mtype === "tv" || first.media_type === "tv" || Array.isArray(first.season)) {
+            const hasValidSeasons = Array.isArray(first.season) && first.season.some(s => (parseInt(s.se || s.season || 0, 10) > 0) && (parseInt(s.ep || s.episodes || 0, 10) > 0));
+            if (first.media_type === "tv" || first.media_type === "series" || hasValidSeasons) {
               isSeries = true;
             }
             if (first.release_date) {
-              const raw = String(first.release_date);
-              yearHint = raw.length === 10 ? String(new Date(parseInt(raw, 10) * 1000).getFullYear()) : raw.slice(0, 4);
+              yearHint = extractYear(first.release_date);
             }
             break;
           }
         }
       } catch {}
     }
-    imdbId = await resolveImdbId(title, yearHint);
+    imdbId = await resolveImdbId(title, yearHint, isSeries);
   }
 
   const season = reqSeason > 0 ? reqSeason : 1;

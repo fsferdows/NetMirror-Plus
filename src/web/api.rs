@@ -899,6 +899,129 @@ pub async fn get_suggest(
 pub struct DetailsQuery {
     pub provider: Option<String>,
     pub title: Option<String>,
+    #[serde(rename = "type")]
+    pub media_type: Option<String>,
+}
+
+fn build_seasons_from_pairs(pairs: Vec<(usize, usize, Option<String>, Option<String>)>) -> Vec<Season> {
+    let mut by_season: std::collections::BTreeMap<usize, Vec<Episode>> = std::collections::BTreeMap::new();
+    for (s_num, e_num, title, overview) in pairs {
+        if s_num == 0 || e_num == 0 {
+            continue;
+        }
+        let eps = by_season.entry(s_num).or_default();
+        if !eps.iter().any(|e| e.number == e_num) {
+            eps.push(Episode {
+                season: s_num,
+                number: e_num,
+                title: title.or_else(|| Some(format!("Episode {e_num}"))),
+                overview,
+            });
+        }
+    }
+    by_season
+        .into_iter()
+        .map(|(number, mut episodes)| {
+            episodes.sort_by_key(|e| e.number);
+            Season { number, episodes }
+        })
+        .collect()
+}
+
+struct RealSeriesMeta {
+    seasons: Vec<Season>,
+    summary: Option<String>,
+    genres: Vec<String>,
+    rating: Option<String>,
+    title: Option<String>,
+    year: Option<String>,
+}
+
+async fn fetch_real_series_meta(imdb_id: &str) -> Option<RealSeriesMeta> {
+    if !imdb_id.starts_with("tt") {
+        return None;
+    }
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_millis(2500))
+        .build()
+        .ok()?;
+
+    // 1. Try TVMaze lookup -> episodes list
+    let lookup_url = format!("https://api.tvmaze.com/lookup/shows?imdb={imdb_id}");
+    if let Ok(res) = client.get(&lookup_url).header("User-Agent", "Mozilla/5.0").send().await {
+        if res.status().is_success() {
+            if let Ok(show) = res.json::<serde_json::Value>().await {
+                if let Some(show_id) = show.get("id").and_then(|v| v.as_i64()) {
+                    let eps_url = format!("https://api.tvmaze.com/shows/{show_id}/episodes");
+                    if let Ok(ep_res) = client.get(&eps_url).header("User-Agent", "Mozilla/5.0").send().await {
+                        if ep_res.status().is_success() {
+                            if let Ok(ep_list) = ep_res.json::<Vec<serde_json::Value>>().await {
+                                let pairs = ep_list
+                                    .iter()
+                                    .filter_map(|e| {
+                                        let s = e.get("season")?.as_u64()? as usize;
+                                        let n = e.get("number")?.as_u64()? as usize;
+                                        let t = e.get("name").and_then(|v| v.as_str()).map(|s| s.to_string());
+                                        let ov = e.get("summary").and_then(|v| v.as_str()).map(|s| s.replace("<p>", "").replace("</p>", "").trim().to_string()).filter(|s| !s.is_empty());
+                                        Some((s, n, t, ov))
+                                    })
+                                    .collect();
+                                let seasons = build_seasons_from_pairs(pairs);
+                                if !seasons.is_empty() {
+                                    let genres = show
+                                        .get("genres")
+                                        .and_then(|v| v.as_array())
+                                        .map(|arr| arr.iter().filter_map(|x| x.as_str().map(|s| s.to_string())).collect())
+                                        .unwrap_or_default();
+                                    let rating = show.get("rating").and_then(|r| r.get("average")).and_then(|v| v.as_f64()).map(|n| format!("{n:.1}"));
+                                    let summary = show.get("summary").and_then(|v| v.as_str()).map(|s| s.replace("<p>", "").replace("</p>", "").replace("<b>", "").replace("</b>", "").trim().to_string()).filter(|s| !s.is_empty());
+                                    let title = show.get("name").and_then(|v| v.as_str()).map(|s| s.to_string());
+                                    let year = show.get("premiered").and_then(|v| v.as_str()).and_then(|s| s.get(..4)).map(|s| s.to_string());
+                                    return Some(RealSeriesMeta { seasons, summary, genres, rating, title, year });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // 2. Fallback to Cinemeta series videos metadata
+    let cm_url = format!("https://v3-cinemeta.strem.io/meta/series/{imdb_id}.json");
+    if let Ok(res) = client.get(&cm_url).header("User-Agent", "Mozilla/5.0").send().await {
+        if res.status().is_success() {
+            if let Ok(json) = res.json::<serde_json::Value>().await {
+                if let Some(meta) = json.get("meta") {
+                    if let Some(videos) = meta.get("videos").and_then(|v| v.as_array()) {
+                        let pairs = videos
+                            .iter()
+                            .filter_map(|v| {
+                                let s = v.get("season")?.as_u64()? as usize;
+                                let n = v.get("episode").or_else(|| v.get("number"))?.as_u64()? as usize;
+                                let t = v.get("title").or_else(|| v.get("name")).and_then(|x| x.as_str()).map(|s| s.to_string());
+                                let ov = v.get("overview").and_then(|x| x.as_str()).map(|s| s.to_string());
+                                Some((s, n, t, ov))
+                            })
+                            .collect();
+                        let seasons = build_seasons_from_pairs(pairs);
+                        if !seasons.is_empty() {
+                            return Some(RealSeriesMeta {
+                                seasons,
+                                summary: meta.get("description").and_then(|v| v.as_str()).map(|s| s.to_string()),
+                                genres: meta.get("genres").and_then(|v| v.as_array()).map(|a| a.iter().filter_map(|x| x.as_str().map(|s| s.to_string())).collect()).unwrap_or_default(),
+                                rating: meta.get("imdbRating").and_then(|v| v.as_str()).map(|s| s.to_string()),
+                                title: meta.get("name").and_then(|v| v.as_str()).map(|s| s.to_string()),
+                                year: meta.get("releaseInfo").and_then(|v| v.as_str()).and_then(|s| s.get(..4)).map(|s| s.to_string()),
+                            });
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    None
 }
 
 pub async fn get_details(
@@ -921,60 +1044,108 @@ pub async fn get_details(
             .ok();
 
         if let Some(c) = client {
-            if let Ok(res) = c.get(&url).header("User-Agent", "Mozilla/5.0").send().await {
-                if let Ok(json) = res.json::<serde_json::Value>().await {
-                    if let Some(list) = json.get("d").and_then(|v| v.as_array()) {
-                        let item = list.iter().find(|x| x.get("id").and_then(|v| v.as_str()) == Some(&id)).or_else(|| list.first());
-                        if let Some(item) = item {
-                            let raw_title = item.get("l").and_then(|v| v.as_str()).unwrap_or("Untitled");
-                            let title = clean_display_title(raw_title);
-                            let qid = item.get("qid").and_then(|v| v.as_str()).unwrap_or("");
-                            let is_series = qid == "tvSeries" || qid == "tvMiniSeries";
-                            let media_type = if is_series { MediaType::Series } else { MediaType::Movie };
-                            let year = item.get("y").and_then(|v| v.as_i64()).map(|y| y.to_string());
-                            let poster_url = item.get("i").and_then(|i| i.get("imageUrl")).and_then(|u| u.as_str()).map(|s| s.to_string());
-                            let stars = item.get("s").and_then(|v| v.as_str()).map(|s| s.to_string());
-
-                            let mut seasons = Vec::new();
-                            if is_series {
-                                for s in 1..=5 {
-                                    let mut episodes = Vec::new();
-                                    for ep in 1..=10 {
-                                        episodes.push(Episode {
-                                            season: s,
-                                            number: ep,
-                                            title: Some(format!("Episode {ep}")),
-                                            overview: None,
-                                        });
-                                    }
-                                    seasons.push(Season {
-                                        number: s,
-                                        episodes,
-                                    });
-                                }
-                            }
-
-                            return Ok(Json(MediaDetails {
-                                id: ProviderMediaId { provider: ProviderKind::MovieBox, value: id.clone() },
-                                title,
-                                media_type,
-                                year,
-                                description: Some("Stream directly in high definition with multi-audio and subtitles.".to_string()),
-                                tagline: None,
-                                imdb_rating: Some("8.5".to_string()),
-                                director: None,
-                                stars,
-                                prints: None,
-                                audios: None,
-                                poster_url,
-                                duration: if is_series { Some("45 min/ep".to_string()) } else { Some("118 min".to_string()) },
-                                genres: if is_series { vec!["TV Series".to_string(), "Drama".to_string()] } else { vec!["Movie".to_string(), "Cinema".to_string()] },
-                                seasons,
-                                dubs: vec![],
-                            }));
-                        }
+            let (imdb_res, real_meta_opt) = tokio::join!(
+                async {
+                    match c.get(&url).header("User-Agent", "Mozilla/5.0").send().await {
+                        Ok(r) => r.json::<serde_json::Value>().await.ok(),
+                        Err(_) => None,
                     }
-                }
+                },
+                fetch_real_series_meta(&id)
+            );
+            let item = imdb_res
+                .as_ref()
+                .and_then(|json| json.get("d").and_then(|v| v.as_array()))
+                .and_then(|list| {
+                    list.iter()
+                        .find(|x| x.get("id").and_then(|v| v.as_str()) == Some(&id))
+                        .or_else(|| list.first())
+                        .cloned()
+                });
+
+            if item.is_some() || real_meta_opt.is_some() {
+                let qid = item.as_ref().and_then(|x| x.get("qid")).and_then(|v| v.as_str()).unwrap_or("");
+                let is_mini = qid == "tvMiniSeries";
+                let is_series = real_meta_opt.is_some()
+                    || qid == "tvSeries"
+                    || is_mini
+                    || params.media_type.as_deref() == Some("tv");
+                let raw_title = item
+                    .as_ref()
+                    .and_then(|x| x.get("l").and_then(|v| v.as_str()))
+                    .or_else(|| real_meta_opt.as_ref().and_then(|m| m.title.as_deref()))
+                    .or_else(|| params.title.as_deref())
+                    .unwrap_or("Untitled");
+                let title = clean_display_title(raw_title);
+                let media_type = if is_series { MediaType::Series } else { MediaType::Movie };
+                let year = item
+                    .as_ref()
+                    .and_then(|x| x.get("y").and_then(|v| v.as_i64()).map(|y| y.to_string()))
+                    .or_else(|| real_meta_opt.as_ref().and_then(|m| m.year.clone()));
+                let poster_url = item
+                    .as_ref()
+                    .and_then(|x| x.get("i").and_then(|i| i.get("imageUrl")).and_then(|u| u.as_str()).map(|s| s.to_string()));
+                let stars = item.as_ref().and_then(|x| x.get("s").and_then(|v| v.as_str()).map(|s| s.to_string()));
+
+                let seasons = if !is_series {
+                    Vec::new()
+                } else if let Some(ref real_meta) = real_meta_opt {
+                    real_meta.seasons.clone()
+                } else {
+                    let s_count = if is_mini { 1 } else { 3 };
+                    (1..=s_count)
+                        .map(|s| Season {
+                            number: s,
+                            episodes: (1..=10)
+                                .map(|ep| Episode {
+                                    season: s,
+                                    number: ep,
+                                    title: Some(format!("Episode {ep}")),
+                                    overview: None,
+                                })
+                                .collect(),
+                        })
+                        .collect()
+                };
+
+                let description = real_meta_opt
+                    .as_ref()
+                    .and_then(|m| m.summary.clone())
+                    .unwrap_or_else(|| "Stream directly in high definition with multi-audio and subtitles.".to_string());
+                let genres = real_meta_opt
+                    .as_ref()
+                    .map(|m| m.genres.clone())
+                    .filter(|g| !g.is_empty())
+                    .unwrap_or_else(|| {
+                        if is_series {
+                            vec!["TV Series".to_string(), "Drama".to_string()]
+                        } else {
+                            vec!["Movie".to_string(), "Cinema".to_string()]
+                        }
+                    });
+                let imdb_rating = real_meta_opt
+                    .as_ref()
+                    .and_then(|m| m.rating.clone())
+                    .or_else(|| Some("8.5".to_string()));
+
+                return Ok(Json(MediaDetails {
+                    id: ProviderMediaId { provider: ProviderKind::MovieBox, value: id.clone() },
+                    title,
+                    media_type,
+                    year,
+                    description: Some(description),
+                    tagline: None,
+                    imdb_rating,
+                    director: None,
+                    stars,
+                    prints: None,
+                    audios: None,
+                    poster_url,
+                    duration: if is_series { Some("45 min/ep".to_string()) } else { Some("118 min".to_string()) },
+                    genres,
+                    seasons,
+                    dubs: vec![],
+                }));
             }
         }
     }
@@ -1035,11 +1206,21 @@ pub async fn get_details(
             if let Some(ref title_hint) = params.title {
                 let imdb_items = search_imdb_global(title_hint).await;
                 if let Some(top) = imdb_items.first() {
-                    let is_ser = top.media_type == MediaType::Series;
+                    let is_ser = top.media_type == MediaType::Series || params.media_type.as_deref() == Some("tv");
+                    let real_seasons = if is_ser {
+                        fetch_real_series_meta(&top.id.value).await.map(|m| m.seasons)
+                    } else {
+                        None
+                    };
+                    let seasons = if is_ser {
+                        real_seasons.unwrap_or_else(make_default_seasons)
+                    } else {
+                        vec![]
+                    };
                     return Ok(Json(MediaDetails {
                         id: ProviderMediaId { provider: ProviderKind::MovieBox, value: top.id.value.clone() },
                         title: top.title.clone(),
-                        media_type: top.media_type,
+                        media_type: if is_ser { MediaType::Series } else { top.media_type },
                         year: top.year.clone(),
                         description: Some("Stream directly in high definition with multi-audio and subtitles.".to_string()),
                         tagline: None,
@@ -1051,7 +1232,7 @@ pub async fn get_details(
                         poster_url: top.poster_url.clone(),
                         duration: if is_ser { Some("45 min/ep".to_string()) } else { Some("118 min".to_string()) },
                         genres: vec!["Cinema".to_string()],
-                        seasons: if is_ser { make_default_seasons() } else { vec![] },
+                        seasons,
                         dubs: vec![],
                     }));
                 }
@@ -1231,17 +1412,6 @@ fn build_embed_urls(
     let ep = episode.max(1);
     let mut embed_urls = Vec::new();
 
-    if let Some(tid) = tmdb_id {
-        embed_urls.push(EmbedSource {
-            name: "VidLink Cloud (4K)".to_string(),
-            url: if is_series {
-                format!("https://vidlink.pro/tv/{tid}/{s}/{ep}")
-            } else {
-                format!("https://vidlink.pro/movie/{tid}")
-            },
-        });
-    }
-
     if let Some(iid) = imdb_id {
         embed_urls.push(EmbedSource {
             name: "2Embed Cloud (HD)".to_string(),
@@ -1253,7 +1423,26 @@ fn build_embed_urls(
         });
     }
 
+    if let Some(vidsrc_id) = imdb_id.or(tmdb_id) {
+        embed_urls.push(EmbedSource {
+            name: "VidSrc.to (HD)".to_string(),
+            url: if is_series {
+                format!("https://vidsrc.to/embed/tv/{vidsrc_id}/{s}/{ep}")
+            } else {
+                format!("https://vidsrc.to/embed/movie/{vidsrc_id}")
+            },
+        });
+    }
+
     if let Some(tid) = tmdb_id {
+        embed_urls.push(EmbedSource {
+            name: "VidLink Cloud (4K)".to_string(),
+            url: if is_series {
+                format!("https://vidlink.pro/tv/{tid}/{s}/{ep}")
+            } else {
+                format!("https://vidlink.pro/movie/{tid}")
+            },
+        });
         embed_urls.push(EmbedSource {
             name: "AutoEmbed Server (Fast)".to_string(),
             url: if is_series {
@@ -1269,17 +1458,6 @@ fn build_embed_urls(
                 format!("https://autoembed.me/tv/imdb/{iid}-{s}-{ep}")
             } else {
                 format!("https://autoembed.me/movie/imdb/{iid}")
-            },
-        });
-    }
-
-    if let Some(vidsrc_id) = imdb_id.or(tmdb_id) {
-        embed_urls.push(EmbedSource {
-            name: "VidSrc.to (HD)".to_string(),
-            url: if is_series {
-                format!("https://vidsrc.to/embed/tv/{vidsrc_id}/{s}/{ep}")
-            } else {
-                format!("https://vidsrc.to/embed/movie/{vidsrc_id}")
             },
         });
     }

@@ -423,15 +423,6 @@ function buildEmbedUrls({ imdbId, tmdbId, title, id, isSeries, season, episode }
   const ep = episode > 0 ? episode : 1;
   const embedUrls = [];
 
-  if (tmdbId) {
-    embedUrls.push({
-      name: "VidLink Cloud (4K)",
-      url: isSeries
-        ? `https://vidlink.pro/tv/${tmdbId}/${s}/${ep}`
-        : `https://vidlink.pro/movie/${tmdbId}`,
-    });
-  }
-
   if (imdbId) {
     embedUrls.push({
       name: "2Embed Cloud (HD)",
@@ -441,7 +432,23 @@ function buildEmbedUrls({ imdbId, tmdbId, title, id, isSeries, season, episode }
     });
   }
 
+  if (imdbId || tmdbId) {
+    const vidsrcId = imdbId || tmdbId;
+    embedUrls.push({
+      name: "VidSrc.to (HD)",
+      url: isSeries
+        ? `https://vidsrc.to/embed/tv/${vidsrcId}/${s}/${ep}`
+        : `https://vidsrc.to/embed/movie/${vidsrcId}`,
+    });
+  }
+
   if (tmdbId) {
+    embedUrls.push({
+      name: "VidLink Cloud (4K)",
+      url: isSeries
+        ? `https://vidlink.pro/tv/${tmdbId}/${s}/${ep}`
+        : `https://vidlink.pro/movie/${tmdbId}`,
+    });
     embedUrls.push({
       name: "AutoEmbed Server (Fast)",
       url: isSeries
@@ -454,16 +461,6 @@ function buildEmbedUrls({ imdbId, tmdbId, title, id, isSeries, season, episode }
       url: isSeries
         ? `https://autoembed.me/tv/imdb/${imdbId}-${s}-${ep}`
         : `https://autoembed.me/movie/imdb/${imdbId}`,
-    });
-  }
-
-  if (imdbId || tmdbId) {
-    const vidsrcId = imdbId || tmdbId;
-    embedUrls.push({
-      name: "VidSrc.to (HD)",
-      url: isSeries
-        ? `https://vidsrc.to/embed/tv/${vidsrcId}/${s}/${ep}`
-        : `https://vidsrc.to/embed/movie/${vidsrcId}`,
     });
   }
 
@@ -1704,6 +1701,7 @@ async function handleDetails(id, params = {}) {
                 }
                 seasons.push({ number: sNum, season_number: sNum, episodes });
               });
+              seasons.sort((a, b) => a.number - b.number);
             } else {
               const sCount = Math.max(1, parseInt(first.season, 10) || 1);
               seasons = buildDefaultSeasons(sCount, 10);
@@ -1748,9 +1746,13 @@ async function handleDetails(id, params = {}) {
       let seasons = [];
       if (isSeries) {
         const tvMazeData = await fetchTvMazeSeasons(top.id.value);
-        seasons = (tvMazeData && tvMazeData.seasons && tvMazeData.seasons.length > 0)
-          ? tvMazeData.seasons
-          : buildDefaultSeasons(1, 10);
+        if (tvMazeData && tvMazeData.seasons && tvMazeData.seasons.length > 0) {
+          seasons = tvMazeData.seasons;
+        } else {
+          const cmMeta = await resolveCinemetaMeta(top.id.value, true);
+          const cmSeasons = cmMeta ? buildSeasonsFromVideos(cmMeta.videos) : [];
+          seasons = cmSeasons.length > 0 ? cmSeasons : buildDefaultSeasons(1, 10);
+        }
       }
       return {
         statusCode: 200,

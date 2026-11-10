@@ -25,6 +25,7 @@
     currentEmbedIndex: 0,
     currentEmbedServerName: '',
     playbackRequestSeq: 0,
+    embedLoadSeq: 0,
     currentNav: 'home',
     activeFilter: 'all',
     gridItems: [],
@@ -1024,8 +1025,11 @@
       let s = season;
       let ep = episode;
       try {
-        const titleParam = title ? `&title=${encodeURIComponent(title)}` : '';
-        const res = await fetch(`/api/details/${watchId}?${titleParam}`);
+        const qs = new URLSearchParams();
+        if (title) qs.set('title', title);
+        if (s > 0 || ep > 0) qs.set('type', 'tv');
+        const qStr = qs.toString();
+        const res = await fetch(`/api/details/${watchId}${qStr ? `?${qStr}` : ''}`);
         if (res.ok) {
           const details = await res.json();
           state.currentDetails = details;
@@ -1228,12 +1232,15 @@
     const firstSeason = seasons[0];
     const firstSNum = parseInt(firstSeason ? (firstSeason.number ?? firstSeason.season_number ?? 1) : 1, 10) || 1;
     state.currentSeason = firstSNum;
+    state.currentEpisode = 1;
+    if (el.episodeSearchInput) el.episodeSearchInput.value = '';
     renderEpisodes(firstSeason ? firstSeason.episodes : []);
 
     el.seasonSelect.onchange = (e) => {
       const sNum = parseInt(e.target.value, 10) || 1;
       state.currentSeason = sNum;
       state.currentEpisode = 1;
+      if (el.episodeSearchInput) el.episodeSearchInput.value = '';
       const found = seasons.find((s, idx) => ((parseInt(s.number ?? s.season_number ?? (idx + 1), 10) || (idx + 1)) === sNum));
       if (found) {
         renderEpisodes(found.episodes);
@@ -1305,9 +1312,12 @@
   }
 
   function openPlayerDirect(item) {
-    const isSeries = item.media_type === 'series' || /\bS\d+(-S\d+)?\b/i.test(item.title || '') || /\bSeason\s*\d+\b/i.test(item.title || '');
-    const s = isSeries ? 1 : 0;
-    const e = isSeries ? 1 : 0;
+    const isSeries = item.media_type === 'series'
+      || (item.season && parseInt(item.season, 10) > 0)
+      || /\bS\d+(-S\d+)?\b/i.test(item.title || '')
+      || /\bSeason\s*\d+\b/i.test(item.title || '');
+    const s = isSeries ? (parseInt(item.season, 10) || 1) : 0;
+    const e = isSeries ? (parseInt(item.episode, 10) || 1) : 0;
     startPlayback(item, s, e);
   }
 
@@ -1633,10 +1643,7 @@
     }
 
     if (!state.isEmbedMode) {
-      if (el.embedPlayerIframe) {
-        el.embedPlayerIframe.classList.add('hidden');
-        el.embedPlayerIframe.src = '';
-      }
+      clearEmbedIframe();
       el.videoElement.classList.remove('hidden');
     }
 
@@ -1744,10 +1751,11 @@
 
           const detectedSeries = details.media_type === 'series' || (details.seasons && details.seasons.length > 0);
           if (!knownSeries && detectedSeries) {
+            const targetS = activeSeason > 0 ? activeSeason : 1;
+            const targetEp = activeEpisode > 0 ? activeEpisode : 1;
             if (el.watchEpisodesColumn) el.watchEpisodesColumn.classList.remove('hidden');
-            renderWatchEpisodes(details, 1, 1);
-            // Reload playback as Season 1 Episode 1 TV stream
-            startPlayback(details, 1, 1);
+            renderWatchEpisodes(details, targetS, targetEp);
+            startPlayback(details, targetS, targetEp);
             return;
           }
         }
@@ -1920,6 +1928,48 @@
     };
   }
 
+  function clearEmbedIframe() {
+    state.embedLoadSeq += 1;
+    if (!el.embedPlayerIframe) return;
+    const parent = el.embedPlayerIframe.parentNode;
+    const blank = document.createElement('iframe');
+    blank.id = 'embedPlayerIframe';
+    blank.className = 'embed-player-iframe hidden';
+    blank.setAttribute('allowfullscreen', '');
+    blank.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
+    blank.setAttribute('referrerpolicy', 'no-referrer');
+    if (parent) {
+      parent.replaceChild(blank, el.embedPlayerIframe);
+      el.embedPlayerIframe = blank;
+    } else {
+      el.embedPlayerIframe.classList.add('hidden');
+      el.embedPlayerIframe.src = '';
+    }
+  }
+
+  function mountEmbedIframe(url) {
+    state.embedLoadSeq += 1;
+    if (!el.embedPlayerIframe) return;
+    const parent = el.embedPlayerIframe.parentNode;
+    const frame = document.createElement('iframe');
+    frame.id = 'embedPlayerIframe';
+    frame.className = 'embed-player-iframe';
+    frame.setAttribute('allowfullscreen', '');
+    frame.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
+    frame.setAttribute('referrerpolicy', 'no-referrer');
+    frame.src = url;
+    if (parent) {
+      parent.replaceChild(frame, el.embedPlayerIframe);
+      el.embedPlayerIframe = frame;
+    } else {
+      el.embedPlayerIframe.removeAttribute('sandbox');
+      el.embedPlayerIframe.setAttribute('referrerpolicy', 'no-referrer');
+      el.embedPlayerIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
+      el.embedPlayerIframe.classList.remove('hidden');
+      el.embedPlayerIframe.src = url;
+    }
+  }
+
   function playEmbedUrl(url, serverName = 'Embed Player') {
     state.isEmbedMode = true;
     state.currentEmbedServerName = serverName;
@@ -1931,25 +1981,7 @@
     if (el.playerControls) {
       el.playerControls.classList.add('hidden');
     }
-    if (el.embedPlayerIframe) {
-      // Remove sandbox attribute so video players load smoothly without "Playback blocked" errors
-      el.embedPlayerIframe.removeAttribute('sandbox');
-      el.embedPlayerIframe.setAttribute('referrerpolicy', 'no-referrer');
-      el.embedPlayerIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
-      el.embedPlayerIframe.classList.remove('hidden');
-
-      const prevSrc = el.embedPlayerIframe.getAttribute('src') || '';
-      if (prevSrc && prevSrc !== 'about:blank') {
-        el.embedPlayerIframe.src = 'about:blank';
-        setTimeout(() => {
-          if (el.embedPlayerIframe && state.isEmbedMode && state.currentEmbedServerName === serverName) {
-            el.embedPlayerIframe.src = url;
-          }
-        }, 30);
-      } else {
-        el.embedPlayerIframe.src = url;
-      }
-    }
+    mountEmbedIframe(url);
     el.playerSpinner.classList.add('hidden');
     if (el.currentServerLabel) {
       el.currentServerLabel.textContent = serverName;
@@ -1980,10 +2012,7 @@
           pill.addEventListener('click', () => {
             state.currentStreamIndex = idx;
             state.isEmbedMode = false;
-            if (el.embedPlayerIframe) {
-              el.embedPlayerIframe.classList.add('hidden');
-              el.embedPlayerIframe.src = '';
-            }
+            clearEmbedIframe();
             el.videoElement.classList.remove('hidden');
             if (el.playerControls) {
               el.playerControls.classList.remove('hidden');
@@ -2039,10 +2068,7 @@
         btn.addEventListener('click', () => {
           state.currentStreamIndex = idx;
           state.isEmbedMode = false;
-          if (el.embedPlayerIframe) {
-            el.embedPlayerIframe.classList.add('hidden');
-            el.embedPlayerIframe.src = '';
-          }
+          clearEmbedIframe();
           el.videoElement.classList.remove('hidden');
           if (el.playerControls) {
             el.playerControls.classList.remove('hidden');
@@ -2084,10 +2110,7 @@
 
   function switchStream(stream, seekTime = 0) {
     state.isEmbedMode = false;
-    if (el.embedPlayerIframe) {
-      el.embedPlayerIframe.classList.add('hidden');
-      el.embedPlayerIframe.src = '';
-    }
+    clearEmbedIframe();
     el.videoElement.classList.remove('hidden');
     if (el.playerControls) {
       el.playerControls.classList.remove('hidden');
@@ -2219,10 +2242,7 @@
     const video = el.videoElement;
     video.pause();
     video.src = '';
-    if (el.embedPlayerIframe) {
-      el.embedPlayerIframe.src = '';
-      el.embedPlayerIframe.classList.add('hidden');
-    }
+    clearEmbedIframe();
     el.videoElement.classList.remove('hidden');
     state.isEmbedMode = false;
     state.currentEmbedServerName = '';
@@ -3199,13 +3219,7 @@
       streamUrl = `/api/sports-stream?name=${encodeURIComponent(activeChannel.name || title)}`;
     }
 
-    if (el.embedPlayerIframe) {
-      el.embedPlayerIframe.removeAttribute('sandbox');
-      el.embedPlayerIframe.setAttribute('referrerpolicy', 'no-referrer');
-      el.embedPlayerIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
-      el.embedPlayerIframe.src = streamUrl;
-      el.embedPlayerIframe.classList.remove('hidden');
-    }
+    mountEmbedIframe(streamUrl);
     if (el.currentServerLabel) {
       el.currentServerLabel.textContent = activeChannel.name || `Server ${initialIndex + 1}`;
     }

@@ -5,6 +5,17 @@ use axum::{
     response::Response,
 };
 use serde::Deserialize;
+use std::sync::LazyLock;
+
+static PROXY_CLIENT: LazyLock<reqwest::Client> = LazyLock::new(|| {
+    crate::net::http_client_builder()
+        .connect_timeout(std::time::Duration::from_secs(10))
+        .tcp_keepalive(std::time::Duration::from_secs(30))
+        .pool_idle_timeout(std::time::Duration::from_secs(90))
+        .pool_max_idle_per_host(16)
+        .build()
+        .expect("proxy http client")
+});
 
 #[derive(Deserialize)]
 pub struct StreamQuery {
@@ -38,13 +49,7 @@ pub async fn handle_stream_proxy(
     Query(params): Query<StreamQuery>,
     client_headers: HeaderMap,
 ) -> Result<Response, (StatusCode, String)> {
-    let client = reqwest::Client::builder()
-        .connect_timeout(std::time::Duration::from_secs(12))
-        .tcp_keepalive(std::time::Duration::from_secs(30))
-        .build()
-        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
-
-    let mut upstream_req = client.get(&params.url);
+    let mut upstream_req = PROXY_CLIENT.get(&params.url);
 
     // Forward Range header if requested by browser for seeking
     if let Some(range_val) = client_headers.get(header::RANGE) {

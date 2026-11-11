@@ -22,6 +22,7 @@
     currentStreamIndex: 0,
     embedUrls: [],
     isEmbedMode: false,
+    userLockedEmbedServer: false,
     currentEmbedIndex: 0,
     currentEmbedServerName: '',
     playbackRequestSeq: 0,
@@ -1680,12 +1681,18 @@
       // Populate Server Menu & Top Server Pills Bar
       populateServerMenu(state.currentStreams, state.embedUrls);
 
-      if (state.isEmbedMode && state.embedUrls.length > 0) {
-        // If user already chose an embed provider, stay on that mirror for the new episode!
+      if (state.userLockedEmbedServer && state.embedUrls.length > 0) {
+        // If user explicitly chose an embed provider, stay on that mirror for the new episode!
         const matchingEmbed = state.embedUrls.find(e => e.name === state.currentEmbedServerName) || state.embedUrls[state.currentEmbedIndex] || state.embedUrls[0];
         playEmbedUrl(matchingEmbed.url, matchingEmbed.name);
       } else if (state.currentStreams.length > 0) {
         state.isEmbedMode = false;
+        state.userLockedEmbedServer = false;
+        clearEmbedIframe();
+        el.videoElement.classList.remove('hidden');
+        if (el.playerControls) {
+          el.playerControls.classList.remove('hidden');
+        }
         const defaultStream = state.currentStreams[0];
         state.currentQuality = defaultStream.quality;
         el.currentQualityLabel.textContent = defaultStream.quality;
@@ -1888,12 +1895,45 @@
     if (el.downloadGuideModal) el.downloadGuideModal.classList.add('hidden');
   }
 
+  let activeStreamFallbackTimer = null;
+
   function playStreamUrl(url, seekTime = 0) {
     const video = el.videoElement;
+    if (activeStreamFallbackTimer) {
+      clearTimeout(activeStreamFallbackTimer);
+      activeStreamFallbackTimer = null;
+    }
+    el.spinnerText.textContent = 'Buffering HD/4K stream...';
+    const reqAtStart = state.playbackRequestSeq;
     video.src = url;
     video.load();
 
+    const triggerFallback = () => {
+      if (activeStreamFallbackTimer) {
+        clearTimeout(activeStreamFallbackTimer);
+        activeStreamFallbackTimer = null;
+      }
+      if (reqAtStart !== state.playbackRequestSeq || state.isEmbedMode) return;
+      const nextIdx = state.currentStreamIndex + 1;
+      if (nextIdx < state.currentStreams.length) {
+        state.currentStreamIndex = nextIdx;
+        const nextStream = state.currentStreams[nextIdx];
+        showToast(`Stream issue. Auto-switching to ${nextStream.server}...`);
+        switchStream(nextStream, video.currentTime || 0);
+      } else if (state.embedUrls && state.embedUrls.length > 0 && !state.isEmbedMode) {
+        showToast('Direct streams unavailable. Switching to Universal Cloud Player...');
+        playEmbedUrl(state.embedUrls[0].url, state.embedUrls[0].name);
+      } else {
+        el.spinnerText.textContent = 'Playback error: Stream could not be played.';
+        el.playerSpinner.classList.remove('hidden');
+      }
+    };
+
     const onCanPlay = () => {
+      if (activeStreamFallbackTimer) {
+        clearTimeout(activeStreamFallbackTimer);
+        activeStreamFallbackTimer = null;
+      }
       el.playerSpinner.classList.add('hidden');
       ensureAudioEngine();
       if (seekTime > 5 && seekTime < video.duration - 10) {
@@ -1910,21 +1950,16 @@
 
     video.addEventListener('canplay', onCanPlay);
 
+    activeStreamFallbackTimer = setTimeout(() => {
+      if (reqAtStart === state.playbackRequestSeq && !state.isEmbedMode && video.readyState < 2) {
+        console.warn('Direct stream buffered slowly, trying fallback mirror');
+        triggerFallback();
+      }
+    }, 15000);
+
     video.onerror = () => {
       console.warn('Video element reported error for:', video.src);
-      const nextIdx = state.currentStreamIndex + 1;
-      if (nextIdx < state.currentStreams.length) {
-        state.currentStreamIndex = nextIdx;
-        const nextStream = state.currentStreams[nextIdx];
-        showToast(`Stream issue. Auto-switching to ${nextStream.server}...`);
-        switchStream(nextStream, video.currentTime || 0);
-      } else if (state.embedUrls && state.embedUrls.length > 0 && !state.isEmbedMode) {
-        showToast('Direct streams unavailable. Switching to Universal Cloud Player...');
-        playEmbedUrl(state.embedUrls[0].url, state.embedUrls[0].name);
-      } else {
-        el.spinnerText.textContent = 'Playback error: Stream could not be played.';
-        el.playerSpinner.classList.remove('hidden');
-      }
+      triggerFallback();
     };
   }
 
@@ -2003,15 +2038,17 @@
           const isActive = idx === state.currentStreamIndex && !state.isEmbedMode;
           pill.className = `server-pill-btn ${isActive ? 'active' : ''}`;
           const label = stream.server || `Server ${idx + 1}`;
+          const pillText = stream.quality && !label.includes(stream.quality) ? `${label} (${stream.quality})` : label;
           if (isActive) {
-            pill.innerHTML = `<span class="live-signal-bars"><span class="bar b1"></span><span class="bar b2"></span><span class="bar b3"></span></span> ${label} (${stream.quality})`;
+            pill.innerHTML = `<span class="live-signal-bars"><span class="bar b1"></span><span class="bar b2"></span><span class="bar b3"></span></span> ${pillText}`;
           } else {
-            pill.textContent = `${label} (${stream.quality})`;
+            pill.textContent = pillText;
           }
 
           pill.addEventListener('click', () => {
             state.currentStreamIndex = idx;
             state.isEmbedMode = false;
+            state.userLockedEmbedServer = false;
             clearEmbedIframe();
             el.videoElement.classList.remove('hidden');
             if (el.playerControls) {
@@ -2042,6 +2079,7 @@
 
           pill.title = emb.name;
           pill.addEventListener('click', () => {
+            state.userLockedEmbedServer = true;
             playEmbedUrl(emb.url, emb.name);
             populateServerMenu(state.currentStreams, state.embedUrls);
           });
@@ -2068,6 +2106,7 @@
         btn.addEventListener('click', () => {
           state.currentStreamIndex = idx;
           state.isEmbedMode = false;
+          state.userLockedEmbedServer = false;
           clearEmbedIframe();
           el.videoElement.classList.remove('hidden');
           if (el.playerControls) {
@@ -2100,6 +2139,7 @@
         btn.className = `menu-item ${isActive ? 'active' : ''}`;
         btn.textContent = `🌐 ${emb.name}`;
         btn.addEventListener('click', () => {
+          state.userLockedEmbedServer = true;
           playEmbedUrl(emb.url, emb.name);
           el.serverMenu.classList.add('hidden');
         });
@@ -2239,12 +2279,17 @@
 
   function closePlayer() {
     state.playbackRequestSeq += 1;
+    if (activeStreamFallbackTimer) {
+      clearTimeout(activeStreamFallbackTimer);
+      activeStreamFallbackTimer = null;
+    }
     const video = el.videoElement;
     video.pause();
     video.src = '';
     clearEmbedIframe();
     el.videoElement.classList.remove('hidden');
     state.isEmbedMode = false;
+    state.userLockedEmbedServer = false;
     state.currentEmbedServerName = '';
     state.currentEmbedIndex = 0;
     if (el.watchEpisodesColumn) el.watchEpisodesColumn.classList.add('hidden');

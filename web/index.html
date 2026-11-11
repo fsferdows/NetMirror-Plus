@@ -41,7 +41,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20261111" />
+  <link rel="stylesheet" href="/styles.css?v=20261111c" />
   <script src="/monetization-config.js"></script>
 </head>
 <body class="bg-dark text-light">
@@ -821,6 +821,9 @@
       <!-- 2. Server Selector Pills Bar (Directly Above Video Player) -->
       <div class="watch-servers-bar" id="watchServersBar">
         <div class="server-pills-scroll" id="serverPillsList"></div>
+        <button class="how-to-download-btn" id="howToDownloadBtn" title="How to download movies and series">
+          How To Download
+        </button>
         <!-- Hidden server menu for compatibility -->
         <div class="player-menu-wrapper hidden" id="serverMenuWrapper">
           <button class="player-btn player-text-btn" id="serverMenuBtn" title="Streaming Server">
@@ -836,11 +839,6 @@
         <!-- Left / Video Column -->
         <div class="watch-video-column" id="watchVideoColumn">
           <div class="player-container" id="playerContainer">
-            <!-- Floating How To Download Button (top right inside player area) -->
-            <button class="how-to-download-btn" id="howToDownloadBtn" title="How to download movies and series">
-              How To Download
-            </button>
-
             <!-- Loading / Buffering Spinner -->
             <div class="player-spinner" id="playerSpinner">
               <div class="spinner-ring"></div>
@@ -848,7 +846,7 @@
             </div>
 
       <!-- Native HTML5 Video Element -->
-      <video id="videoElement" class="video-element" playsinline crossorigin="anonymous"></video>
+      <video id="videoElement" class="video-element" playsinline preload="auto" crossorigin="anonymous"></video>
 
       <!-- Universal Fallback Web Embed Player with Anti-Ad Shield & No-Referrer Protection -->
       <iframe id="embedPlayerIframe" class="embed-player-iframe hidden" allowfullscreen allow="autoplay; fullscreen; picture-in-picture; encrypted-media" referrerpolicy="no-referrer"></iframe>
@@ -1379,7 +1377,7 @@
     </div>
   </div>
 
-  <script src="/app.js?v=20261111b"></script>
+  <script src="/app.js?v=20261111c"></script>
 </body>
 </html>
 

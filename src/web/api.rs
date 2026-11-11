@@ -1383,15 +1383,15 @@ async fn resolve_imdb_id(title: &str, year_hint: Option<&str>, prefer_series: bo
     best_id
 }
 
-async fn resolve_cinemeta_meta(imdb_id: &str, prefer_series: bool) -> (Option<String>, bool) {
+async fn resolve_cinemeta_meta(imdb_id: &str, prefer_series: bool) -> (Option<String>, bool, Option<String>) {
     if !imdb_id.starts_with("tt") {
-        return (None, prefer_series);
+        return (None, prefer_series, None);
     }
     let Ok(client) = reqwest::Client::builder()
         .timeout(std::time::Duration::from_millis(2200))
         .build()
     else {
-        return (None, prefer_series);
+        return (None, prefer_series, None);
     };
 
     let order = if prefer_series {
@@ -1399,7 +1399,7 @@ async fn resolve_cinemeta_meta(imdb_id: &str, prefer_series: bool) -> (Option<St
     } else {
         ["movie", "series"]
     };
-    let mut fallback: Option<(Option<String>, bool)> = None;
+    let mut fallback: Option<(Option<String>, bool, Option<String>)> = None;
 
     for kind in order {
         let url = format!("https://v3-cinemeta.strem.io/meta/{kind}/{imdb_id}.json");
@@ -1425,6 +1425,10 @@ async fn resolve_cinemeta_meta(imdb_id: &str, prefer_series: bool) -> (Option<St
                 .map(|n| n.to_string())
                 .or_else(|| v.as_str().map(|s| s.to_string()))
         });
+        let name = meta
+            .get("name")
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string());
         let has_videos = meta
             .get("videos")
             .and_then(|v| v.as_array())
@@ -1438,14 +1442,14 @@ async fn resolve_cinemeta_meta(imdb_id: &str, prefer_series: bool) -> (Option<St
             || has_videos;
 
         if tmdb_id.is_some() || has_videos {
-            return (tmdb_id, is_series);
+            return (tmdb_id, is_series, name);
         }
         if fallback.is_none() {
-            fallback = Some((tmdb_id, is_series));
+            fallback = Some((tmdb_id, is_series, name));
         }
     }
 
-    fallback.unwrap_or((None, prefer_series))
+    fallback.unwrap_or((None, prefer_series, None))
 }
 
 fn build_embed_urls(
@@ -1562,32 +1566,17 @@ pub async fn get_streams(
     let type_is_tv = params.media_type.as_deref() == Some("tv");
     let provider_hint = params.provider.as_deref().and_then(ProviderKind::parse);
 
-    // If ID is an IMDb ID directly (starts with "tt"), resolve TMDB ID via Cinemeta and generate verified embed mirrors!
-    if id.starts_with("tt") {
+    let is_imdb_id = id.starts_with("tt");
+    let (tt_tmdb_id, tt_is_series, tt_title) = if is_imdb_id {
         let prefer_series = type_is_tv || req_season > 0 || req_episode > 0;
-        let (tmdb_id_opt, cm_is_series) = resolve_cinemeta_meta(&id, prefer_series).await;
-        let is_series = prefer_series || cm_is_series;
-        let clean = params.title.as_deref().unwrap_or("Movie");
-        let embed_urls = build_embed_urls(
-            Some(&id),
-            tmdb_id_opt.as_deref(),
-            clean,
-            is_series,
-            req_season.max(1),
-            req_episode.max(1),
-        );
-        return Ok(Json(StreamsResponse {
-            releases: vec![],
-            streams: vec![],
-            default_stream_url: None,
-            resource_id: None,
-            embed_urls,
-        }));
-    }
+        resolve_cinemeta_meta(&id, prefer_series).await
+    } else {
+        (None, false, None)
+    };
 
     // If ID is a NetMirror platform ID (e.g. "100985" or "4807"), resolve to subjectid, title, and TMDB ID
     let (target_id, fallback_title, netmirror_tm_id, netmirror_is_tv) =
-        if id.len() <= 10 && id.chars().all(|c| c.is_ascii_digit()) {
+        if !is_imdb_id && id.len() <= 10 && id.chars().all(|c| c.is_ascii_digit()) {
             if let Some((subjectid, title, tm_id, _, is_tv)) = resolve_netmirror_subject(&id).await {
                 (subjectid, title, tm_id, is_tv)
             } else {
@@ -1597,15 +1586,21 @@ pub async fn get_streams(
             (id.clone(), None, None, false)
         };
 
-    // Fetch details to accurately inspect media_type, dubs, and title
-    let details_opt = state.service.details_typed(provider_hint.unwrap_or(ProviderKind::MovieBox), &target_id).await.ok();
+    // Fetch details to accurately inspect media_type, dubs, and title (skip for direct IMDb IDs)
+    let details_opt = if is_imdb_id {
+        None
+    } else {
+        state.service.details_typed(provider_hint.unwrap_or(ProviderKind::MovieBox), &target_id).await.ok()
+    };
     let is_series = type_is_tv
+        || tt_is_series
         || netmirror_is_tv
         || req_season > 0
         || req_episode > 0
         || details_opt.as_ref().map(|d| d.is_series()).unwrap_or(false);
     let resolved_title = params.title.clone()
-        .or_else(|| fallback_title)
+        .or(tt_title)
+        .or(fallback_title)
         .or_else(|| details_opt.as_ref().map(|d| d.title.clone()))
         .unwrap_or_default();
 
@@ -1649,11 +1644,15 @@ pub async fn get_streams(
         }
     }
 
-    // 2. MovieBox primary stream extraction
-    let primary_res = state.service.client.episode_streams(&target_id, season, episode).await;
-    let mb_releases = match primary_res {
-        Ok(r) if !r.is_empty() => Ok(r),
-        _ => state.service.client.episode_streams(&target_id, 0, 0).await,
+    // 2. MovieBox primary stream extraction (when target_id is a MovieBox ID)
+    let mb_releases = if !is_imdb_id {
+        let primary_res = state.service.client.episode_streams(&target_id, season, episode).await;
+        match primary_res {
+            Ok(r) if !r.is_empty() => Ok(r),
+            _ => state.service.client.episode_streams(&target_id, 0, 0).await,
+        }
+    } else {
+        Ok(vec![])
     };
 
     if let Ok(mb_rels) = mb_releases {
@@ -1770,7 +1769,9 @@ pub async fn get_streams(
     };
 
     let fallback_tm_id = netmirror_tm_id.filter(|s| !s.trim().is_empty());
-    let cm_tmdb = if let Some(iid) = imdb_id_opt.as_deref() {
+    let cm_tmdb = if tt_tmdb_id.is_some() {
+        tt_tmdb_id
+    } else if let Some(iid) = imdb_id_opt.as_deref() {
         resolve_cinemeta_meta(iid, is_series).await.0
     } else {
         None

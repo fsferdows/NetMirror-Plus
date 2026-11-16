@@ -8,6 +8,7 @@
 [![Axum](https://img.shields.io/badge/axum-0.8-blue.svg)](https://github.com/tokio-rs/axum)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Netlify Status](https://api.netlify.com/api/v1/badges/f13b6aec-1061-4d39-bf41-f5f9c871096c/deploy-status)](https://app.netlify.com/projects/netmirror-plus/deploys)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/fsferdows/NetMirror-Plus)
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/new)
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/fsferdows/NetMirror-Plus)
@@ -149,7 +150,25 @@ netlify login
 netlify deploy --prod --dir=web --functions=netlify/functions
 ```
 
-### Option B: Render.com
+### Option B: Vercel (Serverless Edge)
+```bash
+# 1. Login to Vercel
+npx vercel login
+
+# 2. Deploy preview
+npm run vercel:deploy
+# or: npx vercel
+
+# 3. Deploy directly to production
+npm run vercel:prod
+# or: npx vercel --prod
+```
+Or import the GitHub repo [fsferdows/NetMirror-Plus](https://github.com/fsferdows/NetMirror-Plus) in [Vercel Dashboard](https://vercel.com/new):
+- **Framework Preset**: Other
+- **Output Directory**: `web`
+- **Serverless API**: Automatically detected in `api/` (configured in [`vercel.json`](vercel.json))
+
+### Option C: Render.com
 1. Fork or push this repository to GitHub: `https://github.com/fsferdows/NetMirror-Plus`.
 2. Go to [Render Dashboard](https://dashboard.render.com/) > **New +** > **Web Service**.
 3. Select `NetMirror-Plus`.
@@ -176,6 +195,10 @@ NetMirror-Plus/
 ├── netlify/
 │   └── functions/
 │       └── api.js              # Serverless Netlify API function (HLS sports & stream proxy)
+├── vercel.json                 # Vercel deployment, rewrites, and security headers
+├── api/
+│   ├── index.js                # Serverless Vercel API function router
+│   └── [...path].js            # Catch-all Vercel API route handler
 ├── src/
 │   ├── bin/
 │   │   └── moviebox_web.rs     # Rust Web Server CLI entrypoint ($PORT support)

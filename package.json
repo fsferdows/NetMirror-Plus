@@ -9,7 +9,11 @@
     "build": "cargo build --release --bin moviebox_web",
     "netlify:build": "netlify build",
     "netlify:deploy": "netlify deploy",
-    "netlify:prod": "netlify deploy --prod"
+    "netlify:prod": "netlify deploy --prod",
+    "vercel:dev": "vercel dev",
+    "vercel:build": "vercel build",
+    "vercel:deploy": "vercel",
+    "vercel:prod": "vercel --prod"
   },
   "keywords": [
     "moviebox",
@@ -19,6 +23,8 @@
     "movies",
     "cinema"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "vercel": "^65.16.0"
+  }
 }
-

@@ -478,20 +478,14 @@ function buildEmbedUrls({ imdbId, tmdbId, title, id, isSeries, season, episode }
     });
   }
 
-  // 3. AutoEmbed Server (Fast) - Adaptive HLS streaming
-  if (tmdbId) {
+  // 3. VidSrc.pm (Cloud) - Fast cloud player
+  if (imdbId || tmdbId) {
+    const vidId = imdbId || tmdbId;
     embedUrls.push({
-      name: "AutoEmbed Server (Fast)",
+      name: "VidSrc.pm (Cloud)",
       url: isSeries
-        ? `https://player.autoembed.me/embed/tv/${tmdbId}/${s}/${ep}/`
-        : `https://player.autoembed.me/embed/movie/${tmdbId}/`,
-    });
-  } else if (imdbId) {
-    embedUrls.push({
-      name: "AutoEmbed Server (Fast)",
-      url: isSeries
-        ? `https://autoembed.me/tv/imdb/${imdbId}-${s}-${ep}`
-        : `https://autoembed.me/movie/imdb/${imdbId}`,
+        ? `https://vidsrc.pm/embed/tv/${vidId}/${s}/${ep}`
+        : `https://vidsrc.pm/embed/movie/${vidId}`,
     });
   }
 
@@ -505,19 +499,14 @@ function buildEmbedUrls({ imdbId, tmdbId, title, id, isSeries, season, episode }
     });
   }
 
-  // 5. 2Embed Cloud (HD)
-  if (imdbId) {
+  // 5. VidSrc.net (Backup)
+  if (imdbId || tmdbId) {
+    const vidId = imdbId || tmdbId;
     embedUrls.push({
-      name: "2Embed Cloud (HD)",
+      name: "VidSrc.net (Backup)",
       url: isSeries
-        ? `https://www.2embed.cc/embedtv/${imdbId}&s=${s}&e=${ep}`
-        : `https://www.2embed.cc/embed/${imdbId}`,
-    });
-    embedUrls.push({
-      name: "VidSrc Cloud (Backup)",
-      url: isSeries
-        ? `https://vidsrc.pm/embed/tv/${imdbId}/${s}/${ep}`
-        : `https://vidsrc.pm/embed/movie/${imdbId}`,
+        ? `https://vidsrc.net/embed/tv/${vidId}/${s}/${ep}`
+        : `https://vidsrc.net/embed/movie/${vidId}`,
     });
   } else if (!tmdbId) {
     const cleanTitleStr = encodeURIComponent(

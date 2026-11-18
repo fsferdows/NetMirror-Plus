@@ -1478,7 +1478,7 @@ fn build_embed_urls(
         });
     }
 
-    // 2. VidSrc.to (HD)
+    // 2. VidSrc.to (HD) - High quality clean player
     if let Some(vidsrc_id) = imdb_id.or(tmdb_id) {
         embed_urls.push(EmbedSource {
             name: "VidSrc.to (HD)".to_string(),
@@ -1490,23 +1490,14 @@ fn build_embed_urls(
         });
     }
 
-    // 3. AutoEmbed Server (Fast)
-    if let Some(tid) = tmdb_id {
+    // 3. VidSrc.pm (Cloud) - Fast cloud mirror
+    if let Some(iid) = imdb_id.or(tmdb_id) {
         embed_urls.push(EmbedSource {
-            name: "AutoEmbed Server (Fast)".to_string(),
+            name: "VidSrc.pm (Cloud)".to_string(),
             url: if is_series {
-                format!("https://player.autoembed.me/embed/tv/{tid}/{s}/{ep}/")
+                format!("https://vidsrc.pm/embed/tv/{iid}/{s}/{ep}")
             } else {
-                format!("https://player.autoembed.me/embed/movie/{tid}/")
-            },
-        });
-    } else if let Some(iid) = imdb_id {
-        embed_urls.push(EmbedSource {
-            name: "AutoEmbed Server (Fast)".to_string(),
-            url: if is_series {
-                format!("https://autoembed.me/tv/imdb/{iid}-{s}-{ep}")
-            } else {
-                format!("https://autoembed.me/movie/imdb/{iid}")
+                format!("https://vidsrc.pm/embed/movie/{iid}")
             },
         });
     }
@@ -1523,36 +1514,20 @@ fn build_embed_urls(
         });
     }
 
-    // 5. 2Embed Cloud (HD)
-    if let Some(iid) = imdb_id {
+    // 5. VidSrc.net (Backup)
+    if let Some(iid) = imdb_id.or(tmdb_id) {
         embed_urls.push(EmbedSource {
-            name: "2Embed Cloud (HD)".to_string(),
+            name: "VidSrc.net (Backup)".to_string(),
             url: if is_series {
-                format!("https://www.2embed.cc/embedtv/{iid}&s={s}&e={ep}")
+                format!("https://vidsrc.net/embed/tv/{iid}/{s}/{ep}")
             } else {
-                format!("https://www.2embed.cc/embed/{iid}")
-            },
-        });
-        embed_urls.push(EmbedSource {
-            name: "VidSrc Cloud (Backup)".to_string(),
-            url: if is_series {
-                format!("https://vidsrc.pm/embed/tv/{iid}/{s}/{ep}")
-            } else {
-                format!("https://vidsrc.pm/embed/movie/{iid}")
+                format!("https://vidsrc.net/embed/movie/{iid}")
             },
         });
     } else if tmdb_id.is_none() {
         let encoded_title =
             percent_encoding::utf8_percent_encode(clean_title, percent_encoding::NON_ALPHANUMERIC)
                 .to_string();
-        embed_urls.push(EmbedSource {
-            name: "AutoEmbed Server (Fast)".to_string(),
-            url: if is_series {
-                format!("https://autoembed.me/tv?title={encoded_title}&season={s}&episode={ep}")
-            } else {
-                format!("https://autoembed.me/movie?title={encoded_title}")
-            },
-        });
         embed_urls.push(EmbedSource {
             name: "VidSrc Cloud (Backup)".to_string(),
             url: if is_series {

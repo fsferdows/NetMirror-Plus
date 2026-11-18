@@ -1998,15 +1998,10 @@
     frame.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
     frame.setAttribute('referrerpolicy', 'no-referrer');
 
-    // Hardware AdShield Sandbox:
-    // OMIT allow-top-navigation on ALL servers so embedded iframes CANNOT redirect or hijack the user's tab.
-    // For clean primary servers (VidLink, AutoEmbed, Sports), omit allow-popups for 100% ad-free playback.
-    // For 2Embed/VidSrc fallback, allow-popups is included only so their internal player engine does not trip its anti-sandbox tripwire.
-    const lowerUrl = (url || '').toLowerCase();
-    const isAdHeavy = lowerUrl.includes('2embed') || lowerUrl.includes('vidsrc.to') || lowerUrl.includes('smashystream');
-    const sandboxTokens = isAdHeavy
-      ? 'allow-forms allow-scripts allow-same-origin allow-presentation allow-downloads allow-modals allow-popups'
-      : 'allow-forms allow-scripts allow-same-origin allow-presentation allow-downloads allow-modals';
+    // Strict Hardware AdShield Sandbox:
+    // OMIT allow-top-navigation, allow-top-navigation-by-user-activation, and allow-popups
+    // on ALL servers so embedded iframes CAN NEVER redirect the user's tab or open new popup tabs!
+    const sandboxTokens = 'allow-forms allow-scripts allow-same-origin allow-presentation allow-downloads allow-modals';
 
     frame.setAttribute('sandbox', sandboxTokens);
     frame.src = url;

@@ -37,14 +37,19 @@ window.NETMIRROR_MONETIZATION = {
   // You can sell these passcodes on Gumroad, Discord, Telegram, or Ko-fi!
   vipPasscodes: ["VIP2026", "NETMIRRORVIP", "PREMIUM4K", "GOLDENPASS", "FSFERDOWS"],
 
-  // 5. BANNER ADVERTISING NETWORKS (e.g. Monetag, Adsterra, PropellerAds, Google AdSense)
-  // Set enabled to true when you sign up with an ad network and paste your banner ad HTML:
-  // When enabled: true, your banners will appear in dedicated, clean sponsor slots.
-  // When enabled: false, ALL ad slots are completely removed and blocked.
+  // 5. BANNER ADVERTISING NETWORKS – GOOGLE ADSENSE ONLY
+  // Google AdSense is the only permitted monetization partner.
+  // All unauthorized popups, popunders, and rogue redirects from video mirrors are blocked by AdShield.
+  googleAdSense: {
+    client: "ca-pub-4512671475286537",
+    enabled: true
+  },
   adBanners: {
-    enabled: false,
-    headerBannerHtml: "", // Paste your ad code here (e.g. 728x90 leaderboard or responsive banner)
-    detailsBannerHtml: "" // Paste your ad code here (e.g. 300x250 or native banner)
+    enabled: true,
+    // Google AdSense Responsive Display Unit for Header
+    headerBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script>',
+    // Google AdSense Responsive Display Unit for Movie/Show Details
+    detailsBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-slot="auto" data-ad-format="rectangle" data-full-width-responsive="true"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script>'
   }
 };
 

@@ -559,6 +559,10 @@
           lower.includes(window.location.hostname) ||
           lower.includes('vercel.app') ||
           lower.includes('netlify.app') ||
+          lower.includes('google.com') ||
+          lower.includes('googlesyndication.com') ||
+          lower.includes('googleadservices.com') ||
+          lower.includes('doubleclick.net') ||
           lower.includes('nordvpn.com') ||
           lower.includes('twitter.com') ||
           lower.includes('x.com') ||
@@ -590,6 +594,10 @@
               lower.includes(window.location.hostname) ||
               lower.includes('vercel.app') ||
               lower.includes('netlify.app') ||
+              lower.includes('google.com') ||
+              lower.includes('googlesyndication.com') ||
+              lower.includes('googleadservices.com') ||
+              lower.includes('doubleclick.net') ||
               lower.includes('nordvpn.com') ||
               lower.includes('twitter.com') ||
               lower.includes('x.com') ||

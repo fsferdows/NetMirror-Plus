@@ -547,6 +547,7 @@
         document: { write: () => {}, writeln: () => {}, open: () => {}, close: () => {} },
       };
 
+      // 1. Intercept rogue popup and blank window attempts
       window.open = function (url, target, features) {
         if (!url || typeof url !== 'string' || url === 'about:blank' || url === '') {
           console.warn('[AdShield] Blocked blank popup window attempt');
@@ -556,8 +557,11 @@
         const isSafe =
           url.startsWith('/') ||
           lower.includes(window.location.hostname) ||
+          lower.includes('vercel.app') ||
+          lower.includes('netlify.app') ||
           lower.includes('nordvpn.com') ||
           lower.includes('twitter.com') ||
+          lower.includes('x.com') ||
           lower.includes('facebook.com') ||
           lower.includes('t.me') ||
           lower.includes('wa.me') ||
@@ -572,7 +576,7 @@
         return nativeOpen.call(window, url, target, features);
       };
 
-      // Intercept rogue external link clicks triggered while playing video
+      // 2. Intercept rogue external link clicks triggered while playing video
       document.addEventListener('click', (e) => {
         if (!state.isEmbedMode && (!el.playerOverlay || el.playerOverlay.classList.contains('hidden'))) {
           return;
@@ -584,8 +588,11 @@
           if (href.startsWith('http://') || href.startsWith('https://')) {
             const isSafe =
               lower.includes(window.location.hostname) ||
+              lower.includes('vercel.app') ||
+              lower.includes('netlify.app') ||
               lower.includes('nordvpn.com') ||
               lower.includes('twitter.com') ||
+              lower.includes('x.com') ||
               lower.includes('facebook.com') ||
               lower.includes('t.me') ||
               lower.includes('wa.me') ||
@@ -602,24 +609,14 @@
         }
       }, true);
 
-      // Anti-hijack: prevent rogue iframe ad scripts from redirecting the user away during video playback
-      window.addEventListener('beforeunload', (e) => {
-        if (state.isEmbedMode) {
-          // If in active playback, protect tab from unauthorized background navigation
-          e.preventDefault();
-          e.returnValue = 'Active video playback in progress.';
-          return e.returnValue;
-        }
-      });
-
-      // Auto-refocus: if a rogue popup steals focus, pull focus back to the player immediately
-      window.addEventListener('blur', () => {
-        if (state.isEmbedMode) {
-          setTimeout(() => {
-            window.focus();
-          }, 150);
-        }
-      });
+      // 3. Connect Player AdShield Pill
+      const pill = document.getElementById('playerAdShieldPill');
+      if (pill) {
+        pill.style.cursor = 'pointer';
+        pill.addEventListener('click', () => {
+          showToast('🛡️ AdShield Active: Player sandbox enabled. Tab-redirects and popups are blocked.');
+        });
+      }
     } catch (_) {}
   }
 
@@ -1989,15 +1986,28 @@
     const frame = document.createElement('iframe');
     frame.id = 'embedPlayerIframe';
     frame.className = 'embed-player-iframe';
-    frame.setAttribute('allowfullscreen', '');
+    frame.setAttribute('allowfullscreen', 'true');
     frame.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
     frame.setAttribute('referrerpolicy', 'no-referrer');
+
+    // Hardware AdShield Sandbox:
+    // OMIT allow-top-navigation on ALL servers so embedded iframes CANNOT redirect or hijack the user's tab.
+    // For clean primary servers (VidLink, AutoEmbed, Sports), omit allow-popups for 100% ad-free playback.
+    // For 2Embed/VidSrc fallback, allow-popups is included only so their internal player engine does not trip its anti-sandbox tripwire.
+    const lowerUrl = (url || '').toLowerCase();
+    const isAdHeavy = lowerUrl.includes('2embed') || lowerUrl.includes('vidsrc.to') || lowerUrl.includes('smashystream');
+    const sandboxTokens = isAdHeavy
+      ? 'allow-forms allow-scripts allow-same-origin allow-presentation allow-downloads allow-modals allow-popups'
+      : 'allow-forms allow-scripts allow-same-origin allow-presentation allow-downloads allow-modals';
+
+    frame.setAttribute('sandbox', sandboxTokens);
     frame.src = url;
+
     if (parent) {
       parent.replaceChild(frame, el.embedPlayerIframe);
       el.embedPlayerIframe = frame;
     } else {
-      el.embedPlayerIframe.removeAttribute('sandbox');
+      el.embedPlayerIframe.setAttribute('sandbox', sandboxTokens);
       el.embedPlayerIframe.setAttribute('referrerpolicy', 'no-referrer');
       el.embedPlayerIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
       el.embedPlayerIframe.classList.remove('hidden');

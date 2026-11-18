@@ -457,15 +457,17 @@ function buildEmbedUrls({ imdbId, tmdbId, title, id, isSeries, season, episode }
   const ep = episode > 0 ? episode : 1;
   const embedUrls = [];
 
-  if (imdbId) {
+  // 1. VidLink Cloud (4K Ultra HD) - Cleanest player, zero popups, subtitles, high-speed CDN
+  if (tmdbId) {
     embedUrls.push({
-      name: "2Embed Cloud (HD)",
+      name: "VidLink Cloud (4K)",
       url: isSeries
-        ? `https://www.2embed.cc/embedtv/${imdbId}&s=${s}&e=${ep}`
-        : `https://www.2embed.cc/embed/${imdbId}`,
+        ? `https://vidlink.pro/tv/${tmdbId}/${s}/${ep}?primaryColor=e50914&nextbutton=true`
+        : `https://vidlink.pro/movie/${tmdbId}?primaryColor=e50914`,
     });
   }
 
+  // 2. VidSrc.to (HD) - High quality multi-source mirror
   if (imdbId || tmdbId) {
     const vidsrcId = imdbId || tmdbId;
     embedUrls.push({
@@ -476,13 +478,8 @@ function buildEmbedUrls({ imdbId, tmdbId, title, id, isSeries, season, episode }
     });
   }
 
+  // 3. AutoEmbed Server (Fast) - Adaptive HLS streaming
   if (tmdbId) {
-    embedUrls.push({
-      name: "VidLink Cloud (4K)",
-      url: isSeries
-        ? `https://vidlink.pro/tv/${tmdbId}/${s}/${ep}`
-        : `https://vidlink.pro/movie/${tmdbId}`,
-    });
     embedUrls.push({
       name: "AutoEmbed Server (Fast)",
       url: isSeries
@@ -498,12 +495,23 @@ function buildEmbedUrls({ imdbId, tmdbId, title, id, isSeries, season, episode }
     });
   }
 
+  // 4. SmashyStream (Cinema)
   if (imdbId) {
     embedUrls.push({
       name: "SmashyStream (Cinema)",
       url: isSeries
         ? `https://embed.smashystream.com/playere.php?imdb=${imdbId}&season=${s}&episode=${ep}`
         : `https://embed.smashystream.com/playere.php?imdb=${imdbId}`,
+    });
+  }
+
+  // 5. 2Embed Cloud (HD)
+  if (imdbId) {
+    embedUrls.push({
+      name: "2Embed Cloud (HD)",
+      url: isSeries
+        ? `https://www.2embed.cc/embedtv/${imdbId}&s=${s}&e=${ep}`
+        : `https://www.2embed.cc/embed/${imdbId}`,
     });
     embedUrls.push({
       name: "VidSrc Cloud (Backup)",

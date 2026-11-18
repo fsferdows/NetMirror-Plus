@@ -1464,17 +1464,19 @@ fn build_embed_urls(
     let ep = episode.max(1);
     let mut embed_urls = Vec::new();
 
-    if let Some(iid) = imdb_id {
+    // 1. VidLink Cloud (4K) - Clean, ad-free, 4K streams with subtitles
+    if let Some(tid) = tmdb_id {
         embed_urls.push(EmbedSource {
-            name: "2Embed Cloud (HD)".to_string(),
+            name: "VidLink Cloud (4K)".to_string(),
             url: if is_series {
-                format!("https://www.2embed.cc/embedtv/{iid}&s={s}&e={ep}")
+                format!("https://vidlink.pro/tv/{tid}/{s}/{ep}?primaryColor=e50914&nextbutton=true")
             } else {
-                format!("https://www.2embed.cc/embed/{iid}")
+                format!("https://vidlink.pro/movie/{tid}?primaryColor=e50914")
             },
         });
     }
 
+    // 2. VidSrc.to (HD)
     if let Some(vidsrc_id) = imdb_id.or(tmdb_id) {
         embed_urls.push(EmbedSource {
             name: "VidSrc.to (HD)".to_string(),
@@ -1486,15 +1488,8 @@ fn build_embed_urls(
         });
     }
 
+    // 3. AutoEmbed Server (Fast)
     if let Some(tid) = tmdb_id {
-        embed_urls.push(EmbedSource {
-            name: "VidLink Cloud (4K)".to_string(),
-            url: if is_series {
-                format!("https://vidlink.pro/tv/{tid}/{s}/{ep}")
-            } else {
-                format!("https://vidlink.pro/movie/{tid}")
-            },
-        });
         embed_urls.push(EmbedSource {
             name: "AutoEmbed Server (Fast)".to_string(),
             url: if is_series {
@@ -1514,6 +1509,7 @@ fn build_embed_urls(
         });
     }
 
+    // 4. SmashyStream (Cinema)
     if let Some(iid) = imdb_id {
         embed_urls.push(EmbedSource {
             name: "SmashyStream (Cinema)".to_string(),
@@ -1521,6 +1517,18 @@ fn build_embed_urls(
                 format!("https://embed.smashystream.com/playere.php?imdb={iid}&season={s}&episode={ep}")
             } else {
                 format!("https://embed.smashystream.com/playere.php?imdb={iid}")
+            },
+        });
+    }
+
+    // 5. 2Embed Cloud (HD)
+    if let Some(iid) = imdb_id {
+        embed_urls.push(EmbedSource {
+            name: "2Embed Cloud (HD)".to_string(),
+            url: if is_series {
+                format!("https://www.2embed.cc/embedtv/{iid}&s={s}&e={ep}")
+            } else {
+                format!("https://www.2embed.cc/embed/{iid}")
             },
         });
         embed_urls.push(EmbedSource {

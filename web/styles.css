@@ -2302,7 +2302,25 @@ body {
   color: #94a3b8;
   font-size: 13.5px;
   text-align: center;
-  margin: 0 0 10px;
+  margin: 0 0 8px;
+}
+
+.watch-fallback-helper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(229, 9, 20, 0.08);
+  border: 1px solid rgba(229, 9, 20, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  margin: 4px 0 12px;
+  color: #cbd5e1;
+  font-size: 13px;
+  text-align: center;
+}
+.watch-fallback-helper b {
+  color: #fff;
 }
 
 .watch-download-btn {

@@ -1249,7 +1249,9 @@ pub async fn get_details(
 #[derive(Deserialize)]
 pub struct StreamsQuery {
     pub season: Option<usize>,
+    pub s: Option<usize>,
     pub episode: Option<usize>,
+    pub e: Option<usize>,
     pub title: Option<String>,
     pub provider: Option<String>,
     #[serde(rename = "type")]
@@ -1569,8 +1571,8 @@ pub async fn get_streams(
     Path(id): Path<String>,
     Query(params): Query<StreamsQuery>,
 ) -> Result<Json<StreamsResponse>, (StatusCode, String)> {
-    let req_season = params.season.unwrap_or(0);
-    let req_episode = params.episode.unwrap_or(0);
+    let req_season = params.season.or(params.s).unwrap_or(0);
+    let req_episode = params.episode.or(params.e).unwrap_or(0);
     let type_is_tv = params.media_type.as_deref() == Some("tv");
     let provider_hint = params.provider.as_deref().and_then(ProviderKind::parse);
 

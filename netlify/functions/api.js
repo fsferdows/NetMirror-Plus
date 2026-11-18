@@ -1878,8 +1878,8 @@ async function handleDetails(id, params = {}) {
 async function handleStreams(id, params) {
   let title = params.title || "";
   let yearHint = null;
-  const reqSeason = parseInt(params.season || "0", 10) || 0;
-  const reqEpisode = parseInt(params.episode || "0", 10) || 0;
+  const reqSeason = parseInt(params.season || params.s || "0", 10) || 0;
+  const reqEpisode = parseInt(params.episode || params.e || "0", 10) || 0;
   let isSeries = params.type === "tv" || reqSeason > 0 || reqEpisode > 0 || /\bS\d+/i.test(title);
 
   let imdbId = id.startsWith("tt") ? id : null;

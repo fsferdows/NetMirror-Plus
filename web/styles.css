@@ -5297,49 +5297,78 @@ kbd {
 }
 
 /* 3. Tablets Landscape & Medium Screens (769px - 1024px) */
-@media (max-width: 1024px) {
+@media (min-width: 769px) and (max-width: 1024px) {
   .nav-container {
-    padding: 0 20px;
+    padding: 0 16px !important;
+  }
+  .nav-left {
+    gap: 10px !important;
   }
   .nav-links {
-    gap: 14px;
+    gap: 8px !important;
   }
   .nav-link {
-    font-size: 13px;
-    padding: 6px 4px;
+    font-size: 12.5px !important;
+    padding: 6px 6px !important;
   }
   .search-wrapper {
-    width: 220px;
+    width: 160px !important;
+    min-width: 140px !important;
+    transition: width 0.25s ease !important;
   }
   .search-wrapper:focus-within {
-    width: 270px;
+    width: 220px !important;
+  }
+  .vip-upgrade-btn {
+    padding: 6px 12px !important;
+    font-size: 12px !important;
   }
   .hero-section {
-    min-height: 58vh;
-    padding-top: 90px;
+    min-height: 52vh !important;
+    max-height: 560px !important;
+    padding-top: 80px !important;
   }
   .hero-title {
-    font-size: 38px;
+    font-size: 34px !important;
+  }
+  .hero-synopsis {
+    font-size: 13.5px !important;
+    -webkit-line-clamp: 3 !important;
   }
   .media-grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 14px !important;
   }
   .sports-matches-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
   }
   .sports-channels-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 14px !important;
   }
   .cricket-hub-cards-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 14px !important;
   }
   .modal-card {
-    width: 86vw;
-    max-width: 820px;
+    width: 86vw !important;
+    max-width: 780px !important;
+    max-height: 88vh !important;
+  }
+  .watch-view-wrapper {
+    padding: 16px 20px 40px !important;
+    max-width: 100% !important;
+  }
+  .watch-main-layout {
+    gap: 18px !important;
+  }
+  .watch-episodes-column {
+    width: 100% !important;
+  }
+  .watch-episodes-grid {
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)) !important;
+    gap: 8px !important;
   }
 }
 
@@ -6181,13 +6210,125 @@ kbd {
   }
 
   /* Video Player & Watch View Overlay on Mobile */
+  .watch-view-wrapper {
+    padding: 10px 12px calc(40px + env(safe-area-inset-bottom, 16px)) !important;
+    max-width: 100% !important;
+  }
+
   .watch-top-bar,
   .player-header {
     height: auto !important;
-    min-height: 44px !important;
-    padding: calc(4px + env(safe-area-inset-top, 0px)) 0 10px !important;
+    min-height: 40px !important;
+    padding: calc(4px + env(safe-area-inset-top, 0px)) 0 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
     opacity: 1 !important;
     pointer-events: auto !important;
+  }
+
+  .watch-breadcrumb {
+    flex: 1 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+    font-size: 13px !important;
+    gap: 4px !important;
+  }
+
+  .breadcrumb-link,
+  .breadcrumb-sep,
+  .breadcrumb-current,
+  .breadcrumb-sub {
+    font-size: 13px !important;
+  }
+
+  .breadcrumb-current {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 140px !important;
+  }
+
+  .watch-top-actions {
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+
+  .player-adshield-pill {
+    padding: 3px 8px !important;
+    font-size: 10.5px !important;
+  }
+
+  #watchShortcutsBtn {
+    display: none !important;
+  }
+
+  .watch-close-btn {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 14px !important;
+    border-radius: 6px !important;
+  }
+
+  /* Watch Server Pills Selector */
+  .watch-servers-bar {
+    gap: 6px !important;
+    margin-bottom: 10px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .server-pills-scroll {
+    flex: 1 1 100% !important;
+    gap: 6px !important;
+    padding: 2px 0 4px !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+
+  .server-pills-scroll::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .server-pill-btn {
+    padding: 6px 11px !important;
+    font-size: 11.5px !important;
+    border-radius: 6px !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .how-to-download-btn {
+    padding: 6px 12px !important;
+    font-size: 11px !important;
+    height: 30px !important;
+    border-radius: 15px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .player-container {
+    width: 100% !important;
+    aspect-ratio: 16 / 9 !important;
+    max-height: 72vh !important;
+    border-radius: 10px !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.85) !important;
+  }
+
+  .player-floating-actions {
+    top: 8px !important;
+    right: 8px !important;
+    gap: 6px !important;
+  }
+
+  .floating-action-btn {
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+    border-radius: 6px !important;
   }
 
   .player-sponsor-pill,
@@ -6196,21 +6337,22 @@ kbd {
   }
 
   .player-controls {
-    padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 8px)) 12px !important;
+    padding: 6px 8px calc(8px + env(safe-area-inset-bottom, 4px)) 8px !important;
     background: linear-gradient(0deg, rgba(6, 10, 18, 0.98) 0%, rgba(6, 10, 18, 0.85) 70%, transparent 100%) !important;
   }
 
   .progress-bar-container {
-    height: 24px !important;
+    height: 20px !important;
+    margin-bottom: 2px !important;
   }
 
   .progress-track {
-    height: 5px !important;
+    height: 4px !important;
   }
 
   .progress-handle {
-    width: 14px !important;
-    height: 14px !important;
+    width: 12px !important;
+    height: 12px !important;
   }
 
   .volume-slider {
@@ -6218,39 +6360,208 @@ kbd {
   }
 
   .volume-percent-badge {
-    font-size: 10.5px !important;
+    font-size: 10px !important;
     min-width: auto !important;
+    padding: 1px 4px !important;
   }
 
   .time-display {
-    font-size: 11px !important;
+    font-size: 10.5px !important;
     margin-left: 2px !important;
+    white-space: nowrap !important;
   }
 
   .controls-row {
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    gap: 6px !important;
+    gap: 4px !important;
   }
 
   .controls-left {
     display: flex !important;
     align-items: center !important;
-    gap: 6px !important;
+    gap: 4px !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
   }
 
   .controls-right {
     display: flex !important;
     align-items: center !important;
-    gap: 4px !important;
+    gap: 3px !important;
+    flex-shrink: 0 !important;
   }
 
   .player-btn {
-    min-width: 38px !important;
-    min-height: 38px !important;
-    padding: 6px !important;
-    border-radius: 8px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    width: 34px !important;
+    height: 34px !important;
+    padding: 5px !important;
+    border-radius: 6px !important;
+  }
+
+  .player-text-btn {
+    min-width: auto !important;
+    width: auto !important;
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+  }
+
+  #speedMenuBtn {
+    display: none !important;
+  }
+
+  #audioEnhancerBtn #audioEnhanceBadge {
+    display: inline-block !important;
+    max-width: 44px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    font-size: 10px !important;
+  }
+
+  /* Video Below Helpers & Download Area */
+  .watch-video-footer {
+    padding: 10px 0 6px !important;
+  }
+
+  .watch-ads-note {
+    font-size: 12px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .watch-fallback-helper {
+    font-size: 11.5px !important;
+    padding: 6px 10px !important;
+    margin: 4px 0 10px !important;
+  }
+
+  .watch-download-btn {
+    width: 100% !important;
+    max-width: 300px !important;
+    justify-content: center !important;
+    min-height: 44px !important;
+    font-size: 14px !important;
+    margin: 0 auto !important;
+  }
+
+  /* Watch Series Episodes Column */
+  .watch-episodes-column {
+    width: 100% !important;
+    margin-top: 8px !important;
+    padding: 12px !important;
+    border-radius: 10px !important;
+  }
+
+  .watch-seasons-row {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    flex-wrap: nowrap !important;
+    padding-bottom: 4px !important;
+  }
+
+  .watch-seasons-row::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .watch-season-pill {
+    flex-shrink: 0 !important;
+    padding: 5px 12px !important;
+    font-size: 12px !important;
+  }
+
+  .watch-episodes-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 6px !important;
+    max-height: 280px !important;
+  }
+
+  .watch-ep-btn {
+    height: 42px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+  }
+
+  /* Download Center Modal Bottom Sheet */
+  #downloadGuideModal {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  .download-hub-card {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    max-height: 88vh !important;
+    border-radius: 20px 20px 0 0 !important;
+    border-bottom: none !important;
+    margin: 0 !important;
+    animation: slideUpSheet 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  .download-media-header {
+    padding: 12px 16px !important;
+  }
+
+  .download-media-poster {
+    width: 48px !important;
+    height: 72px !important;
+  }
+
+  .download-body-scroll {
+    padding: 14px 16px !important;
+  }
+
+  .download-quality-card {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    padding: 12px 14px !important;
+  }
+
+  .download-quality-info {
+    width: 100% !important;
+  }
+
+  .download-quality-card > div:last-child {
+    display: flex !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  .download-quality-card .btn-copy,
+  .download-quality-card .download-action-btn {
+    flex: 1 !important;
+    text-align: center !important;
+    justify-content: center !important;
+    min-height: 40px !important;
+  }
+
+  /* Dialog Bottom Sheet styling for Sound Booster & Audio Dubs Modals */
+  #soundBoosterModal,
+  #audioDubsModal {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  #soundBoosterModal .modal-card,
+  #audioDubsModal .modal-card {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: auto !important;
+    max-height: 85vh !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    border-radius: 20px 20px 0 0 !important;
+    border-bottom: none !important;
+    margin: 0 !important;
+    animation: slideUpSheet 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 12px)) !important;
   }
 
   /* Audio Enhancer Menu as Mobile Bottom Sheet */

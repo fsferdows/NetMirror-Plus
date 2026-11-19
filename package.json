@@ -6,7 +6,7 @@
   "scripts": {
     "start": "cargo run --release --bin moviebox_web",
     "dev": "cargo run --bin moviebox_web",
-    "build": "echo 'NetMirror Plus static build ready in web/'",
+    "build": "echo 'MovieBox Plus static build ready in web/'",
     "build:rust": "cargo build --release --bin moviebox_web",
     "netlify:build": "netlify build",
     "netlify:deploy": "netlify deploy",

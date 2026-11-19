@@ -1012,10 +1012,10 @@
       : generateMovieUrl(id, cleanT);
 
     const shareData = {
-      title: `${cleanT} – NetMirror Plus`,
+      title: `${cleanT} – MovieBox Plus`,
       text: isWatch && season > 0
-        ? `Watch ${cleanT} Season ${season} Episode ${episode} on NetMirror Plus:`
-        : `Watch ${cleanT} in Full HD on NetMirror Plus:`,
+        ? `Watch ${cleanT} Season ${season} Episode ${episode} on MovieBox Plus:`
+        : `Watch ${cleanT} in Full HD on MovieBox Plus:`,
       url: shareUrl,
     };
 
@@ -4089,9 +4089,19 @@
       }
     });
 
+    // Block unauthorized popup window attempts when in watch mode
+    const originalWindowOpen = window.open;
+    window.open = function(url, target, features) {
+      if (state.isEmbedMode && !isInternalNavigation) {
+        console.warn('Blocked unauthorized popup/tab creation:', url);
+        return null;
+      }
+      return originalWindowOpen.apply(this, arguments);
+    };
+
     // Auto-focus Trap:
     // If an ad click inside an embed tries to open a popup tab or blur window,
-    // refocus immediately to keep the user in NetMirror Plus.
+    // refocus immediately to keep the user in MovieBox Plus.
     window.addEventListener('blur', () => {
       if (state.isEmbedMode) {
         setTimeout(() => {

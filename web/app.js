@@ -1569,7 +1569,15 @@
       localStorage.setItem('moviebox_audio_boost', String(clamped));
     }
 
+    if (el.videoElement) {
+      el.videoElement.muted = false;
+      el.videoElement.volume = 1.0;
+    }
+
     if (boostGainNode && audioCtx) {
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
       boostGainNode.gain.setTargetAtTime(clamped, audioCtx.currentTime, 0.05);
     }
 
@@ -2013,9 +2021,9 @@
 
         const sizeStr = stream.size_bytes ? ` • ${formatBytes(stream.size_bytes)}` : '';
         const codecStr = stream.codec ? ` • ${stream.codec.toUpperCase()}` : '';
+        const directFileUrl = stream.direct_url || stream.proxy_url;
         const streamFile = `${fileName}_${qual}.mp4`;
-        const downloadUrl = stream.proxy_url || stream.direct_url;
-        if (!bestStreamUrl && downloadUrl) bestStreamUrl = downloadUrl;
+        if (!bestStreamUrl && directFileUrl) bestStreamUrl = directFileUrl;
 
         card.innerHTML = `
           <div class="download-quality-info">
@@ -2023,25 +2031,37 @@
               <span>${isUhd ? '⚡' : isFhd ? '🎬' : '📱'} ${qual} ${isUhd ? 'Ultra HD' : isFhd ? 'Full HD' : 'HD'}</span>
               ${isUhd ? '<span class="download-badge-uhd">4K UHD</span>' : ''}
             </div>
-            <div class="download-quality-meta">${stream.server}${codecStr}${sizeStr} • Direct CDN</div>
+            <div class="download-quality-meta">${stream.server}${codecStr}${sizeStr} • Direct CDN MP4</div>
           </div>
           <div style="display:flex;gap:6px;align-items:center;">
-            <button type="button" class="download-action-btn btn-copy" title="Copy Stream Link for IDM/VLC">
+            <button type="button" class="download-action-btn btn-copy" title="Copy Direct Stream Link for IDM/ADM/VLC">
               📋 Copy Link
             </button>
-            <a href="${downloadUrl}" download="${streamFile}" target="_blank" class="download-action-btn">
+            <a href="${directFileUrl}" download="${streamFile}" target="_blank" class="download-action-btn">
               ⬇ Download
             </a>
           </div>
         `;
 
         card.querySelector('.btn-copy').addEventListener('click', () => {
-          copyTextToClipboard(downloadUrl);
-          showToast('📋 Stream URL copied! Paste into IDM, ADM or VLC for max speed.');
+          copyTextToClipboard(directFileUrl);
+          showToast('📋 Direct MP4 Stream URL copied! Paste into IDM, 1DM, ADM or VLC for max speed.');
         });
 
         el.downloadStreamsList.appendChild(card);
       });
+    } else if (details?.id?.value && !state.downloadModalStreamsLoading) {
+      state.downloadModalStreamsLoading = true;
+      fetch(`/api/streams/${details.id.value}?season=${s}&episode=${ep}&title=${encodeURIComponent(rawTitle)}`)
+        .then(r => r.json())
+        .then(data => {
+          state.downloadModalStreamsLoading = false;
+          if (data && data.streams && data.streams.length > 0) {
+            state.currentStreams = data.streams;
+            renderDownloadModal();
+          }
+        })
+        .catch(() => { state.downloadModalStreamsLoading = false; });
     }
 
     // Always provide 8K & 4K Ultra HD Cloud Downloader options
@@ -4538,7 +4558,25 @@
   function openSoundBoosterModal() {
     ensureAudioEngine();
     updateAudioEnhancerUI();
-    if (el.soundBoosterModal) el.soundBoosterModal.classList.remove('hidden');
+    if (el.soundBoosterModal) {
+      const modeHint = document.getElementById('soundBoosterModeHint');
+      if (modeHint) {
+        if (state.isEmbedMode) {
+          modeHint.innerHTML = `
+            <div style="padding:10px 14px;background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.3);border-radius:8px;font-size:12px;color:#fde047;line-height:1.5;margin-bottom:14px;">
+              ⚠️ <strong>Playing via Video Mirror:</strong> Video sound is managed via the mirror's on-screen volume control. Switch to <strong>Server 1 (Ultra 4K / Direct CDN)</strong> above to activate hardware 300% volume boost & equalizer!
+            </div>
+          `;
+        } else {
+          modeHint.innerHTML = `
+            <div style="padding:10px 14px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:8px;font-size:12px;color:#86efac;line-height:1.5;margin-bottom:14px;">
+              ⚡ <strong>Direct Hardware DSP Active:</strong> Amplifying native HTML5 audio stream up to 300% with studio equalizer presets.
+            </div>
+          `;
+        }
+      }
+      el.soundBoosterModal.classList.remove('hidden');
+    }
   }
 
   function closeSoundBoosterModal() {

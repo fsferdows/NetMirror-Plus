@@ -3,6 +3,8 @@
  * Provides instant, autonomous API support on Netlify Edge & Serverless
  */
 
+const crypto = require("crypto");
+
 const PLATFORMS = [
   {
     key: "netflix",
@@ -1859,6 +1861,240 @@ async function handleDetails(id, params = {}) {
   };
 }
 
+// --- MovieBox Direct Stream Decryption & Resolution Engine ---
+const MOVIEBOX_SECRET_BYTES = Buffer.from([
+  0xef, 0xa8, 0x91, 0x97, 0x4e, 0xec, 0xd3, 0x14, 0x8d, 0xf6, 0x3a, 0xa6, 0x11, 0x60, 0x2d, 0xef,
+  0xd1, 0x01, 0x25, 0x9b, 0xa5, 0x21, 0x02, 0x2c, 0x57, 0xae, 0x05, 0x66, 0xbd, 0x8e
+]);
+
+const MOVIEBOX_JWT_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjU1OTgyNTYzMTU5MjA0NDM0ODAsImV4cCI6MTgwMjU4NDU3OCwiaWF0IjoxNzk0ODA4Mjc4fQ.Q5ShpbvyVH1F1CUa-HalY-iUrdlNwzpWBJFmriWAsgc";
+
+function mbRandomSpoofedIp() {
+  const prefixes = ["103.241", "49.36", "117.195", "106.198", "122.162", "157.32", "182.70", "103.58", "27.60", "59.90"];
+  const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+  const c = Math.floor(Math.random() * 253) + 1;
+  const d = Math.floor(Math.random() * 253) + 1;
+  return `${prefix}.${c}.${d}`;
+}
+
+function mbRandomHex(len) {
+  let s = "";
+  for (let i = 0; i < len; i++) {
+    s += Math.floor(Math.random() * 16).toString(16);
+  }
+  return s;
+}
+
+function mbRandomUuid() {
+  return `${mbRandomHex(8)}-${mbRandomHex(4)}-${mbRandomHex(4)}-${mbRandomHex(4)}-${mbRandomHex(12)}`;
+}
+
+function mbGenerateClientInfoAndUa() {
+  const androidVersions = [
+    ["9", "PQ3A.190605.03081104"],
+    ["10", "QP1A.191005.007.A3"],
+    ["11", "RP1A.200720.011"],
+    ["12", "S1B.220414.015"],
+    ["13", "TQ2A.230405.003"],
+  ];
+  const redmiDevices = [
+    ["23078RKD5C", "Redmi"],
+    ["2201117TY", "Redmi"],
+    ["2201117TG", "Redmi"],
+    ["22101316G", "Redmi"],
+    ["21121210G", "Redmi"],
+    ["M2012K11AG", "Redmi"],
+    ["M2007J20CG", "Redmi"],
+  ];
+  const versionCodes = [50020117, 50020118, 50020119, 50020120, 50020121];
+  const android = androidVersions[Math.floor(Math.random() * androidVersions.length)];
+  const device = redmiDevices[Math.floor(Math.random() * redmiDevices.length)];
+  const versionCode = versionCodes[Math.floor(Math.random() * versionCodes.length)];
+
+  const userAgent = `com.community.oneroom/${versionCode} (Linux; U; Android ${android[0]}; en_US; ${device[0]}; Build/${android[1]}; Cronet/135.0.7012.3)`;
+  const clientInfo = JSON.stringify({
+    package_name: "com.community.oneroom",
+    version_name: "4.0.01.0813.03",
+    version_code: versionCode,
+    os: "android",
+    os_version: android[0],
+    install_ch: "ps",
+    device_id: mbRandomHex(32),
+    install_store: "ps",
+    gaid: mbRandomUuid(),
+    brand: device[1],
+    model: device[0],
+    system_language: "en",
+    net: "NETWORK_WIFI",
+    region: "US",
+    timezone: "America/New_York",
+    sp_code: "40401",
+    "X-Play-Mode": "2"
+  });
+
+  return { userAgent, clientInfo };
+}
+
+function mbGenerateXClientToken(ts) {
+  const tsStr = ts.toString();
+  const rev = tsStr.split("").reverse().join("");
+  const hash = crypto.createHash("md5").update(rev).digest("hex");
+  return `${tsStr},${hash}`;
+}
+
+function mbSortedQueryString(urlStr) {
+  try {
+    const u = new URL(urlStr);
+    const entries = Array.from(u.searchParams.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+    if (entries.length === 0) return "";
+    return entries.map(([k, v]) => `${k}=${v}`).join("&");
+  } catch (_) {
+    return "";
+  }
+}
+
+function mbGenerateXTrSignature(method, accept, contentType, urlStr, ts) {
+  let canonicalUrl = urlStr;
+  try {
+    const u = new URL(urlStr);
+    const query = mbSortedQueryString(urlStr);
+    canonicalUrl = query ? `${u.pathname}?${query}` : u.pathname;
+  } catch (_) {}
+
+  const canonical = [
+    method.toUpperCase(),
+    accept || "",
+    contentType || "",
+    "",
+    ts.toString(),
+    "",
+    canonicalUrl
+  ].join("\n");
+
+  const hmac = crypto.createHmac("md5", MOVIEBOX_SECRET_BYTES).update(canonical).digest("base64");
+  return `${ts}|2|${hmac}`;
+}
+
+async function fetchMovieboxDirectStreams(subjectId, season = 0, episode = 0) {
+  if (!subjectId) return [];
+  const url = `https://api6.aoneroom.com/wefeed-mobile-bff/subject-api/get?subjectId=${subjectId}`;
+  const ts = Date.now();
+  const { userAgent, clientInfo } = mbGenerateClientInfoAndUa();
+  const ip = mbRandomSpoofedIp();
+
+  const headers = {
+    "accept": "application/json",
+    "content-type": "application/json",
+    "connection": "keep-alive",
+    "user-agent": userAgent,
+    "client-info": clientInfo,
+    "x-client-token": mbGenerateXClientToken(ts),
+    "x-tr-signature": mbGenerateXTrSignature("GET", "application/json", "application/json", url, ts),
+    "x-forwarded-for": ip,
+    "x-real-ip": ip,
+    "authorization": `Bearer ${MOVIEBOX_JWT_TOKEN}`
+  };
+
+  try {
+    const res = await fetch(url, { headers });
+    if (!res.ok) return [];
+    const json = await res.json();
+    if (!json.data || !json.data.resourceDetectors) return [];
+
+    const streams = [];
+    const seenUrls = new Set();
+
+    for (const det of json.data.resourceDetectors) {
+      const items = (det.resolutionList && det.resolutionList.length > 0)
+        ? det.resolutionList
+        : [det];
+
+      for (const item of items) {
+        const streamUrl = item.resourceLink || item.downloadUrl;
+        if (!streamUrl || typeof streamUrl !== "string" || !streamUrl.startsWith("http")) continue;
+        if (streamUrl.includes("1c7de0bd3393702d9191801f15f88f8d")) continue; // deprecation notice
+        const base = streamUrl.split("?")[0];
+        if (seenUrls.has(base)) continue;
+        seenUrls.add(base);
+
+        let resVal = parseInt(item.resolution, 10);
+        if (!resVal || isNaN(resVal)) {
+          const match = streamUrl.match(/(\d{3,4})P/i) || (item.title || "").match(/(\d{3,4})P/i);
+          resVal = match ? parseInt(match[1], 10) : 1080;
+        }
+
+        const size = parseInt(item.size || item.firstSize || item.totalSize, 10) || null;
+        const codec = item.codecName || (streamUrl.includes("h265") ? "hevc" : "h264");
+        const proxyUrl = `/api/stream?url=${encodeURIComponent(streamUrl)}`;
+
+        streams.push({
+          server: "MovieBox Direct",
+          quality: `${resVal}p`,
+          codec: codec,
+          size_bytes: size,
+          direct_url: streamUrl,
+          proxy_url: proxyUrl,
+          resource_id: item.resourceId || det.resourceId || null
+        });
+      }
+    }
+
+    // Also look for sibling dubs (e.g. Hindi dub)
+    if (Array.isArray(json.data.dubs)) {
+      const otherDubs = json.data.dubs.filter(d => !d.original && d.subjectId && d.subjectId !== subjectId).slice(0, 2);
+      for (const dub of otherDubs) {
+        try {
+          const dubUrl = `https://api6.aoneroom.com/wefeed-mobile-bff/subject-api/get?subjectId=${dub.subjectId}`;
+          const dubTs = Date.now();
+          const dubHeaders = {
+            "accept": "application/json",
+            "content-type": "application/json",
+            "user-agent": userAgent,
+            "client-info": clientInfo,
+            "x-client-token": mbGenerateXClientToken(dubTs),
+            "x-tr-signature": mbGenerateXTrSignature("GET", "application/json", "application/json", dubUrl, dubTs),
+            "x-forwarded-for": mbRandomSpoofedIp(),
+            "authorization": `Bearer ${MOVIEBOX_JWT_TOKEN}`
+          };
+          const dubRes = await fetch(dubUrl, { headers: dubHeaders });
+          if (dubRes.ok) {
+            const dubJson = await dubRes.json();
+            if (dubJson.data && dubJson.data.resourceDetectors) {
+              for (const det of dubJson.data.resourceDetectors) {
+                const items = (det.resolutionList && det.resolutionList.length > 0) ? det.resolutionList : [det];
+                for (const item of items) {
+                  const sUrl = item.resourceLink || item.downloadUrl;
+                  if (!sUrl || !sUrl.startsWith("http")) continue;
+                  const base = sUrl.split("?")[0];
+                  if (seenUrls.has(base)) continue;
+                  seenUrls.add(base);
+                  const resVal = parseInt(item.resolution, 10) || 720;
+                  const size = parseInt(item.size || item.firstSize, 10) || null;
+                  streams.push({
+                    server: `MovieBox (${dub.lanName || "Dub"})`,
+                    quality: `${resVal}p`,
+                    codec: item.codecName || "h264",
+                    size_bytes: size,
+                    direct_url: sUrl,
+                    proxy_url: `/api/stream?url=${encodeURIComponent(sUrl)}`,
+                    resource_id: item.resourceId || null
+                  });
+                }
+              }
+            }
+          }
+        } catch (_) {}
+      }
+    }
+
+    streams.sort((a, b) => (parseInt(b.quality, 10) || 0) - (parseInt(a.quality, 10) || 0));
+    return streams;
+  } catch (err) {
+    console.error("fetchMovieboxDirectStreams error:", err.message);
+    return [];
+  }
+}
+
 async function handleStreams(id, params) {
   let title = params.title || "";
   let yearHint = null;
@@ -1868,8 +2104,9 @@ async function handleStreams(id, params) {
 
   let imdbId = id.startsWith("tt") ? id : null;
   let tmdbId = null;
+  let subjectId = /^\d{15,20}$/.test(id) ? id : null;
 
-  if (!imdbId) {
+  if (!imdbId || !subjectId) {
     // Fetch title, real media_type, and TMDB ID (tm_id) from Moviebox
     const checkTypes = isSeries ? ["tv", "movie"] : ["movie", "tv"];
     for (const mtype of checkTypes) {
@@ -1887,6 +2124,9 @@ async function handleStreams(id, params) {
             if (first.tm_id) {
               tmdbId = String(first.tm_id).trim() || null;
             }
+            if (first.subjectid) {
+              subjectId = String(first.subjectid).trim() || null;
+            }
             if (first.release_date) {
               yearHint = extractYear(first.release_date);
             }
@@ -1895,7 +2135,9 @@ async function handleStreams(id, params) {
         }
       } catch {}
     }
-    imdbId = await resolveImdbId(title, yearHint, isSeries);
+    if (!imdbId) {
+      imdbId = await resolveImdbId(title, yearHint, isSeries);
+    }
   }
 
   if (imdbId) {
@@ -1911,14 +2153,22 @@ async function handleStreams(id, params) {
   const isSeriesMode = isSeries || reqSeason > 0 || reqEpisode > 0;
   const embedUrls = buildEmbedUrls({ imdbId, tmdbId, title, id, isSeries: isSeriesMode, season, episode });
 
+  let directStreams = [];
+  if (subjectId) {
+    directStreams = await fetchMovieboxDirectStreams(subjectId, reqSeason, reqEpisode);
+  }
+
+  const defaultStreamUrl = directStreams.length > 0 ? directStreams[0].proxy_url || directStreams[0].direct_url : null;
+  const primaryResourceId = directStreams.length > 0 ? directStreams[0].resource_id : null;
+
   return {
     statusCode: 200,
     headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
     body: JSON.stringify({
       releases: [],
-      streams: [],
-      default_stream_url: null,
-      resource_id: null,
+      streams: directStreams,
+      default_stream_url: defaultStreamUrl,
+      resource_id: primaryResourceId,
       embed_urls: embedUrls,
     }),
   };
@@ -1943,6 +2193,27 @@ exports.handler = async (event) => {
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       },
       body: "",
+    };
+  }
+
+  if (cleanPath === "/stream") {
+    const streamUrl = params.url || "";
+    if (streamUrl) {
+      return {
+        statusCode: 302,
+        headers: {
+          "Location": streamUrl,
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+          "Cache-Control": "public, max-age=3600",
+        },
+        body: "",
+      };
+    }
+    return {
+      statusCode: 400,
+      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ error: "Missing stream url" }),
     };
   }
 

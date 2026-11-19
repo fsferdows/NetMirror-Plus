@@ -183,7 +183,7 @@ pub fn build_signed_headers(
     headers
 }
 
-pub(crate) fn generate_client_info_and_ua() -> (String, String) {
+pub fn generate_client_info_and_ua() -> (String, String) {
     use rand::RngExt;
     let mut rng = rand::rng();
 

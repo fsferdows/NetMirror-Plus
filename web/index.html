@@ -9,6 +9,11 @@
   <meta name="keywords" content="moviebox, moviebox plus, movie streaming, watch movies online, tv series, live sports stream, live cricket, live football, free streaming, hd movies" />
   <meta name="theme-color" content="#e50914" />
   <meta name="msapplication-TileColor" content="#060a14" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="MovieBox Plus" />
+  <meta name="application-name" content="MovieBox Plus" />
+  <meta name="mobile-web-app-capable" content="yes" />
 
   <!-- Standard Favicons & App Icons -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico" />
@@ -43,9 +48,13 @@
   <link rel="dns-prefetch" href="https://vidlink.pro">
   <link rel="preconnect" href="https://vidlink.pro" crossorigin>
   <link rel="dns-prefetch" href="https://embed.smashystream.com">
+  <link rel="preconnect" href="https://embed.smashystream.com" crossorigin>
   <link rel="dns-prefetch" href="https://multiembed.mov">
+  <link rel="dns-prefetch" href="https://www.2embed.cc">
+  <link rel="dns-prefetch" href="https://player.autoembed.cc">
+  <link rel="dns-prefetch" href="https://vidsrc.to">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20261119p" />
+  <link rel="stylesheet" href="/styles.css?v=20261119q" />
   <style>
     :root, html, body {
       background-color: #060a14 !important;
@@ -152,6 +161,12 @@
           <!-- Autocomplete Dropdown -->
           <div class="suggestions-popover hidden" id="suggestionsPopover"></div>
         </div>
+
+        <!-- Install App / Download Software Button -->
+        <button class="install-app-nav-btn" id="installAppNavBtn" title="Install App on Phone, Computer, Tablet (iOS, Mac, Windows, Linux, Android)">
+          <svg viewBox="0 0 24 24" class="install-app-icon"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+          <span class="install-app-btn-text">Install App</span>
+        </button>
 
         <!-- VIP & Supporter Monetization Pass -->
         <button class="vip-upgrade-btn" id="vipModalBtn" title="VIP Access & Support">
@@ -1451,6 +1466,17 @@
           <button class="sheet-close-btn" id="mobileSheetCloseBtn" type="button">✕</button>
         </div>
       </div>
+
+      <div style="padding: 0 0 14px 0;">
+        <button class="mobile-install-banner-btn" id="mobileInstallBannerBtn" type="button">
+          <span class="install-banner-icon">📲</span>
+          <div class="install-banner-text">
+            <strong>Download MovieBox App</strong>
+            <small>Install for iOS, Android, Windows & Mac</small>
+          </div>
+          <span class="install-banner-arrow">➔</span>
+        </button>
+      </div>
       <div class="mobile-platforms-grid">
         <button class="mobile-plat-btn" data-ott="netflix" style="--c:#e50914">Netflix</button>
         <button class="mobile-plat-btn" data-ott="primeVideo" style="--c:#00a8e1">Prime Video</button>
@@ -1580,7 +1606,143 @@
     </div>
   </div>
 
-  <script src="/app.js?v=20261119p"></script>
+  <!-- Universal App Install Modal (iOS, Mac, Windows, Linux, Android, Extension) -->
+  <div class="modal-backdrop hidden" id="installAppModal" style="z-index: 10006;">
+    <div class="modal-card install-modal-card" style="max-width: 560px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 24px;">📲</span>
+          <div>
+            <h3 class="modal-title" style="margin: 0; font-size: 16px;">Download & Install MovieBox App</h3>
+            <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--text-secondary);">Native Software for iPhone, Android, Windows PC, Mac & Linux</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="closeInstallModalBtn">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 16px 20px;">
+        <!-- Native Prompt Banner (Visible on supported Chromium / Android / Windows browsers) -->
+        <div id="nativeInstallPromptBanner" class="native-install-banner">
+          <div class="native-install-info">
+            <span class="native-install-badge">READY TO INSTALL</span>
+            <p style="margin: 4px 0 0; font-size: 13px; font-weight: 600;">Install standalone app with desktop shortcut & taskbar pinning</p>
+          </div>
+          <button type="button" class="btn btn-primary" id="nativeInstallTriggerBtn" style="padding: 8px 18px; font-weight: 700; background: linear-gradient(135deg, #e50914, #b91c1c);">
+            ⬇️ Install Now
+          </button>
+        </div>
+
+        <!-- OS Selector Tabs -->
+        <div class="install-os-tabs">
+          <button type="button" class="install-os-tab active" data-tab="ios">🍏 iPhone / iPad</button>
+          <button type="button" class="install-os-tab" data-tab="android">🤖 Android</button>
+          <button type="button" class="install-os-tab" data-tab="windows">💻 Windows</button>
+          <button type="button" class="install-os-tab" data-tab="mac">🍏 Mac</button>
+          <button type="button" class="install-os-tab" data-tab="linux">🐧 Linux</button>
+          <button type="button" class="install-os-tab" data-tab="extension">🧩 Chrome Extension</button>
+        </div>
+
+        <!-- Tab Contents -->
+        <div class="install-tab-content" id="tabContent-ios">
+          <div class="install-step-card">
+            <div class="step-badge">Step 1</div>
+            <div class="step-text">Open this website in <strong>Safari</strong> on your iPhone or iPad, then tap the <strong>Share</strong> button <span class="ios-share-icon">⎋</span> (bottom bar).</div>
+          </div>
+          <div class="install-step-card">
+            <div class="step-badge">Step 2</div>
+            <div class="step-text">Scroll down the share sheet and tap <strong>"Add to Home Screen"</strong> <span class="ios-add-icon">➕</span>.</div>
+          </div>
+          <div class="install-step-card">
+            <div class="step-badge">Step 3</div>
+            <div class="step-text">Tap <strong>"Add"</strong> in the top-right corner. MovieBox Plus will appear on your Home Screen as a standalone fullscreen app!</div>
+          </div>
+        </div>
+
+        <div class="install-tab-content hidden" id="tabContent-android">
+          <div class="install-step-card">
+            <div class="step-badge">Option 1</div>
+            <div class="step-text">Tap the <strong>"Install Now"</strong> button above, or tap the <strong>"Install App"</strong> prompt that appears at the bottom of Google Chrome.</div>
+          </div>
+          <div class="install-step-card">
+            <div class="step-badge">Option 2</div>
+            <div class="step-text">Tap the Chrome menu (<strong>⋮</strong> top-right) and choose <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong>.</div>
+          </div>
+        </div>
+
+        <div class="install-tab-content hidden" id="tabContent-windows">
+          <div class="install-step-card">
+            <div class="step-badge">Step 1</div>
+            <div class="step-text">On <strong>Google Chrome</strong> or <strong>Microsoft Edge</strong>, look at the right side of the address bar for the <strong>App Install icon</strong> (⊕ or 💻).</div>
+          </div>
+          <div class="install-step-card">
+            <div class="step-badge">Step 2</div>
+            <div class="step-text">Click <strong>"Install MovieBox Plus"</strong>. The app will launch in its own window and create a Windows Desktop and Start Menu shortcut!</div>
+          </div>
+        </div>
+
+        <div class="install-tab-content hidden" id="tabContent-mac">
+          <div class="install-step-card">
+            <div class="step-badge">Chrome / Brave</div>
+            <div class="step-text">Click the <strong>Install</strong> icon (⊕) on the right side of the address bar, or click Chrome menu ⋮ → <strong>"Save and share" → "Install MovieBox Plus"</strong>.</div>
+          </div>
+          <div class="install-step-card">
+            <div class="step-badge">Safari (macOS)</div>
+            <div class="step-text">Click <strong>File</strong> in the top menu bar → <strong>"Add to Dock..."</strong> to create an instant native macOS Dock app!</div>
+          </div>
+        </div>
+
+        <div class="install-tab-content hidden" id="tabContent-linux">
+          <div class="install-step-card">
+            <div class="step-badge">Step 1</div>
+            <div class="step-text">In Chromium, Chrome, or Brave, click the address bar install icon (⊕) or menu ⋮ → <strong>"Install MovieBox Plus"</strong>.</div>
+          </div>
+          <div class="install-step-card">
+            <div class="step-badge">Step 2</div>
+            <div class="step-text">MovieBox Plus integrates into your desktop launcher (.desktop application entry) with full keyboard shortcuts and zero browser borders.</div>
+          </div>
+        </div>
+
+        <div class="install-tab-content hidden" id="tabContent-extension">
+          <div style="background: rgba(229,9,20,0.1); border: 1px solid rgba(229,9,20,0.3); border-radius: 8px; padding: 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <strong style="color: #fff; font-size: 13px; display: block;">MovieBox Plus Extension (ZIP)</strong>
+              <span style="font-size: 11px; color: var(--text-secondary);">Manifest V3 • Chrome, Edge, Brave, Opera</span>
+            </div>
+            <a href="/moviebox-extension.zip" download="moviebox-extension.zip" class="btn btn-primary" style="padding: 6px 14px; font-size: 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+              <span>⬇️ Download ZIP</span>
+            </a>
+          </div>
+          <div class="install-step-card">
+            <div class="step-badge">Step 1</div>
+            <div class="step-text">Download the ZIP above and extract it into a folder on your computer.</div>
+          </div>
+          <div class="install-step-card">
+            <div class="step-badge">Step 2</div>
+            <div class="step-text">Open <code>chrome://extensions</code> (or <code>edge://extensions</code>), and enable <strong>Developer mode</strong> (top right).</div>
+          </div>
+          <div class="install-step-card">
+            <div class="step-badge">Step 3</div>
+            <div class="step-text">Click <strong>"Load unpacked"</strong> and select the extracted folder. Enjoy instant toolbar streaming!</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding: 12px 20px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 12px; color: var(--text-muted);">✨ Free software • Zero configuration</span>
+        <button type="button" class="btn btn-secondary" id="closeInstallModalBottomBtn" style="padding: 6px 18px;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js?v=20261119q"></script>
+  <!-- Progressive Web App (PWA) Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js?v=20261119q')
+          .then((reg) => console.log('MovieBox PWA ServiceWorker active:', reg.scope))
+          .catch((err) => console.warn('PWA registration error:', err));
+      });
+    }
+  </script>
 </body>
 </html>
 

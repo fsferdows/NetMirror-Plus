@@ -7109,3 +7109,205 @@ kbd {
     transition: transform 0.1s ease !important;
   }
 }
+
+/* 9. PWA Software Install & Multi-Platform App Styles */
+.install-app-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(229, 9, 20, 0.14);
+  border: 1px solid rgba(229, 9, 20, 0.38);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.install-app-nav-btn:hover {
+  background: #e50914;
+  border-color: #e50914;
+  box-shadow: 0 0 16px rgba(229, 9, 20, 0.45);
+  transform: translateY(-1px);
+}
+
+.install-app-icon {
+  width: 16px;
+  height: 16px;
+  fill: #e50914;
+  transition: fill 0.2s ease;
+}
+
+.install-app-nav-btn:hover .install-app-icon {
+  fill: #fff;
+}
+
+.mobile-install-banner-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, rgba(229, 9, 20, 0.22), rgba(15, 23, 42, 0.95));
+  border: 1px solid rgba(229, 9, 20, 0.45);
+  border-radius: 12px;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.mobile-install-banner-btn:active {
+  transform: scale(0.98);
+}
+
+.install-banner-icon {
+  font-size: 24px;
+}
+
+.install-banner-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.install-banner-text strong {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.install-banner-text small {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.install-banner-arrow {
+  color: #e50914;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+/* Universal App Install Modal */
+.install-modal-card {
+  background: #0b1120 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(229, 9, 20, 0.15) !important;
+}
+
+.native-install-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: linear-gradient(135deg, rgba(229, 9, 20, 0.18), rgba(30, 41, 59, 0.75));
+  border: 1px solid rgba(229, 9, 20, 0.4);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.native-install-badge {
+  display: inline-block;
+  background: #e50914;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.install-os-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  scrollbar-width: none;
+}
+
+.install-os-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.install-os-tab {
+  background: rgba(30, 41, 59, 0.7);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 7px 13px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.install-os-tab:hover {
+  background: rgba(51, 65, 85, 0.8);
+  color: #fff;
+}
+
+.install-os-tab.active {
+  background: #e50914;
+  color: #fff;
+  border-color: #e50914;
+  box-shadow: 0 2px 10px rgba(229, 9, 20, 0.4);
+}
+
+.install-step-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+
+.step-badge {
+  background: rgba(229, 9, 20, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(229, 9, 20, 0.3);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.step-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #e2e8f0;
+}
+
+.ios-share-icon, .ios-add-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .install-app-nav-btn {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+  
+  .install-app-btn-text {
+    display: none;
+  }
+}

@@ -677,8 +677,164 @@
     } catch (_) {}
   }
 
+  // ==========================================================================
+  // UNIVERSAL MULTI-DEVICE PWA & SOFTWARE INSTALL ENGINE
+  // ==========================================================================
+  let deferredInstallPrompt = null;
+
+  function initPwaInstall() {
+    const installNavBtn = document.getElementById('installAppNavBtn');
+    const mobileInstallBannerBtn = document.getElementById('mobileInstallBannerBtn');
+    const installModal = document.getElementById('installAppModal');
+    const closeInstallModalBtn = document.getElementById('closeInstallModalBtn');
+    const closeInstallModalBottomBtn = document.getElementById('closeInstallModalBottomBtn');
+    const nativeInstallTriggerBtn = document.getElementById('nativeInstallTriggerBtn');
+    const nativeBanner = document.getElementById('nativeInstallPromptBanner');
+    const osTabs = document.querySelectorAll('.install-os-tab');
+
+    // Detect user platform
+    const ua = navigator.userAgent.toLowerCase();
+    const isIOS = /iphone|ipad|ipod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isAndroid = /android/.test(ua);
+    const isWindows = /windows/.test(ua);
+    const isMac = /macintosh|mac os x/.test(ua) && !isIOS;
+    const isLinux = /linux/.test(ua) && !isAndroid;
+
+    function detectTargetTab() {
+      if (isIOS) return 'ios';
+      if (isAndroid) return 'android';
+      if (isWindows) return 'windows';
+      if (isMac) return 'mac';
+      if (isLinux) return 'linux';
+      return 'windows';
+    }
+
+    function switchOsTab(tabName) {
+      osTabs.forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === tabName);
+      });
+      document.querySelectorAll('.install-tab-content').forEach(content => {
+        if (content.id === `tabContent-${tabName}`) {
+          content.classList.remove('hidden');
+        } else {
+          content.classList.add('hidden');
+        }
+      });
+    }
+
+    function openInstallModal() {
+      if (!installModal) return;
+      const targetTab = detectTargetTab();
+      switchOsTab(targetTab);
+
+      // If native deferred prompt is available, highlight the 1-click install banner
+      if (nativeBanner) {
+        if (deferredInstallPrompt) {
+          nativeBanner.classList.remove('hidden');
+        } else if (isIOS) {
+          nativeBanner.classList.add('hidden');
+        }
+      }
+
+      installModal.classList.remove('hidden');
+    }
+
+    function closeInstallModal() {
+      if (installModal) installModal.classList.add('hidden');
+    }
+
+    // Capture standard PWA install event (Chromium, Edge, Brave, Android)
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      if (nativeBanner) nativeBanner.classList.remove('hidden');
+      if (installNavBtn) {
+        installNavBtn.style.borderColor = '#22c55e';
+        installNavBtn.style.boxShadow = '0 0 12px rgba(34, 197, 94, 0.4)';
+      }
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      if (nativeBanner) nativeBanner.classList.add('hidden');
+      closeInstallModal();
+      showToast('🎉 MovieBox Plus software installed successfully! Enjoy 4K streaming.');
+    });
+
+    // Wire trigger buttons
+    if (installNavBtn) {
+      installNavBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (deferredInstallPrompt && !isIOS) {
+          deferredInstallPrompt.prompt();
+          deferredInstallPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+              showToast('Installing MovieBox Plus...');
+            }
+            deferredInstallPrompt = null;
+          });
+        } else {
+          openInstallModal();
+        }
+      });
+    }
+
+    if (mobileInstallBannerBtn) {
+      mobileInstallBannerBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const sheet = document.getElementById('mobilePlatformsSheet');
+        if (sheet) sheet.classList.add('hidden');
+        if (deferredInstallPrompt && isAndroid) {
+          deferredInstallPrompt.prompt();
+          deferredInstallPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+              showToast('Installing MovieBox Plus...');
+            }
+            deferredInstallPrompt = null;
+          });
+        } else {
+          openInstallModal();
+        }
+      });
+    }
+
+    if (nativeInstallTriggerBtn) {
+      nativeInstallTriggerBtn.addEventListener('click', () => {
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          deferredInstallPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+              showToast('Installing MovieBox Plus...');
+              closeInstallModal();
+            }
+            deferredInstallPrompt = null;
+          });
+        } else {
+          showToast('Please follow the step-by-step instructions below for your device.');
+        }
+      });
+    }
+
+    // Tab buttons
+    osTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        switchOsTab(tab.dataset.tab);
+      });
+    });
+
+    // Close buttons
+    if (closeInstallModalBtn) closeInstallModalBtn.addEventListener('click', closeInstallModal);
+    if (closeInstallModalBottomBtn) closeInstallModalBottomBtn.addEventListener('click', closeInstallModal);
+    if (installModal) {
+      installModal.addEventListener('click', (e) => {
+        if (e.target === installModal) closeInstallModal();
+      });
+    }
+  }
+
   async function init() {
     initAdShield();
+    initPwaInstall();
     setupEventListeners();
     updateAudioEnhancerUI();
     initMonetization();
@@ -1741,13 +1897,13 @@
 
     // Immediate pre-warm for instant playback (0ms wait)
     const immediateTarget = (media && (media.tmdb_id || media.tm_id)) || (mediaIdVal.startsWith('tt') ? mediaIdVal : null) || (state.currentDetails && (state.currentDetails.tmdb_id || state.currentDetails.tm_id)) || (state.currentDetails && state.currentDetails.id && state.currentDetails.id.value && state.currentDetails.id.value.startsWith('tt') ? state.currentDetails.id.value : null);
-    if (immediateTarget && (!state.embedUrls || state.embedUrls.length === 0)) {
+    if (immediateTarget) {
       state.embedUrls = [
         {
           name: 'VidLink Cloud (4K)',
           url: isSeries
-            ? `https://vidlink.pro/tv/${immediateTarget}/${s}/${ep}?primaryColor=e50914&nextbutton=true`
-            : `https://vidlink.pro/movie/${immediateTarget}?primaryColor=e50914`
+            ? `https://vidlink.pro/tv/${immediateTarget}/${s}/${ep}?primaryColor=e50914&nextbutton=true&autoplay=true`
+            : `https://vidlink.pro/movie/${immediateTarget}?primaryColor=e50914&autoplay=true`
         },
         {
           name: 'SmashyStream (Cinema HD)',
@@ -1760,13 +1916,23 @@
           url: isSeries
             ? `https://multiembed.mov/?video_id=${immediateTarget}&tmdb=1&s=${s}&e=${ep}`
             : `https://multiembed.mov/?video_id=${immediateTarget}&tmdb=1`
+        },
+        {
+          name: '2Embed (Ultra HD)',
+          url: isSeries
+            ? `https://www.2embed.cc/embedtv/${immediateTarget}&s=${s}&e=${ep}`
+            : `https://www.2embed.cc/embed/${immediateTarget}`
+        },
+        {
+          name: 'AutoEmbed (VIP)',
+          url: isSeries
+            ? `https://player.autoembed.cc/embed/tv/${immediateTarget}/${s}/${ep}`
+            : `https://player.autoembed.cc/embed/movie/${immediateTarget}`
         }
       ];
       populateServerMenu(state.currentStreams, state.embedUrls);
-      if (state.userLockedEmbedServer) {
-        const preWarmEmbed = state.embedUrls.find(e => e.name === state.currentEmbedServerName) || state.embedUrls[0];
-        playEmbedUrl(preWarmEmbed.url, preWarmEmbed.name);
-      }
+      const preWarmEmbed = (state.userLockedEmbedServer && state.embedUrls.find(e => e.name === state.currentEmbedServerName)) || state.embedUrls[0];
+      playEmbedUrl(preWarmEmbed.url, preWarmEmbed.name);
     }
 
     try {
@@ -1815,8 +1981,17 @@
       if (state.userLockedEmbedServer && state.embedUrls.length > 0) {
         // If user explicitly chose an embed provider, stay on that mirror for the new episode!
         const matchingEmbed = state.embedUrls.find(e => e.name === state.currentEmbedServerName) || state.embedUrls[state.currentEmbedIndex] || state.embedUrls[0];
-        playEmbedUrl(matchingEmbed.url, matchingEmbed.name);
+        if (!el.embedPlayerIframe || el.embedPlayerIframe.src !== matchingEmbed.url) {
+          playEmbedUrl(matchingEmbed.url, matchingEmbed.name);
+        }
+      } else if (state.embedUrls.length > 0) {
+        // Fast Cloud Mirrors are prioritized as Server 1 for zero-delay, instant playback!
+        const targetEmbed = state.embedUrls[0];
+        if (!state.isEmbedMode || !el.embedPlayerIframe || el.embedPlayerIframe.src !== targetEmbed.url) {
+          playEmbedUrl(targetEmbed.url, targetEmbed.name);
+        }
       } else if (state.currentStreams.length > 0) {
+        // Fallback to direct stream if no embed mirrors
         state.isEmbedMode = false;
         state.userLockedEmbedServer = false;
         clearEmbedIframe();
@@ -1841,9 +2016,6 @@
 
         // Play video
         playStreamUrl(defaultStream.proxy_url, resumeTime);
-      } else if (state.embedUrls.length > 0) {
-        // Fallback directly to universal embed player
-        playEmbedUrl(state.embedUrls[0].url, state.embedUrls[0].name);
       } else {
         throw new Error('No playable stream mirrors available');
       }
@@ -2330,7 +2502,53 @@
       el.serverPillsList.innerHTML = '';
       let serverCounter = 1;
 
-      // Direct streams (HTML5 native video player - ad-free, 300% sound booster, direct CDN)
+      // Embed cloud servers first (instant playback, 4K UHD, subtitles, zero 428/429 delays)
+      if (embeds && embeds.length > 0) {
+        embeds.forEach((emb, idx) => {
+          const pill = document.createElement('button');
+          pill.type = 'button';
+          const isActive = state.isEmbedMode && (state.currentEmbedServerName === emb.name || (el.embedPlayerIframe && el.embedPlayerIframe.src === emb.url));
+          pill.className = `server-pill-btn ${isActive ? 'active' : ''}`;
+
+          let displayName = `Server ${serverCounter}`;
+          const isVidLink = emb.name.includes('VidLink') || emb.name.includes('4K');
+          const isSmashy = emb.name.includes('Smashy') || emb.name.includes('Cinema');
+          const isMulti = emb.name.includes('Multi') || emb.name.includes('Fast');
+          const is2Embed = emb.name.includes('2Embed') || emb.name.includes('Ultra');
+          const isAutoEmbed = emb.name.includes('AutoEmbed') || emb.name.includes('VIP');
+
+          if (serverCounter === 1) {
+            displayName = isVidLink ? '⚡ Server 1 (4K)' : '⚡ Server 1';
+          } else if (isSmashy) {
+            displayName = `Server ${serverCounter} (Cinema)`;
+          } else if (isMulti) {
+            displayName = `Server ${serverCounter} (Fast)`;
+          } else if (is2Embed) {
+            displayName = `Server ${serverCounter} (Ultra)`;
+          } else if (isAutoEmbed) {
+            displayName = `Server ${serverCounter} (VIP)`;
+          } else {
+            displayName = `Server ${serverCounter} (${emb.name.replace(/\(.*?\)/g, '').trim() || 'HD'})`;
+          }
+          serverCounter++;
+
+          if (isActive) {
+            pill.innerHTML = `<span class="live-signal-bars"><span class="bar b1"></span><span class="bar b2"></span><span class="bar b3"></span></span> ${displayName}`;
+          } else {
+            pill.textContent = displayName;
+          }
+
+          pill.title = emb.name;
+          pill.addEventListener('click', () => {
+            state.userLockedEmbedServer = true;
+            playEmbedUrl(emb.url, emb.name);
+            populateServerMenu(state.currentStreams, state.embedUrls);
+          });
+          el.serverPillsList.appendChild(pill);
+        });
+      }
+
+      // Direct CDN streams (optional raw streams / experimental)
       if (streams && streams.length > 0) {
         streams.forEach((stream, idx) => {
           const pill = document.createElement('button');
@@ -2338,14 +2556,7 @@
           const isActive = idx === state.currentStreamIndex && !state.isEmbedMode;
           pill.className = `server-pill-btn ${isActive ? 'active' : ''}`;
           
-          let displayName = `Server ${serverCounter}`;
-          if (serverCounter === 1) {
-            displayName = `⚡ Server 1 (${stream.quality || '4K'})`;
-          } else if (stream.server && stream.server.includes('(')) {
-            displayName = `Server ${serverCounter} ${stream.server.replace('MovieBox ', '')}`;
-          } else {
-            displayName = `Server ${serverCounter} (${stream.quality || 'HD'})`;
-          }
+          let displayName = `Server ${serverCounter} (Direct CDN)`;
           serverCounter++;
 
           if (isActive) {
@@ -2364,46 +2575,6 @@
               el.playerControls.classList.remove('hidden');
             }
             switchStream(stream, el.videoElement.currentTime || 0);
-            populateServerMenu(state.currentStreams, state.embedUrls);
-          });
-          el.serverPillsList.appendChild(pill);
-        });
-      }
-
-      // Embed cloud servers
-      if (embeds && embeds.length > 0) {
-        embeds.forEach((emb, idx) => {
-          const pill = document.createElement('button');
-          pill.type = 'button';
-          const isActive = state.isEmbedMode && (state.currentEmbedServerName === emb.name || (el.embedPlayerIframe && el.embedPlayerIframe.src === emb.url));
-          pill.className = `server-pill-btn ${isActive ? 'active' : ''}`;
-
-          let displayName = `Server ${serverCounter}`;
-          const isVidLink = emb.name.includes('VidLink') || emb.name.includes('4K');
-          const isSmashy = emb.name.includes('Smashy') || emb.name.includes('Cinema');
-          const isMulti = emb.name.includes('Multi') || emb.name.includes('Fast');
-
-          if (serverCounter === 1) {
-            displayName = isVidLink ? '⚡ Server 1 (4K)' : '⚡ Server 1';
-          } else if (isSmashy) {
-            displayName = `Server ${serverCounter} (Cinema)`;
-          } else if (isMulti) {
-            displayName = `Server ${serverCounter} (Fast)`;
-          } else {
-            displayName = `Server ${serverCounter} (${emb.name.replace(/\(.*?\)/g, '').trim() || 'HD'})`;
-          }
-          serverCounter++;
-
-          if (isActive) {
-            pill.innerHTML = `<span class="live-signal-bars"><span class="bar b1"></span><span class="bar b2"></span><span class="bar b3"></span></span> ${displayName}`;
-          } else {
-            pill.textContent = displayName;
-          }
-
-          pill.title = emb.name;
-          pill.addEventListener('click', () => {
-            state.userLockedEmbedServer = true;
-            playEmbedUrl(emb.url, emb.name);
             populateServerMenu(state.currentStreams, state.embedUrls);
           });
           el.serverPillsList.appendChild(pill);

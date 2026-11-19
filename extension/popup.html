@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MovieBox Plus</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="popup-header">
+      <div class="header-brand">
+        <span class="brand-badge">M</span>
+        <div class="brand-names">
+          <span class="brand-title">MOVIEBOX</span>
+          <span class="brand-tag">PLUS</span>
+        </div>
+      </div>
+      <a href="https://netmirror-plus.vercel.app/" target="_blank" class="header-launch-btn" title="Open Full Website">
+        <span>Launch Web</span>
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+    </header>
+
+    <!-- Search Section -->
+    <div class="search-section">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchInput" placeholder="Search movies, series, anime..." autocomplete="off" autofocus />
+        <button id="clearSearchBtn" class="clear-btn hidden">&times;</button>
+      </div>
+    </div>
+
+    <!-- Quick Navigation Pills -->
+    <div class="quick-nav">
+      <button class="nav-chip active" data-filter="trending">🍿 Trending</button>
+      <button class="nav-chip" data-filter="movies">🎬 Movies</button>
+      <button class="nav-chip" data-filter="series">📺 Series</button>
+      <button class="nav-chip chip-sports" data-filter="sports">⚽ Live Sports</button>
+      <button class="nav-chip" data-filter="dubbed">🎧 Dubbed</button>
+    </div>
+
+    <!-- Content List -->
+    <div class="content-scroll" id="contentScroll">
+      <div class="section-title-row">
+        <h3 id="sectionTitle">🔥 Trending Now</h3>
+        <span class="result-count" id="resultCount"></span>
+      </div>
+
+      <div class="items-list" id="itemsList">
+        <div class="loader-wrap" id="loaderWrap">
+          <div class="spinner"></div>
+          <span>Loading 4K catalog...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="popup-footer">
+      <div class="footer-status">
+        <span class="status-dot"></span>
+        <span>4K Servers Active • Zero Ads</span>
+      </div>
+      <a href="https://netmirror-plus.vercel.app/" target="_blank" class="footer-btn">
+        Open Full Website ➔
+      </a>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

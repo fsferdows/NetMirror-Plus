@@ -469,14 +469,14 @@ function buildEmbedUrls({ imdbId, tmdbId, title, id, isSeries, season, episode }
     (title || id || "").replace(/\[.*?\]|\(.*?\)|S\d+(-S\d+)?/gi, "").trim()
   );
 
-  // 1. VidLink Cloud (4K Ultra HD) - Cleanest player, zero popups, subtitles, high-speed CDN
+  // 1. VidLink Cloud (4K Ultra HD) - Cleanest player, zero popups, subtitles, high-speed CDN, instant autoplay
   const vidTargetId = tmdbId || imdbId;
   if (vidTargetId) {
     embedUrls.push({
       name: "VidLink Cloud (4K)",
       url: isSeries
-        ? `https://vidlink.pro/tv/${vidTargetId}/${s}/${ep}?primaryColor=e50914&nextbutton=true`
-        : `https://vidlink.pro/movie/${vidTargetId}?primaryColor=e50914`,
+        ? `https://vidlink.pro/tv/${vidTargetId}/${s}/${ep}?primaryColor=e50914&nextbutton=true&autoplay=true`
+        : `https://vidlink.pro/movie/${vidTargetId}?primaryColor=e50914&autoplay=true`,
     });
   }
 
@@ -505,6 +505,28 @@ function buildEmbedUrls({ imdbId, tmdbId, title, id, isSeries, season, episode }
       url: isSeries
         ? `https://multiembed.mov/?video_id=${imdbId}&s=${s}&e=${ep}`
         : `https://multiembed.mov/?video_id=${imdbId}`,
+    });
+  }
+
+  // 4. 2Embed (Ultra HD) - Multi-CDN backup mirror
+  const embed2Id = imdbId || tmdbId;
+  if (embed2Id) {
+    embedUrls.push({
+      name: "2Embed (Ultra HD)",
+      url: isSeries
+        ? `https://www.2embed.cc/embedtv/${embed2Id}&s=${s}&e=${ep}`
+        : `https://www.2embed.cc/embed/${embed2Id}`,
+    });
+  }
+
+  // 5. AutoEmbed (VIP Mirror)
+  if (imdbId || tmdbId) {
+    const autoId = imdbId || tmdbId;
+    embedUrls.push({
+      name: "AutoEmbed (VIP)",
+      url: isSeries
+        ? `https://player.autoembed.cc/embed/tv/${autoId}/${s}/${ep}`
+        : `https://player.autoembed.cc/embed/movie/${autoId}`,
     });
   }
 

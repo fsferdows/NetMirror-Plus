@@ -1393,7 +1393,27 @@
   let isAudioEngineReady = false;
 
   const audioProfiles = {
+    balanced: {
+      name: 'Studio Balanced',
+      badge: 'Balanced',
+      bass: 0.0,
+      voice: 0.0,
+      treble: 0.0,
+      boost: 1.0,
+      compressor: { threshold: -12, knee: 10, ratio: 2, attack: 0.005, release: 0.2 },
+      desc: 'Clean, flat reference studio acoustic passthrough'
+    },
     cinema: {
+      name: 'Cinema Theater',
+      badge: 'Cinema',
+      bass: 5.5,
+      voice: 4.5,
+      treble: 3.0,
+      boost: 1.5,
+      compressor: { threshold: -22, knee: 24, ratio: 4, attack: 0.003, release: 0.25 },
+      desc: 'Theater surround, warm bass punch & clear dialogue'
+    },
+    theater: {
       name: 'Cinema Theater',
       badge: 'Cinema',
       bass: 5.5,
@@ -1434,12 +1454,12 @@
       desc: 'Softens loud explosions, boosts quiet whispers'
     },
     loud: {
-      name: 'Super Loud 250%',
-      badge: 'Loud',
+      name: 'Super Loud 300%',
+      badge: '300%',
       bass: 4.0,
       voice: 5.0,
       treble: 3.0,
-      boost: 2.5,
+      boost: 3.0,
       compressor: { threshold: -18, knee: 20, ratio: 5, attack: 0.002, release: 0.2 },
       desc: 'Maximized volume boost with anti-clipping limiter'
     },
@@ -1463,33 +1483,65 @@
       }
     }
 
-    if (isAudioEngineReady) {
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume().catch(() => {});
+    if (!audioCtx) {
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      } catch (e) {
+        console.warn('AudioContext init note:', e);
       }
-      return;
     }
 
-    try {
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (AudioContextClass && !audioCtx) {
-        audioCtx = new AudioContextClass();
+    if (audioCtx && !sourceNode && el.videoElement) {
+      try {
+        sourceNode = audioCtx.createMediaElementSource(el.videoElement);
+        bassNode = audioCtx.createBiquadFilter();
+        bassNode.type = 'lowshelf';
+        bassNode.frequency.value = 250;
+
+        voiceNode = audioCtx.createBiquadFilter();
+        voiceNode.type = 'peaking';
+        voiceNode.frequency.value = 2500;
+        voiceNode.Q.value = 1.0;
+
+        trebleNode = audioCtx.createBiquadFilter();
+        trebleNode.type = 'highshelf';
+        trebleNode.frequency.value = 4000;
+
+        compressorNode = audioCtx.createDynamicsCompressor();
+
+        boostGainNode = audioCtx.createGain();
+        boostGainNode.gain.value = state.audioBoost || 1.5;
+
+        // Chain: source -> bass -> voice -> treble -> compressor -> boostGain -> destination
+        sourceNode.connect(bassNode);
+        bassNode.connect(voiceNode);
+        voiceNode.connect(trebleNode);
+        trebleNode.connect(compressorNode);
+        compressorNode.connect(boostGainNode);
+        boostGainNode.connect(audioCtx.destination);
+      } catch (err) {
+        console.warn('MediaElementSource note (direct audio fallback):', err);
       }
-      isAudioEngineReady = true;
-      applyAudioProfile(state.audioProfile || 'cinema', false);
-      setVolumeBoost(state.audioBoost || 1.5, false);
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume().catch(() => {});
-      }
-    } catch (err) {
-      console.warn('Audio Engine note:', err);
     }
+
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
+
+    isAudioEngineReady = true;
   }
 
   function applyAudioProfile(profileKey, showNotification = true) {
-    const profile = audioProfiles[profileKey] || audioProfiles.cinema;
+    const profile = audioProfiles[profileKey] || audioProfiles.theater || audioProfiles.cinema;
     state.audioProfile = profileKey;
     localStorage.setItem('moviebox_audio_profile', profileKey);
+
+    if (profile.boost && Math.abs((state.audioBoost || 1.5) - profile.boost) > 0.05) {
+      setVolumeBoost(profile.boost, true);
+    }
 
     if (audioCtx) {
       const now = audioCtx.currentTime;
@@ -4559,26 +4611,22 @@
     if (el.soundBoosterModal) {
       const modeHint = document.getElementById('soundBoosterModeHint');
       if (modeHint) {
-        if (state.isEmbedMode) {
-          modeHint.innerHTML = `
-            <div style="padding:10px 14px;background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.3);border-radius:8px;font-size:12px;color:#fde047;line-height:1.5;margin-bottom:14px;">
-              ⚠️ <strong>Playing via Video Mirror:</strong> Video sound is managed via the mirror's on-screen volume control. Switch to <strong>Server 1 (Ultra 4K / Direct CDN)</strong> above to activate hardware 300% volume boost & equalizer!
-            </div>
-          `;
-        } else {
-          modeHint.innerHTML = `
-            <div style="padding:10px 14px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:8px;font-size:12px;color:#86efac;line-height:1.5;margin-bottom:14px;">
-              ⚡ <strong>Direct Hardware DSP Active:</strong> Amplifying native HTML5 audio stream up to 300% with studio equalizer presets.
-            </div>
-          `;
-        }
+        const boostPercent = Math.round((state.audioBoost || 1.5) * 100);
+        const profile = audioProfiles[state.audioProfile || 'cinema'] || audioProfiles.cinema;
+        modeHint.innerHTML = `
+          <div style="padding:10px 14px;background:rgba(229,9,20,0.1);border:1px solid rgba(229,9,20,0.3);border-radius:8px;font-size:12.5px;color:#fca5a5;line-height:1.5;margin-bottom:14px;">
+            ⚡ <strong>Current Sound Profile:</strong> ${profile.name} • <strong>${boostPercent}% Volume Multiplier</strong>. Tap any preset or drag the slider to change acoustics on any device.
+          </div>
+        `;
       }
       el.soundBoosterModal.classList.remove('hidden');
     }
   }
 
   function closeSoundBoosterModal() {
-    if (el.soundBoosterModal) el.soundBoosterModal.classList.add('hidden');
+    if (el.soundBoosterModal) {
+      el.soundBoosterModal.classList.add('hidden');
+    }
   }
 
   function openAudioDubsModal() {

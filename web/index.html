@@ -41,7 +41,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20261119l" />
+  <link rel="stylesheet" href="/styles.css?v=20261119m" />
   <style>
     :root, html, body {
       background-color: #060a14 !important;
@@ -1490,7 +1490,7 @@
   </div>
 
   <!-- Sound Booster & Studio EQ Modal -->
-  <div class="modal hidden" id="soundBoosterModal" style="z-index: 10005;">
+  <div class="modal-backdrop hidden" id="soundBoosterModal" style="z-index: 10005;">
     <div class="modal-card" style="max-width: 480px;">
       <div class="modal-header">
         <h3 class="modal-title">🔊 Studio Sound Booster & EQ</h3>
@@ -1525,25 +1525,29 @@
         <div>
           <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 8px; color: var(--text-secondary);">Cinema Audio Profiles (DSP EQ)</label>
           <div id="modalPresetsList" style="display: flex; flex-direction: column; gap: 6px;">
-            <button type="button" class="menu-item preset-item active" data-preset="balanced" style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06);">
-              <span>⚖️ Studio Balanced</span>
-              <span style="font-size: 11px; color: var(--text-muted);">Neutral clean acoustics</span>
-            </button>
-            <button type="button" class="menu-item preset-item" data-preset="theater" style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06);">
+            <button type="button" class="menu-item preset-item active" data-preset="cinema" style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06); cursor: pointer;">
               <span>🎬 Cinema Theater</span>
-              <span style="font-size: 11px; color: var(--text-muted);">Dolby Atmos simulated curve</span>
+              <span style="font-size: 11px; color: var(--text-muted);">Dolby Atmos simulated curve (150%)</span>
             </button>
-            <button type="button" class="menu-item preset-item" data-preset="vocal" style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06);">
+            <button type="button" class="menu-item preset-item" data-preset="balanced" style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06); cursor: pointer;">
+              <span>⚖️ Studio Balanced</span>
+              <span style="font-size: 11px; color: var(--text-muted);">Neutral clean acoustics (100%)</span>
+            </button>
+            <button type="button" class="menu-item preset-item" data-preset="vocal" style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06); cursor: pointer;">
               <span>🗣️ Vocal & Dialogue Clarity</span>
-              <span style="font-size: 11px; color: var(--text-muted);">Boosts whispered speech</span>
+              <span style="font-size: 11px; color: var(--text-muted);">Boosts whispered speech (160%)</span>
             </button>
-            <button type="button" class="menu-item preset-item" data-preset="bass" style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06);">
+            <button type="button" class="menu-item preset-item" data-preset="bass" style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06); cursor: pointer;">
               <span>💣 Action Bass Blast</span>
-              <span style="font-size: 11px; color: var(--text-muted);">Sub-bass +8dB for explosions</span>
+              <span style="font-size: 11px; color: var(--text-muted);">Sub-bass +8dB for explosions (150%)</span>
             </button>
-            <button type="button" class="menu-item preset-item" data-preset="night" style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06);">
+            <button type="button" class="menu-item preset-item" data-preset="night" style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06); cursor: pointer;">
               <span>🌙 Late Night Mode</span>
-              <span style="font-size: 11px; color: var(--text-muted);">Dynamic compression, quiet explosions</span>
+              <span style="font-size: 11px; color: var(--text-muted);">Dynamic compression, quiet explosions (130%)</span>
+            </button>
+            <button type="button" class="menu-item preset-item" data-preset="loud" style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06); cursor: pointer;">
+              <span>🔥 Maximum Loudness</span>
+              <span style="font-size: 11px; color: var(--text-muted);">Full 300% loudness amplifier</span>
             </button>
           </div>
         </div>
@@ -1556,7 +1560,7 @@
   </div>
 
   <!-- Audio Dubs / Multi-Language Modal -->
-  <div class="modal hidden" id="audioDubsModal" style="z-index: 10005;">
+  <div class="modal-backdrop hidden" id="audioDubsModal" style="z-index: 10005;">
     <div class="modal-card" style="max-width: 440px;">
       <div class="modal-header">
         <h3 class="modal-title">🎧 Select Audio Track / Dub</h3>
@@ -1572,7 +1576,7 @@
     </div>
   </div>
 
-  <script src="/app.js?v=20261119l"></script>
+  <script src="/app.js?v=20261119m"></script>
 </body>
 </html>
 

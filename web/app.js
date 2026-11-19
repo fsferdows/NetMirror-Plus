@@ -1376,9 +1376,9 @@
           const details = await res.json();
           state.currentDetails = details;
           if (details) {
-            const isSer = details.media_type === 'series' || (details.seasons && details.seasons.length > 0);
-            const targetS = activeSeason > 0 ? activeSeason : 1;
-            const targetEp = activeEpisode > 0 ? activeEpisode : 1;
+            const isSer = details.media_type === 'series' || (details.seasons && details.seasons.length > 0) || s > 0 || ep > 0;
+            const targetS = s > 0 ? s : 1;
+            const targetEp = ep > 0 ? ep : 1;
             if (isSer) {
               el.playerMediaSubtitle.textContent = `Season ${targetS} • Episode ${targetEp}`;
             } else {
@@ -2205,7 +2205,7 @@
           if (reqId !== state.playbackRequestSeq) return;
           state.currentDetails = details;
           if (details) {
-            const isSer = details.media_type === 'series' || (details.seasons && details.seasons.length > 0);
+            const isSer = details.media_type === 'series' || (details.seasons && details.seasons.length > 0) || activeSeason > 0 || activeEpisode > 0;
             const targetS = activeSeason > 0 ? activeSeason : 1;
             const targetEp = activeEpisode > 0 ? activeEpisode : 1;
             if (isSer) {

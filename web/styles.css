@@ -7311,3 +7311,21 @@ kbd {
     display: none;
   }
 }
+
+/* Direct Software Download CTA Cards */
+.download-cta-box {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.download-cta-box:hover {
+  transform: translateY(-1px);
+}
+@media (max-width: 640px) {
+  .download-cta-box {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  .download-cta-box .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

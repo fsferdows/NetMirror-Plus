@@ -709,6 +709,64 @@
       return 'windows';
     }
 
+    const tabDownloadMeta = {
+      mac: {
+        url: '/downloads/MovieBox-Plus-Mac.dmg',
+        filename: 'MovieBox-Plus-Mac.dmg',
+        btnText: '⬇️ Download Mac DMG',
+        bannerTitle: 'Download Native macOS App (Apple Silicon & Intel DMG)',
+        toast: '⬇️ Starting download: MovieBox Plus for Mac (DMG)...'
+      },
+      windows: {
+        url: '/downloads/MovieBox-Plus-Windows.zip',
+        filename: 'MovieBox-Plus-Windows.zip',
+        btnText: '⬇️ Download Windows (.zip)',
+        bannerTitle: 'Download Native Windows Launcher (.zip)',
+        toast: '⬇️ Starting download: MovieBox Plus for Windows (.zip)...'
+      },
+      android: {
+        url: '/downloads/MovieBox-Plus.apk',
+        filename: 'MovieBox-Plus.apk',
+        btnText: '⬇️ Download Android APK',
+        bannerTitle: 'Download Standalone Android APK (Phones, Tablets & TV)',
+        toast: '⬇️ Starting download: MovieBox Plus for Android (APK)...'
+      },
+      linux: {
+        url: '/downloads/MovieBox-Plus-Linux.tar.gz',
+        filename: 'MovieBox-Plus-Linux.tar.gz',
+        btnText: '⬇️ Download Linux Package',
+        bannerTitle: 'Download Native Linux Package (.tar.gz)',
+        toast: '⬇️ Starting download: MovieBox Plus for Linux (.tar.gz)...'
+      },
+      extension: {
+        url: '/downloads/moviebox-extension.zip',
+        filename: 'moviebox-extension.zip',
+        btnText: '⬇️ Download Extension (ZIP)',
+        bannerTitle: 'Download Chrome Extension (Manifest V3)',
+        toast: '⬇️ Starting download: MovieBox Plus Chrome Extension (ZIP)...'
+      },
+      ios: {
+        url: null,
+        filename: null,
+        btnText: '📲 How to Install on iOS',
+        bannerTitle: 'Install Standalone Fullscreen Web App for iPhone & iPad',
+        toast: '📲 On iPhone/iPad: Tap Share (⎋) in Safari, then "Add to Home Screen"!'
+      }
+    };
+
+    function triggerFileDownload(url, filename) {
+      if (!url) return;
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        if (link.parentNode) link.parentNode.removeChild(link);
+      }, 300);
+    }
+
     function switchOsTab(tabName) {
       osTabs.forEach(t => {
         t.classList.toggle('active', t.dataset.tab === tabName);
@@ -720,6 +778,15 @@
           content.classList.add('hidden');
         }
       });
+
+      const meta = tabDownloadMeta[tabName];
+      if (meta && nativeInstallTriggerBtn) {
+        nativeInstallTriggerBtn.textContent = meta.btnText;
+      }
+      if (meta && nativeBanner) {
+        const titleEl = nativeBanner.querySelector('p');
+        if (titleEl) titleEl.textContent = meta.bannerTitle;
+      }
     }
 
     function openInstallModal() {
@@ -727,13 +794,9 @@
       const targetTab = detectTargetTab();
       switchOsTab(targetTab);
 
-      // If native deferred prompt is available, highlight the 1-click install banner
+      // Keep download banner visible so user can 1-click download directly
       if (nativeBanner) {
-        if (deferredInstallPrompt) {
-          nativeBanner.classList.remove('hidden');
-        } else if (isIOS) {
-          nativeBanner.classList.add('hidden');
-        }
+        nativeBanner.classList.remove('hidden');
       }
 
       installModal.classList.remove('hidden');
@@ -756,7 +819,6 @@
 
     window.addEventListener('appinstalled', () => {
       deferredInstallPrompt = null;
-      if (nativeBanner) nativeBanner.classList.add('hidden');
       closeInstallModal();
       showToast('🎉 MovieBox Plus software installed successfully! Enjoy 4K streaming.');
     });
@@ -765,17 +827,7 @@
     if (installNavBtn) {
       installNavBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        if (deferredInstallPrompt && !isIOS) {
-          deferredInstallPrompt.prompt();
-          deferredInstallPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-              showToast('Installing MovieBox Plus...');
-            }
-            deferredInstallPrompt = null;
-          });
-        } else {
-          openInstallModal();
-        }
+        openInstallModal();
       });
     }
 
@@ -784,33 +836,37 @@
         e.preventDefault();
         const sheet = document.getElementById('mobilePlatformsSheet');
         if (sheet) sheet.classList.add('hidden');
-        if (deferredInstallPrompt && isAndroid) {
-          deferredInstallPrompt.prompt();
-          deferredInstallPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-              showToast('Installing MovieBox Plus...');
-            }
-            deferredInstallPrompt = null;
-          });
-        } else {
-          openInstallModal();
-        }
+        openInstallModal();
       });
     }
 
     if (nativeInstallTriggerBtn) {
       nativeInstallTriggerBtn.addEventListener('click', () => {
+        const activeTabEl = document.querySelector('.install-os-tab.active');
+        const currentTab = activeTabEl ? activeTabEl.dataset.tab : detectTargetTab();
+        const meta = tabDownloadMeta[currentTab] || tabDownloadMeta[detectTargetTab()];
+
+        if (meta && meta.url) {
+          triggerFileDownload(meta.url, meta.filename);
+          showToast(meta.toast);
+        } else if (currentTab === 'ios') {
+          showToast('📲 On iPhone/iPad: Tap Share (⎋) in Safari, then "Add to Home Screen"!');
+        }
+
+        // Also prompt PWA installer if browser supports it
         if (deferredInstallPrompt) {
-          deferredInstallPrompt.prompt();
-          deferredInstallPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-              showToast('Installing MovieBox Plus...');
-              closeInstallModal();
-            }
-            deferredInstallPrompt = null;
-          });
-        } else {
-          showToast('Please follow the step-by-step instructions below for your device.');
+          setTimeout(() => {
+            try {
+              deferredInstallPrompt.prompt();
+              deferredInstallPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                  showToast('Installing MovieBox Plus...');
+                  closeInstallModal();
+                }
+                deferredInstallPrompt = null;
+              });
+            } catch (_) {}
+          }, 350);
         }
       });
     }

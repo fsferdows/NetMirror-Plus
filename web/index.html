@@ -1623,11 +1623,11 @@
         <!-- Native Prompt Banner (Visible on supported Chromium / Android / Windows browsers) -->
         <div id="nativeInstallPromptBanner" class="native-install-banner">
           <div class="native-install-info">
-            <span class="native-install-badge">READY TO INSTALL</span>
-            <p style="margin: 4px 0 0; font-size: 13px; font-weight: 600;">Install standalone app with desktop shortcut & taskbar pinning</p>
+            <span class="native-install-badge">DIRECT DOWNLOAD & INSTALL</span>
+            <p style="margin: 4px 0 0; font-size: 13px; font-weight: 600;">Download native software for Mac, Windows, Android, Linux & iPhone</p>
           </div>
-          <button type="button" class="btn btn-primary" id="nativeInstallTriggerBtn" style="padding: 8px 18px; font-weight: 700; background: linear-gradient(135deg, #e50914, #b91c1c);">
-            ⬇️ Install Now
+          <button type="button" class="btn btn-primary" id="nativeInstallTriggerBtn" style="padding: 10px 20px; font-weight: 700; background: linear-gradient(135deg, #e50914, #b91c1c); box-shadow: 0 0 16px rgba(229,9,20,0.5);">
+            ⬇️ Download / Install Now
           </button>
         </div>
 
@@ -1658,58 +1658,113 @@
         </div>
 
         <div class="install-tab-content hidden" id="tabContent-android">
+          <!-- Direct Android APK Download -->
+          <div class="download-cta-box" style="background: linear-gradient(135deg, rgba(34,197,94,0.18), rgba(30,41,59,0.85)); border: 1px solid rgba(34,197,94,0.45); border-radius: 10px; padding: 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 180px;">
+              <strong style="color: #fff; font-size: 14px; display: block;">🤖 MovieBox Plus for Android</strong>
+              <span style="font-size: 12px; color: #94a3b8;">Standalone APK • Phones, Tablets & Android TV</span>
+            </div>
+            <a href="/downloads/MovieBox-Plus.apk" download="MovieBox-Plus.apk" class="btn btn-primary" style="padding: 9px 18px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #16a34a, #15803d); box-shadow: 0 0 14px rgba(34,197,94,0.4);">
+              <span>⬇️ Download Android APK</span>
+            </a>
+          </div>
+
           <div class="install-step-card">
             <div class="step-badge">Option 1</div>
-            <div class="step-text">Tap the <strong>"Install Now"</strong> button above, or tap the <strong>"Install App"</strong> prompt that appears at the bottom of Google Chrome.</div>
+            <div class="step-text">Tap the <strong>"Download Android APK"</strong> button above to install the standalone app directly.</div>
           </div>
           <div class="install-step-card">
             <div class="step-badge">Option 2</div>
-            <div class="step-text">Tap the Chrome menu (<strong>⋮</strong> top-right) and choose <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong>.</div>
+            <div class="step-text">Or tap the Chrome menu (<strong>⋮</strong> top-right) and choose <strong>"Install app"</strong> / <strong>"Add to Home screen"</strong>.</div>
           </div>
         </div>
 
         <div class="install-tab-content hidden" id="tabContent-windows">
+          <!-- Direct Windows Download -->
+          <div class="download-cta-box" style="background: linear-gradient(135deg, rgba(0,120,215,0.18), rgba(30,41,59,0.85)); border: 1px solid rgba(0,120,215,0.45); border-radius: 10px; padding: 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 180px;">
+              <strong style="color: #fff; font-size: 14px; display: block;">💻 MovieBox Plus for Windows</strong>
+              <span style="font-size: 12px; color: #94a3b8;">Standalone Software (Windows 11 / 10 / 8)</span>
+            </div>
+            <a href="/downloads/MovieBox-Plus-Windows.zip" download="MovieBox-Plus-Windows.zip" class="btn btn-primary" style="padding: 9px 18px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #0078d7, #005a9e); box-shadow: 0 0 14px rgba(0,120,215,0.4);">
+              <span>⬇️ Download for Windows (.zip)</span>
+            </a>
+          </div>
+
           <div class="install-step-card">
             <div class="step-badge">Step 1</div>
-            <div class="step-text">On <strong>Google Chrome</strong> or <strong>Microsoft Edge</strong>, look at the right side of the address bar for the <strong>App Install icon</strong> (⊕ or 💻).</div>
+            <div class="step-text">Download the Windows package above, extract the ZIP, and run <code>Launch-MovieBox-Plus.bat</code>.</div>
           </div>
           <div class="install-step-card">
             <div class="step-badge">Step 2</div>
-            <div class="step-text">Click <strong>"Install MovieBox Plus"</strong>. The app will launch in its own window and create a Windows Desktop and Start Menu shortcut!</div>
+            <div class="step-text">Double-click <code>Create-Desktop-Shortcut.vbs</code> to pin a native MovieBox Plus shortcut to your Windows Desktop and Taskbar!</div>
           </div>
         </div>
 
         <div class="install-tab-content hidden" id="tabContent-mac">
+          <!-- Direct Mac Download -->
+          <div class="download-cta-box" style="background: linear-gradient(135deg, rgba(229,9,20,0.18), rgba(30,41,59,0.85)); border: 1px solid rgba(229,9,20,0.45); border-radius: 10px; padding: 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 180px;">
+              <strong style="color: #fff; font-size: 14px; display: block;">🍏 MovieBox Plus for Mac</strong>
+              <span style="font-size: 12px; color: #94a3b8;">Native macOS Software (Apple Silicon & Intel)</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <a href="/downloads/MovieBox-Plus-Mac.dmg" download="MovieBox-Plus-Mac.dmg" class="btn btn-primary" style="padding: 9px 18px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #e50914, #b91c1c); box-shadow: 0 0 14px rgba(229,9,20,0.4);">
+                <span>⬇️ Download .DMG</span>
+              </a>
+              <a href="/downloads/MovieBox-Plus-Mac.zip" download="MovieBox-Plus-Mac.zip" class="btn btn-secondary" style="padding: 9px 14px; font-size: 13px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                <span>⬇️ .ZIP</span>
+              </a>
+            </div>
+          </div>
+
           <div class="install-step-card">
-            <div class="step-badge">Chrome / Brave</div>
-            <div class="step-text">Click the <strong>Install</strong> icon (⊕) on the right side of the address bar, or click Chrome menu ⋮ → <strong>"Save and share" → "Install MovieBox Plus"</strong>.</div>
+            <div class="step-badge">Method 1</div>
+            <div class="step-text">Click <strong>"Download .DMG"</strong> above, open the disk image, and drag MovieBox Plus into your Applications folder!</div>
           </div>
           <div class="install-step-card">
-            <div class="step-badge">Safari (macOS)</div>
-            <div class="step-text">Click <strong>File</strong> in the top menu bar → <strong>"Add to Dock..."</strong> to create an instant native macOS Dock app!</div>
+            <div class="step-badge">Method 2</div>
+            <div class="step-text">In Chrome or Brave, click the <strong>Install</strong> icon (⊕) on the right side of the address bar to install as a web app.</div>
+          </div>
+          <div class="install-step-card">
+            <div class="step-badge">Safari</div>
+            <div class="step-text">In Safari, click <strong>File</strong> in the top menu bar → <strong>"Add to Dock..."</strong> to create an instant native macOS Dock app!</div>
           </div>
         </div>
 
         <div class="install-tab-content hidden" id="tabContent-linux">
+          <!-- Direct Linux Download -->
+          <div class="download-cta-box" style="background: linear-gradient(135deg, rgba(234,179,8,0.18), rgba(30,41,59,0.85)); border: 1px solid rgba(234,179,8,0.45); border-radius: 10px; padding: 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 180px;">
+              <strong style="color: #fff; font-size: 14px; display: block;">🐧 MovieBox Plus for Linux</strong>
+              <span style="font-size: 12px; color: #94a3b8;">Ubuntu, Debian, Fedora & Arch Package</span>
+            </div>
+            <a href="/downloads/MovieBox-Plus-Linux.tar.gz" download="MovieBox-Plus-Linux.tar.gz" class="btn btn-primary" style="padding: 9px 18px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #ca8a04, #a16207); box-shadow: 0 0 14px rgba(234,179,8,0.4);">
+              <span>⬇️ Download Linux Package</span>
+            </a>
+          </div>
+
           <div class="install-step-card">
             <div class="step-badge">Step 1</div>
-            <div class="step-text">In Chromium, Chrome, or Brave, click the address bar install icon (⊕) or menu ⋮ → <strong>"Install MovieBox Plus"</strong>.</div>
-          </div>
-          <div class="install-step-card">
-            <div class="step-badge">Step 2</div>
-            <div class="step-text">MovieBox Plus integrates into your desktop launcher (.desktop application entry) with full keyboard shortcuts and zero browser borders.</div>
+            <div class="step-text">Extract the tar.gz package and run <code>./install-desktop-entry.sh</code> to integrate MovieBox Plus into your desktop app menu.</div>
           </div>
         </div>
 
         <div class="install-tab-content hidden" id="tabContent-extension">
-          <div style="background: rgba(229,9,20,0.1); border: 1px solid rgba(229,9,20,0.3); border-radius: 8px; padding: 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+          <!-- Chrome Extension Download -->
+          <div style="background: rgba(229,9,20,0.1); border: 1px solid rgba(229,9,20,0.3); border-radius: 10px; padding: 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
             <div>
-              <strong style="color: #fff; font-size: 13px; display: block;">MovieBox Plus Extension (ZIP)</strong>
-              <span style="font-size: 11px; color: var(--text-secondary);">Manifest V3 • Chrome, Edge, Brave, Opera</span>
+              <strong style="color: #fff; font-size: 14px; display: block;">🧩 Chrome Extension (MV3)</strong>
+              <span style="font-size: 12px; color: var(--text-secondary);">Direct toolbar streaming for Chrome, Edge, Brave, Opera</span>
             </div>
-            <a href="/moviebox-extension.zip" download="moviebox-extension.zip" class="btn btn-primary" style="padding: 6px 14px; font-size: 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
-              <span>⬇️ Download ZIP</span>
-            </a>
+            <div style="display: flex; gap: 8px;">
+              <a href="/downloads/moviebox-extension.zip" download="moviebox-extension.zip" class="btn btn-primary" style="padding: 8px 16px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                <span>⬇️ Download ZIP</span>
+              </a>
+              <a href="/downloads/extension.crx" download="extension.crx" class="btn btn-secondary" style="padding: 8px 14px; font-size: 13px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                <span>⬇️ Download CRX</span>
+              </a>
+            </div>
           </div>
           <div class="install-step-card">
             <div class="step-badge">Step 1</div>

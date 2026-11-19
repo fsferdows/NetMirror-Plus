@@ -1,0 +1,21 @@
+{
+  "name": "moviebox-plus-desktop",
+  "version": "1.0.0",
+  "description": "MovieBox Plus – Watch Worldwide Movies, TV Series & Live Sports in 4K Ultra HD",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux"
+  },
+  "keywords": [
+    "moviebox",
+    "streaming",
+    "movies",
+    "desktop",
+    "electron"
+  ],
+  "author": "FS FERDOWS",
+  "license": "MIT"
+}

@@ -28,3 +28,7 @@ docs/contributing.md
 .vercel
 # Node dependencies
 node_modules
+
+# Chrome Extension packing
+*.pem
+/extension.crx

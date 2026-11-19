@@ -2284,17 +2284,16 @@
   </div>
 </div>
 
-<script src="/app.js?v=20261119q"></script>
+<script src="/app.js?v=20261120a"></script>
 <!-- Progressive Web App (PWA) Service Worker Registration -->
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js?v=20261119q')
+      navigator.serviceWorker.register('/sw.js?v=20261120a')
         .then((reg) => console.log('MovieBox PWA ServiceWorker active:', reg.scope))
         .catch((err) => console.warn('PWA registration error:', err));
     });
   }
 </script>
 </body>
-
 </html>

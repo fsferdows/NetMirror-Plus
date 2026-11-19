@@ -351,6 +351,43 @@
     return `${pad(mins)}:${pad(secs)}`;
   }
 
+  function formatDisplayDuration(rawDuration, isSeries = false) {
+    if (!rawDuration) return isSeries ? '45 min/ep' : '2h 05m';
+    const s = String(rawDuration).trim();
+    const m = s.match(/^(\d+)\s*(?:min|m|s|sec)?$/i);
+    if (m) {
+      const num = parseInt(m[1], 10);
+      const mins = num > 360 ? Math.round(num / 60) : num;
+      if (mins > 0) {
+        if (isSeries && mins <= 65) return `${mins} min/ep`;
+        const hrs = Math.floor(mins / 60);
+        const rem = mins % 60;
+        if (hrs > 0) {
+          return rem > 0 ? `${hrs}h ${rem}m (${mins} min)` : `${hrs}h (${mins} min)`;
+        }
+        return `${mins} min`;
+      }
+    }
+    return s;
+  }
+
+  function parseDurationToSeconds(rawDuration) {
+    if (!rawDuration) return 0;
+    const s = String(rawDuration).trim();
+    const m = s.match(/^(\d+)\s*(?:min|m|s|sec)?$/i);
+    if (m) {
+      const num = parseInt(m[1], 10);
+      return num > 360 ? num : num * 60;
+    }
+    const hm = s.match(/(?:(\d+)\s*h(?:ours?)?)?\s*(?:(\d+)\s*m(?:in(?:utes?)?)?)?/i);
+    if (hm && (hm[1] || hm[2])) {
+      const hrs = parseInt(hm[1] || '0', 10);
+      const mins = parseInt(hm[2] || '0', 10);
+      return hrs * 3600 + mins * 60;
+    }
+    return 0;
+  }
+
   // Fallback poster image generator
   function fallbackPoster(title) {
     const cleanTitle = (title || 'Movie').slice(0, 16);
@@ -1152,6 +1189,7 @@
         <div class="card-meta">
           <span>${year}</span>
           <span>${mediaTypeLabel}</span>
+          ${item.duration ? `<span class="card-duration">⏱️ ${formatDisplayDuration(item.duration, item.media_type === 'series')}</span>` : ''}
         </div>
       </div>
     `;
@@ -1300,6 +1338,21 @@
         if (res.ok) {
           const details = await res.json();
           state.currentDetails = details;
+          if (details && details.duration) {
+            const isSer = details.media_type === 'series' || (details.seasons && details.seasons.length > 0);
+            const durBadge = ` • ⏱️ ${formatDisplayDuration(details.duration, isSer)}`;
+            const targetS = activeSeason > 0 ? activeSeason : 1;
+            const targetEp = activeEpisode > 0 ? activeEpisode : 1;
+            if (isSer) {
+              el.playerMediaSubtitle.textContent = `Season ${targetS} • Episode ${targetEp}${durBadge}`;
+            } else {
+              el.playerMediaSubtitle.textContent = `${details.year || 'Movie'}${durBadge}`;
+            }
+            if (el.durationTime && (!el.videoElement.duration || isNaN(el.videoElement.duration) || el.videoElement.duration === 0)) {
+              const parsedSecs = parseDurationToSeconds(details.duration);
+              if (parsedSecs > 0) el.durationTime.textContent = formatTime(parsedSecs);
+            }
+          }
           const isSeries = details.media_type === 'series' || (details.seasons && details.seasons.length > 0) || s > 0 || ep > 0;
           if (isSeries) {
             if (s <= 0) s = 1;
@@ -1389,7 +1442,7 @@
       el.modalTitle.textContent = displayTitle;
       el.modalTagline.textContent = details.tagline || '';
       el.modalYear.textContent = details.year || '2025';
-      el.modalDuration.textContent = details.duration || 'Full Feature';
+      el.modalDuration.textContent = formatDisplayDuration(details.duration, details.media_type === 'series');
       el.modalMediaType.textContent = details.media_type === 'series' ? 'TV SERIES' : 'MOVIE';
       el.modalRating.textContent = `⭐ ${details.imdb_rating || '8.5'}`;
       el.modalOverview.textContent = details.description || 'No detailed overview available.';
@@ -1911,14 +1964,19 @@
 
     // Set Header Info
     el.playerMediaTitle.textContent = media.title;
+    const durBadge = media.duration ? ` • ⏱️ ${formatDisplayDuration(media.duration, isSeries)}` : '';
     if (isSeries) {
       if (s <= 0) s = 1;
       if (ep <= 0) ep = 1;
-      el.playerMediaSubtitle.textContent = `Season ${s} • Episode ${ep}`;
+      el.playerMediaSubtitle.textContent = `Season ${s} • Episode ${ep}${durBadge}`;
       el.nextEpisodeControlBtn.classList.remove('hidden');
     } else {
-      el.playerMediaSubtitle.textContent = media.year || 'Movie';
+      el.playerMediaSubtitle.textContent = `${media.year || 'Movie'}${durBadge}`;
       el.nextEpisodeControlBtn.classList.add('hidden');
+    }
+    if (media.duration && el.durationTime) {
+      const parsedSecs = parseDurationToSeconds(media.duration);
+      if (parsedSecs > 0) el.durationTime.textContent = formatTime(parsedSecs);
     }
 
     state.currentSeason = s;
@@ -2114,6 +2172,21 @@
           details = await res.json();
           if (reqId !== state.playbackRequestSeq) return;
           state.currentDetails = details;
+          if (details && details.duration) {
+            const isSer = details.media_type === 'series' || (details.seasons && details.seasons.length > 0);
+            const durBadge = ` • ⏱️ ${formatDisplayDuration(details.duration, isSer)}`;
+            const targetS = activeSeason > 0 ? activeSeason : 1;
+            const targetEp = activeEpisode > 0 ? activeEpisode : 1;
+            if (isSer) {
+              el.playerMediaSubtitle.textContent = `Season ${targetS} • Episode ${targetEp}${durBadge}`;
+            } else {
+              el.playerMediaSubtitle.textContent = `${details.year || 'Movie'}${durBadge}`;
+            }
+            if (el.durationTime && (!el.videoElement.duration || isNaN(el.videoElement.duration) || el.videoElement.duration === 0)) {
+              const parsedSecs = parseDurationToSeconds(details.duration);
+              if (parsedSecs > 0) el.durationTime.textContent = formatTime(parsedSecs);
+            }
+          }
 
           const detectedSeries = details.media_type === 'series' || (details.seasons && details.seasons.length > 0);
           if (!knownSeries && detectedSeries) {
@@ -2219,7 +2292,9 @@
 
     // Update Selected Episode Card (matching screenshot format)
     if (el.watchSelectedEpCard) {
-      el.watchSelectedEpCard.textContent = `Season ${sNum} Selected Episode: ${epNumActive}`;
+      const epObj = (activeSeasonObj && activeSeasonObj.episodes) ? activeSeasonObj.episodes.find(e => (parseInt(e.number ?? e.episode_number ?? 1, 10)) === epNumActive) : null;
+      const durLabel = epObj?.duration ? ` • ⏱️ ${formatDisplayDuration(epObj.duration, true)}` : (details?.duration ? ` • ⏱️ ${formatDisplayDuration(details.duration, true)}` : '');
+      el.watchSelectedEpCard.textContent = `Season ${sNum} Selected Episode: ${epNumActive}${durLabel}`;
     }
   }
 
@@ -2270,7 +2345,8 @@
       el.downloadPosterImg.src = details.poster_url;
     }
     if (el.downloadSeasonEpBadge) {
-      el.downloadSeasonEpBadge.textContent = isSeries ? `Season ${s} • Episode ${ep}` : (details?.year ? `${details.year} Movie` : 'Feature Film');
+      const durLabel = details?.duration ? ` • ⏱️ ${formatDisplayDuration(details.duration, isSeries)}` : '';
+      el.downloadSeasonEpBadge.textContent = (isSeries ? `Season ${s} • Episode ${ep}` : (details?.year ? `${details.year} Movie` : 'Feature Film')) + durLabel;
     }
 
     if (!el.downloadStreamsList) {

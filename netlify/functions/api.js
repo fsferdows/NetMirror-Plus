@@ -255,6 +255,39 @@ function buildDefaultSeasons(seasonCount = 1, epPerSeason = 10) {
   return seasons;
 }
 
+function formatAccurateDuration(rawDuration, isSeries = false, fallbackMins = null) {
+  if (rawDuration !== null && rawDuration !== undefined && rawDuration !== "") {
+    const s = String(rawDuration).trim();
+    const m = s.match(/^(\d+)\s*(?:min|m|s|sec)?$/i);
+    if (m) {
+      const num = parseInt(m[1], 10);
+      const mins = num > 360 ? Math.round(num / 60) : num;
+      if (mins > 0) {
+        if (isSeries && mins <= 65) {
+          return `${mins} min/ep`;
+        }
+        const hrs = Math.floor(mins / 60);
+        const rem = mins % 60;
+        if (hrs > 0) {
+          return rem > 0 ? `${hrs}h ${rem}m (${mins} min)` : `${hrs}h (${mins} min)`;
+        }
+        return `${mins} min`;
+      }
+    }
+    if (s.includes("h") || s.includes("min")) {
+      return s;
+    }
+  }
+
+  if (fallbackMins && fallbackMins > 0) {
+    const hrs = Math.floor(fallbackMins / 60);
+    const rem = fallbackMins % 60;
+    return hrs > 0 ? `${hrs}h ${rem}m (${fallbackMins} min)` : `${fallbackMins} min`;
+  }
+
+  return isSeries ? "45 min/ep" : "2h 05m (125 min)";
+}
+
 async function fetchTvMazeSeasons(imdbId) {
   if (!imdbId || !imdbId.startsWith("tt")) return null;
   try {
@@ -425,6 +458,12 @@ async function resolveCinemetaMeta(imdbId, preferSeries = false) {
         isSeries: meta.type === "series" || videos.length > 0,
         videos,
         name: meta.name || null,
+        runtime: meta.runtime || null,
+        description: meta.description || null,
+        imdbRating: meta.imdbRating || null,
+        genres: Array.isArray(meta.genres) ? meta.genres : [],
+        director: Array.isArray(meta.director) ? meta.director.join(", ") : (meta.director || null),
+        cast: Array.isArray(meta.cast) ? meta.cast.slice(0, 5).join(", ") : null,
       };
       if (tmdbId || videos.length > 0) {
         return parsed;
@@ -449,7 +488,7 @@ function buildSeasonsFromVideos(videos) {
       episode_number: eNum,
       title: v.title || v.name || `Episode ${eNum}`,
       air_date: v.released ? String(v.released).slice(0, 10) : null,
-      duration: null,
+      duration: v.runtime ? `${v.runtime} min` : "45-55 min",
     });
   }
   return Array.from(bySeason.keys())
@@ -1717,28 +1756,36 @@ async function handleDetails(id, params = {}) {
         item = (json.d || []).find(x => x.id === id) || (json.d || [])[0] || null;
       }
 
-      if (item || tvMazeData) {
-        const qid = item?.qid || "";
-        const isMiniSeries = qid === "tvMiniSeries" || /mini/i.test(item?.q || "");
-        const isSeries = Boolean(tvMazeData) || qid === "tvSeries" || qid === "tvMiniSeries" || params.type === "tv" || /series/i.test(item?.q || "");
-        const title = cleanTitle(item?.l || tvMazeData?.show?.name || params.title || "Untitled");
+      const qid = item?.qid || "";
+      const isMiniSeries = qid === "tvMiniSeries" || /mini/i.test(item?.q || "");
+      const isSeriesHint = Boolean(tvMazeData) || qid === "tvSeries" || qid === "tvMiniSeries" || params.type === "tv" || /series/i.test(item?.q || "");
+      const cmMeta = await resolveCinemetaMeta(id, isSeriesHint).catch(() => null);
+
+      if (item || tvMazeData || cmMeta) {
+        const isSeries = Boolean(tvMazeData) || cmMeta?.isSeries || isSeriesHint;
+        const title = cleanTitle(item?.l || cmMeta?.name || tvMazeData?.show?.name || params.title || "Untitled");
         const year = item?.y ? String(item.y) : extractYear(tvMazeData?.show?.premiered);
         const posterUrl = item?.i?.imageUrl || tvMazeData?.show?.image?.original || tvMazeData?.show?.image?.medium || null;
-        const stars = item?.s || null;
-        const rating = tvMazeData?.show?.rating?.average ? String(tvMazeData.show.rating.average) : "8.6";
-        const desc = tvMazeData?.show?.summary
+        const stars = cmMeta?.cast || item?.s || null;
+        const director = cmMeta?.director || null;
+        const rating = cmMeta?.imdbRating || (tvMazeData?.show?.rating?.average ? String(tvMazeData.show.rating.average) : "8.6");
+        const desc = cmMeta?.description || (tvMazeData?.show?.summary
           ? tvMazeData.show.summary.replace(/<[^>]+>/g, "").trim()
-          : `Stream ${title} (${year}) in high definition with multi-audio and subtitles.`;
-        const genres = (tvMazeData?.show?.genres && tvMazeData.show.genres.length > 0)
-          ? tvMazeData.show.genres
-          : (isSeries ? ["TV Series", "Drama"] : ["Movie", "Cinema"]);
+          : `Stream ${title} (${year}) in high definition with multi-audio and subtitles.`);
+        const genres = (cmMeta?.genres && cmMeta.genres.length > 0)
+          ? cmMeta.genres
+          : ((tvMazeData?.show?.genres && tvMazeData.show.genres.length > 0)
+            ? tvMazeData.show.genres
+            : (isSeries ? ["TV Series", "Drama"] : ["Movie", "Cinema"]));
+
+        const rawRuntime = cmMeta?.runtime || tvMazeData?.show?.runtime || tvMazeData?.show?.averageRuntime || null;
+        const accurateDuration = formatAccurateDuration(rawRuntime, isSeries);
 
         let seasons = [];
         if (isSeries) {
           if (tvMazeData && tvMazeData.seasons && tvMazeData.seasons.length > 0) {
             seasons = tvMazeData.seasons;
           } else {
-            const cmMeta = await resolveCinemetaMeta(id, true);
             const cmSeasons = cmMeta ? buildSeasonsFromVideos(cmMeta.videos) : [];
             seasons = cmSeasons.length > 0 ? cmSeasons : buildDefaultSeasons(isMiniSeries ? 1 : 3, 10);
           }
@@ -1759,12 +1806,12 @@ async function handleDetails(id, params = {}) {
             description: desc,
             tagline: null,
             imdb_rating: rating,
-            director: null,
+            director,
             stars,
             prints: null,
             audios: null,
             poster_url: posterUrl,
-            duration: isSeries ? "45 min/ep" : "118 min",
+            duration: accurateDuration,
             genres,
             seasons,
             dubs: [],
@@ -1800,6 +1847,9 @@ async function handleDetails(id, params = {}) {
             posterUrl = "https://image.tmdb.org/t/p/w500" + posterUrl;
           }
 
+          const rawDuration = first.duration || first.runtime || first.play_time || null;
+          let accurateDuration = formatAccurateDuration(rawDuration, isSeries);
+
           // Build season & episode list if series
           let seasons = [];
           if (isSeries) {
@@ -1814,7 +1864,7 @@ async function handleDetails(id, params = {}) {
                     number: ep,
                     episode_number: ep,
                     title: `Episode ${ep}`,
-                    duration: null,
+                    duration: "45-55 min",
                   });
                 }
                 seasons.push({ number: sNum, season_number: sNum, episodes });
@@ -1846,7 +1896,7 @@ async function handleDetails(id, params = {}) {
               prints: null,
               audios: null,
               poster_url: posterUrl,
-              duration: first.duration ? `${first.duration} min` : (isSeries ? "45 min/ep" : "118 min"),
+              duration: accurateDuration,
               genres: first.genre || [],
               seasons,
               dubs: [],
@@ -1866,15 +1916,23 @@ async function handleDetails(id, params = {}) {
       const top = (preferSeries ? imdbItems.find(x => x.media_type === "series") : null) || imdbItems[0];
       const isSeries = top.media_type === "series" || preferSeries;
       let seasons = [];
+      let accurateDuration = isSeries ? "45 min/ep" : "2h 05m (125 min)";
       if (isSeries) {
         const tvMazeData = await fetchTvMazeSeasons(top.id.value);
         if (tvMazeData && tvMazeData.seasons && tvMazeData.seasons.length > 0) {
           seasons = tvMazeData.seasons;
+          if (tvMazeData.show?.runtime || tvMazeData.show?.averageRuntime) {
+            accurateDuration = formatAccurateDuration(tvMazeData.show.runtime || tvMazeData.show.averageRuntime, true);
+          }
         } else {
           const cmMeta = await resolveCinemetaMeta(top.id.value, true);
           const cmSeasons = cmMeta ? buildSeasonsFromVideos(cmMeta.videos) : [];
           seasons = cmSeasons.length > 0 ? cmSeasons : buildDefaultSeasons(1, 10);
+          if (cmMeta?.runtime) accurateDuration = formatAccurateDuration(cmMeta.runtime, true);
         }
+      } else {
+        const cmMeta = await resolveCinemetaMeta(top.id.value, false);
+        if (cmMeta?.runtime) accurateDuration = formatAccurateDuration(cmMeta.runtime, false);
       }
       return {
         statusCode: 200,
@@ -1896,7 +1954,7 @@ async function handleDetails(id, params = {}) {
           prints: null,
           audios: null,
           poster_url: top.poster_url,
-          duration: isSeries ? "45 min/ep" : "118 min",
+          duration: accurateDuration,
           genres: ["Cinema"],
           seasons,
           dubs: [],

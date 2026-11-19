@@ -2268,6 +2268,118 @@ body {
   border-radius: 0 !important;
 }
 
+/* Watch Action Pills Group (Sound, Fullscreen, Audio Dubs, Download) */
+.watch-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.player-action-pill-btn {
+  background: #1e293b;
+  color: #f1f5f9;
+  border: 1px solid #334155;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.player-action-pill-btn .btn-icon {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+
+.player-action-pill-btn:hover {
+  background: #334155;
+  color: #fff;
+  border-color: #64748b;
+  transform: translateY(-1px);
+}
+
+.player-action-pill-btn.sound-boost-btn {
+  border-color: rgba(234, 179, 8, 0.4);
+  color: #fde047;
+  background: rgba(234, 179, 8, 0.1);
+}
+
+.player-action-pill-btn.sound-boost-btn:hover {
+  background: rgba(234, 179, 8, 0.2);
+  border-color: #eab308;
+}
+
+.player-action-pill-btn.fullscreen-btn {
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #93c5fd;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.player-action-pill-btn.fullscreen-btn:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
+}
+
+/* Floating Controls inside Player Container (Always accessible on top of both HTML5 & Embeds) */
+.player-floating-actions {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.85;
+  transition: opacity 0.25s ease;
+  pointer-events: auto;
+}
+
+.player-container:hover .player-floating-actions {
+  opacity: 1;
+}
+
+.floating-action-btn {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.floating-action-btn:hover {
+  background: rgba(229, 9, 20, 0.9);
+  border-color: #e50914;
+  transform: scale(1.04);
+}
+
+.floating-action-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+
 /* How To Download Button (aligned cleanly on right of server bar, never blocking player controls) */
 .how-to-download-btn {
   flex-shrink: 0;

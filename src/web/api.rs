@@ -1511,22 +1511,10 @@ fn build_embed_urls(
         });
     }
 
-    // 4. VidSrc (HD)
-    if let Some(vidsrc_id) = imdb_id.or(tmdb_id) {
-        embed_urls.push(EmbedSource {
-            name: "VidSrc (HD)".to_string(),
-            url: if is_series {
-                format!("https://vidsrc.to/embed/tv/{vidsrc_id}/{s}/{ep}")
-            } else {
-                format!("https://vidsrc.to/embed/movie/{vidsrc_id}")
-            },
-        });
-    }
-
-    // 5. VidSrc.pm (Backup)
+    // 4. VidSrc.pm (VIP Backup) - High speed, no captcha mirror
     if let Some(iid) = imdb_id.or(tmdb_id) {
         embed_urls.push(EmbedSource {
-            name: "VidSrc.pm (Backup)".to_string(),
+            name: "VidSrc.pm (VIP Backup)".to_string(),
             url: if is_series {
                 format!("https://vidsrc.pm/embed/tv/{iid}/{s}/{ep}")
             } else {

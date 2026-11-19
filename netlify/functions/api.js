@@ -456,6 +456,9 @@ function buildEmbedUrls({ imdbId, tmdbId, title, id, isSeries, season, episode }
   const s = season > 0 ? season : 1;
   const ep = episode > 0 ? episode : 1;
   const embedUrls = [];
+  const cleanTitleStr = encodeURIComponent(
+    (title || id || "").replace(/\[.*?\]|\(.*?\)|S\d+(-S\d+)?/gi, "").trim()
+  );
 
   // 1. VidLink Cloud (4K Ultra HD) - Cleanest player, zero popups, subtitles, high-speed CDN
   const vidTargetId = tmdbId || imdbId;
@@ -496,38 +499,18 @@ function buildEmbedUrls({ imdbId, tmdbId, title, id, isSeries, season, episode }
     });
   }
 
-  // 4. VidSrc (HD) - High quality multi-source mirror
-  if (imdbId || tmdbId) {
-    const vidsrcId = imdbId || tmdbId;
-    embedUrls.push({
-      name: "VidSrc (HD)",
-      url: isSeries
-        ? `https://vidsrc.to/embed/tv/${vidsrcId}/${s}/${ep}`
-        : `https://vidsrc.to/embed/movie/${vidsrcId}`,
-    });
-  }
-
-  // 5. VidSrc.pm (Backup) - Fast cloud player
+  // 4. VidSrc.pm (VIP Backup) - Fast cloud player, no motorcycle captchas
   if (imdbId || tmdbId) {
     const vidId = imdbId || tmdbId;
     embedUrls.push({
-      name: "VidSrc.pm (Backup)",
+      name: "VidSrc.pm (VIP Backup)",
       url: isSeries
         ? `https://vidsrc.pm/embed/tv/${vidId}/${s}/${ep}`
         : `https://vidsrc.pm/embed/movie/${vidId}`,
     });
-  } else if (!tmdbId) {
-    const cleanTitleStr = encodeURIComponent(
-      (title || id || "").replace(/\[.*?\]|\(.*?\)|S\d+(-S\d+)?/gi, "").trim()
-    );
+  } else if (!tmdbId && cleanTitleStr) {
     embedUrls.push({
-      name: "AutoEmbed Server (Fast)",
-      url: isSeries
-        ? `https://autoembed.me/tv?title=${cleanTitleStr}&season=${s}&episode=${ep}`
-        : `https://autoembed.me/movie?title=${cleanTitleStr}`,
-    });
-    embedUrls.push({
-      name: "VidSrc Cloud (Backup)",
+      name: "VidSrc.pm (VIP Backup)",
       url: isSeries
         ? `https://vidsrc.pm/embed/tv?title=${cleanTitleStr}&season=${s}&episode=${ep}`
         : `https://vidsrc.pm/embed/movie?title=${cleanTitleStr}`,

@@ -257,6 +257,29 @@
     closeDownloadGuideBtn: document.getElementById('closeDownloadGuideBtn'),
     gotItDownloadGuideBtn: document.getElementById('gotItDownloadGuideBtn'),
 
+    // Modern Watch Actions: Fullscreen, Sound Booster, Audio Dubs
+    watchAudioDubsBtn: document.getElementById('watchAudioDubsBtn'),
+    watchAudioDubsLabel: document.getElementById('watchAudioDubsLabel'),
+    watchSoundBoosterBtn: document.getElementById('watchSoundBoosterBtn'),
+    watchSoundBoosterLabel: document.getElementById('watchSoundBoosterLabel'),
+    watchFullscreenBtn: document.getElementById('watchFullscreenBtn'),
+    playerFloatingActions: document.getElementById('playerFloatingActions'),
+    floatingSoundBtn: document.getElementById('floatingSoundBtn'),
+    floatingSoundLabel: document.getElementById('floatingSoundLabel'),
+    floatingFullscreenBtn: document.getElementById('floatingFullscreenBtn'),
+
+    // Standalone Modals for Sound Booster & Audio Dubs
+    soundBoosterModal: document.getElementById('soundBoosterModal'),
+    closeSoundBoosterBtn: document.getElementById('closeSoundBoosterBtn'),
+    doneSoundBoosterBtn: document.getElementById('doneSoundBoosterBtn'),
+    modalBoostLevelLabel: document.getElementById('modalBoostLevelLabel'),
+    modalBoostRangeSlider: document.getElementById('modalBoostRangeSlider'),
+    modalPresetsList: document.getElementById('modalPresetsList'),
+    audioDubsModal: document.getElementById('audioDubsModal'),
+    closeAudioDubsBtn: document.getElementById('closeAudioDubsBtn'),
+    doneAudioDubsBtn: document.getElementById('doneAudioDubsBtn'),
+    audioDubsListContainer: document.getElementById('audioDubsListContainer'),
+
     // Shortcuts & Toasts
     shortcutsModal: document.getElementById('shortcutsModal'),
     shortcutsCloseBtn: document.getElementById('shortcutsCloseBtn'),
@@ -1555,9 +1578,15 @@
     const boostPercent = Math.round((state.audioBoost || 1.5) * 100);
     const profile = audioProfiles[state.audioProfile || 'cinema'] || audioProfiles.cinema;
 
-    // Update Badge
+    // Update Badge & Watch Bar Labels
     if (el.audioEnhanceBadge) {
       el.audioEnhanceBadge.textContent = `${profile.badge} ${boostPercent}%`;
+    }
+    if (el.watchSoundBoosterLabel) {
+      el.watchSoundBoosterLabel.textContent = `🔊 Sound (${profile.name} ${boostPercent}%)`;
+    }
+    if (el.floatingSoundLabel) {
+      el.floatingSoundLabel.textContent = `${boostPercent}%`;
     }
 
     // Update Level Label
@@ -1565,14 +1594,21 @@
       const extra = boostPercent > 100 ? ` (${boostPercent}% Loud)` : ' (Standard)';
       el.boostLevelLabel.textContent = `${boostPercent}%${extra}`;
     }
+    if (el.modalBoostLevelLabel) {
+      const extra = boostPercent > 100 ? ` (${boostPercent}% Loud)` : ' (Standard)';
+      el.modalBoostLevelLabel.textContent = `${boostPercent}%${extra}`;
+    }
 
     // Update Slider
     if (el.boostRangeSlider) {
       el.boostRangeSlider.value = state.audioBoost || 1.5;
     }
+    if (el.modalBoostRangeSlider) {
+      el.modalBoostRangeSlider.value = state.audioBoost || 1.5;
+    }
 
     // Update Chips
-    document.querySelectorAll('.boost-chip').forEach((chip) => {
+    document.querySelectorAll('.boost-chip, .modal-boost-chip').forEach((chip) => {
       const val = parseFloat(chip.dataset.boost);
       chip.classList.toggle('active', Math.abs(val - (state.audioBoost || 1.5)) < 0.1);
     });
@@ -1580,6 +1616,11 @@
     // Update Presets List
     if (el.enhancerPresetsList) {
       el.enhancerPresetsList.querySelectorAll('.preset-item').forEach((item) => {
+        item.classList.toggle('active', item.dataset.preset === (state.audioProfile || 'cinema'));
+      });
+    }
+    if (el.modalPresetsList) {
+      el.modalPresetsList.querySelectorAll('.preset-item').forEach((item) => {
         item.classList.toggle('active', item.dataset.preset === (state.audioProfile || 'cinema'));
       });
     }
@@ -2096,8 +2137,7 @@
             '⚡ Server 1 (Ultra 4K)',
             'Server 2 (Cinema HD)',
             'Server 3 (Cloud Fast)',
-            'Server 4 (Multi-Source)',
-            'Server 5 (Backup)'
+            'Server 4 (VIP Backup)'
           ];
           const displayName = serverLabels[idx] || `Server ${idx + 1}`;
 
@@ -4122,8 +4162,57 @@
       }
     });
 
-    // Fullscreen
+    // Fullscreen / Zoom In
     el.fullscreenBtn.addEventListener('click', toggleFullscreen);
+    if (el.watchFullscreenBtn) el.watchFullscreenBtn.addEventListener('click', toggleFullscreen);
+    if (el.floatingFullscreenBtn) el.floatingFullscreenBtn.addEventListener('click', toggleFullscreen);
+
+    // Sound Booster & Audio Presets
+    if (el.watchSoundBoosterBtn) el.watchSoundBoosterBtn.addEventListener('click', openSoundBoosterModal);
+    if (el.floatingSoundBtn) el.floatingSoundBtn.addEventListener('click', openSoundBoosterModal);
+    if (el.closeSoundBoosterBtn) el.closeSoundBoosterBtn.addEventListener('click', closeSoundBoosterModal);
+    if (el.doneSoundBoosterBtn) el.doneSoundBoosterBtn.addEventListener('click', closeSoundBoosterModal);
+    if (el.soundBoosterModal) {
+      el.soundBoosterModal.addEventListener('click', (e) => {
+        if (e.target === el.soundBoosterModal) closeSoundBoosterModal();
+      });
+    }
+
+    if (el.modalBoostRangeSlider) {
+      el.modalBoostRangeSlider.addEventListener('input', (e) => {
+        ensureAudioEngine();
+        const boost = parseFloat(e.target.value);
+        setVolumeBoost(boost, true);
+      });
+    }
+
+    document.querySelectorAll('.modal-boost-chip').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        ensureAudioEngine();
+        const boost = parseFloat(chip.dataset.boost);
+        setVolumeBoost(boost, true);
+        showToast(`Volume Boost: ${Math.round(boost * 100)}% ⚡`);
+      });
+    });
+
+    if (el.modalPresetsList) {
+      el.modalPresetsList.querySelectorAll('.preset-item').forEach((item) => {
+        item.addEventListener('click', () => {
+          ensureAudioEngine();
+          applyAudioProfile(item.dataset.preset, true);
+        });
+      });
+    }
+
+    // Audio Dubs / Languages
+    if (el.watchAudioDubsBtn) el.watchAudioDubsBtn.addEventListener('click', openAudioDubsModal);
+    if (el.closeAudioDubsBtn) el.closeAudioDubsBtn.addEventListener('click', closeAudioDubsModal);
+    if (el.doneAudioDubsBtn) el.doneAudioDubsBtn.addEventListener('click', closeAudioDubsModal);
+    if (el.audioDubsModal) {
+      el.audioDubsModal.addEventListener('click', (e) => {
+        if (e.target === el.audioDubsModal) closeAudioDubsModal();
+      });
+    }
 
     // Next episode button in player header/control
     el.nextEpisodeControlBtn.addEventListener('click', playNextEpisode);
@@ -4192,15 +4281,79 @@
   }
 
   function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-      el.playerOverlay.requestFullscreen().catch(() => {});
-      el.fullscreenOpenIcon.classList.add('hidden');
-      el.fullscreenExitIcon.classList.remove('hidden');
+    const isFull = document.fullscreenElement || document.webkitFullscreenElement;
+    if (!isFull) {
+      const target = el.playerContainer || el.playerOverlay || document.documentElement;
+      if (target.requestFullscreen) {
+        target.requestFullscreen().catch(() => {
+          if (el.embedPlayerIframe && el.embedPlayerIframe.requestFullscreen) {
+            el.embedPlayerIframe.requestFullscreen().catch(() => {});
+          }
+        });
+      } else if (target.webkitRequestFullscreen) {
+        target.webkitRequestFullscreen();
+      }
+      if (el.fullscreenOpenIcon) el.fullscreenOpenIcon.classList.add('hidden');
+      if (el.fullscreenExitIcon) el.fullscreenExitIcon.classList.remove('hidden');
+      showToast('⛶ Zoomed to Fullscreen (Press Esc to exit)');
     } else {
-      document.exitFullscreen().catch(() => {});
-      el.fullscreenOpenIcon.classList.remove('hidden');
-      el.fullscreenExitIcon.classList.add('hidden');
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen().catch(() => {});
+      }
+      if (el.fullscreenOpenIcon) el.fullscreenOpenIcon.classList.remove('hidden');
+      if (el.fullscreenExitIcon) el.fullscreenExitIcon.classList.add('hidden');
     }
+  }
+
+  function openSoundBoosterModal() {
+    ensureAudioEngine();
+    updateAudioEnhancerUI();
+    if (el.soundBoosterModal) el.soundBoosterModal.classList.remove('hidden');
+  }
+
+  function closeSoundBoosterModal() {
+    if (el.soundBoosterModal) el.soundBoosterModal.classList.add('hidden');
+  }
+
+  function openAudioDubsModal() {
+    if (!el.audioDubsModal || !el.audioDubsListContainer) return;
+    el.audioDubsListContainer.innerHTML = '';
+
+    const dubs = state.currentDetails?.dubs || [];
+    if (dubs.length > 0) {
+      dubs.forEach((dub, idx) => {
+        const btn = document.createElement('button');
+        btn.className = `menu-item preset-item ${idx === 0 ? 'active' : ''}`;
+        btn.style.cssText = 'padding:12px 16px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.06);margin-bottom:6px;';
+        btn.innerHTML = `
+          <span style="font-weight:600;font-size:14px;">🎧 ${dub.label || dub.language || `Audio Track ${idx + 1}`}</span>
+          <span style="font-size:12px;color:var(--text-muted);">${dub.language ? 'Available' : 'Primary'}</span>
+        `;
+        btn.addEventListener('click', () => {
+          closeAudioDubsModal();
+          showToast(`Switching to Audio Track: ${dub.label || dub.language}`);
+          if (dub.subject_id) {
+            startPlayback({ id: { provider: 'moviebox', value: dub.subject_id }, title: state.currentDetails?.title });
+          }
+        });
+        el.audioDubsListContainer.appendChild(btn);
+      });
+    } else {
+      el.audioDubsListContainer.innerHTML = `
+        <div style="padding:14px 16px;background:rgba(255,255,255,0.05);border-radius:8px;font-size:13px;line-height:1.6;color:var(--text-secondary);">
+          <p><strong>⚡ Multi-Language Server:</strong> Server 1 (Ultra 4K) includes built-in multi-language audio dubs and subtitles.</p>
+          <p style="margin-top:8px;">Click the <strong>Audio / Subtitles (CC)</strong> icon inside the player bottom-right controls to switch between English, Hindi, Spanish, French, and other languages instantly!</p>
+        </div>
+      `;
+    }
+
+    el.audioDubsModal.classList.remove('hidden');
+  }
+
+  function closeAudioDubsModal() {
+    if (el.audioDubsModal) el.audioDubsModal.classList.add('hidden');
   }
 
   function toggleFavorite(item) {

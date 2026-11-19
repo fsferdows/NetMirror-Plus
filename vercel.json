@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
+  "buildCommand": "echo 'NetMirror Plus static build ready in web/'",
   "outputDirectory": "web",
   "cleanUrls": true,
   "trailingSlash": false,

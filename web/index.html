@@ -54,7 +54,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20261120_ep_fix" />
+  <link rel="stylesheet" href="/styles.css?v=20261120_v5" />
   <link rel="dns-prefetch" href="https://vidlink.pro">
   <link rel="preconnect" href="https://vidlink.pro" crossorigin>
   <link rel="dns-prefetch" href="https://embed.smashystream.com">
@@ -1938,10 +1938,13 @@
           <div class="step-text">Download <strong>.DMG</strong>, open it, and double-click <strong>"Install & Open
               MovieBox.command"</strong> for instant 1-click automatic setup.</div>
         </div>
-        <div class="install-step-card">
-          <div class="step-badge">Gatekeeper</div>
-          <div class="step-text">If macOS warns about unverified developer: <strong>Right-Click (Control-Click)</strong>
-            the app and select <strong>"Open"</strong> → <strong>"Open"</strong>.</div>
+        <div class="install-step-card" style="border-left: 3px solid #f59e0b; background: rgba(245, 158, 11, 0.08);">
+          <div class="step-badge" style="background: #d97706;">macOS Notice</div>
+          <div class="step-text">
+            If macOS shows <em>"Apple could not verify..."</em>: <br>
+            <strong>1.</strong> Right-click (or Control-click) the app icon in Finder → Select <strong>"Open"</strong> → Click <strong>"Open"</strong>.<br>
+            <strong>2.</strong> Or open <strong>System Settings → Privacy & Security</strong> and click <strong>"Open Anyway"</strong>!
+          </div>
         </div>
       </div>
 
@@ -2013,12 +2016,12 @@
   </div>
 </div>
 
-<script src="/app.js?v=20261120_ep_fix"></script>
+<script src="/app.js?v=20261120_v5"></script>
 <!-- Progressive Web App (PWA) Service Worker Registration -->
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js?v=20261120_ep_fix')
+      navigator.serviceWorker.register('/sw.js?v=20261120_v5')
         .then((reg) => console.log('MovieBox PWA ServiceWorker active:', reg.scope))
         .catch((err) => console.warn('PWA registration error:', err));
     });

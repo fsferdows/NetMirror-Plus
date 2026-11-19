@@ -429,6 +429,40 @@
       .replace(/[^a-z0-9]/g, '');
   }
 
+  function getMediaIdValue(item) {
+    if (!item) return '';
+    if (typeof item === 'string') return item.trim();
+    if (typeof item === 'number') return String(item);
+    if (item.id !== undefined && item.id !== null) {
+      if (typeof item.id === 'string' || typeof item.id === 'number') return String(item.id).trim();
+      if (typeof item.id === 'object') {
+        if (item.id.value !== undefined && item.id.value !== null) return String(item.id.value).trim();
+        if (item.id.id !== undefined && item.id.id !== null) return String(item.id.id).trim();
+      }
+    }
+    if (item.value !== undefined && item.value !== null) return String(item.value).trim();
+    if (item.imdb_id) return String(item.imdb_id).trim();
+    if (item.tmdb_id) return String(item.tmdb_id).trim();
+    return '';
+  }
+
+  function getMediaProvider(item) {
+    if (!item) return 'moviebox';
+    if (item.id && typeof item.id === 'object' && item.id.provider) return item.id.provider;
+    if (item.provider) return item.provider;
+    return 'moviebox';
+  }
+
+  function isSameMedia(a, b) {
+    if (!a || !b) return false;
+    const idA = getMediaIdValue(a);
+    const idB = getMediaIdValue(b);
+    if (idA && idB && idA === idB) return true;
+    const keyA = getCanonicalKey(a);
+    const keyB = getCanonicalKey(b);
+    return Boolean(keyA && keyB && keyA === keyB);
+  }
+
   // ==========================================================================
   // MONETIZATION, VIP & SPONSOR MANAGEMENT
   // ==========================================================================
@@ -1173,8 +1207,8 @@
 
   function updateHeroFavBtn() {
     if (!state.heroItem) return;
-    const isFav = state.favorites.some((f) => f.id.value === state.heroItem.id.value);
-    el.heroFavBtn.classList.toggle('fav-active', isFav);
+    const isFav = (state.favorites || []).some((f) => isSameMedia(f, state.heroItem));
+    if (el.heroFavBtn) el.heroFavBtn.classList.toggle('fav-active', isFav);
   }
 
   // ==========================================================================
@@ -1182,30 +1216,42 @@
   // ==========================================================================
   function renderCarousel(container, items) {
     if (!container) return;
-    container.innerHTML = '';
     const seen = new Set();
+    const fragment = document.createDocumentFragment();
     let index = 0;
     (items || []).forEach((item) => {
-      if (!item || !item.id) return;
-      const key = getCanonicalKey(item);
-      if (key && seen.has(key)) return;
-      if (key) seen.add(key);
-      const card = createMovieCard(item, index++);
-      container.appendChild(card);
+      try {
+        if (!item) return;
+        const key = getCanonicalKey(item) || getMediaIdValue(item);
+        if (key && seen.has(key)) return;
+        if (key) seen.add(key);
+        const card = createMovieCard(item, index++);
+        if (card) fragment.appendChild(card);
+      } catch (e) {
+        console.warn('Error rendering carousel card:', e, item);
+      }
     });
+    if (fragment.children.length > 0) {
+      container.innerHTML = '';
+      container.appendChild(fragment);
+    }
   }
 
   function createMovieCard(item, index = 0) {
     const card = document.createElement('div');
     card.className = 'movie-card';
 
-    const displayTitle = cleanDisplayTitle(item.title);
-    const poster = item.poster_url || fallbackPoster(displayTitle);
-    const mediaTypeLabel = item.media_type === 'series' ? 'SERIES' : 'MOVIE';
-    const year = item.year || '';
+    const displayTitle = cleanDisplayTitle(item?.title || 'Unknown Title');
+    const poster = item?.poster_url || fallbackPoster(displayTitle);
+    const mediaTypeLabel = item?.media_type === 'series' ? 'SERIES' : 'MOVIE';
+    const year = item?.year || '';
 
-    // Check if item is in continue watching history
-    const historyItem = state.history.find((h) => h.id.value === item.id.value);
+    // Check if item is in continue watching history safely
+    let historyItem = null;
+    try {
+      historyItem = (state.history || []).find((h) => isSameMedia(h, item));
+    } catch (_) {}
+
     const progressPercent = historyItem && historyItem.duration > 0
       ? Math.min(100, Math.floor((historyItem.currentTime / historyItem.duration) * 100))
       : 0;
@@ -1238,7 +1284,7 @@
         e.stopPropagation();
         openPlayerDirect(item);
       } else {
-        openDetailsModal(item.id.value, item.id.provider, item.title);
+        openDetailsModal(getMediaIdValue(item), getMediaProvider(item), item?.title || '');
       }
     });
 
@@ -1247,16 +1293,28 @@
 
   function renderContinueWatching() {
     if (!state.history || state.history.length === 0) {
-      el.continueWatchingSection.classList.add('hidden');
+      if (el.continueWatchingSection) el.continueWatchingSection.classList.add('hidden');
       return;
     }
-    el.continueWatchingSection.classList.remove('hidden');
-    el.continueWatchingList.innerHTML = '';
-
+    const fragment = document.createDocumentFragment();
     state.history.slice(0, 12).forEach((item) => {
-      const card = createMovieCard(item);
-      el.continueWatchingList.appendChild(card);
+      try {
+        if (!item) return;
+        const card = createMovieCard(item);
+        if (card) fragment.appendChild(card);
+      } catch (e) {
+        console.warn('Error rendering continue watching card:', e, item);
+      }
     });
+    if (fragment.children.length > 0) {
+      if (el.continueWatchingSection) el.continueWatchingSection.classList.remove('hidden');
+      if (el.continueWatchingList) {
+        el.continueWatchingList.innerHTML = '';
+        el.continueWatchingList.appendChild(fragment);
+      }
+    } else if (el.continueWatchingSection) {
+      el.continueWatchingSection.classList.add('hidden');
+    }
   }
 
   // ==========================================================================
@@ -1465,12 +1523,13 @@
       const poster = details.poster_url || fallbackPoster(displayTitle);
 
       // Update Browser URL so every movie has its own unique, shareable link
-      updateMovieUrl(details.id.value, details.title, true);
+      const detailsIdVal = getMediaIdValue(details);
+      updateMovieUrl(detailsIdVal, details.title, true);
 
       // Wire Share Link Button
       if (el.modalShareBtn) {
         el.modalShareBtn.onclick = () => {
-          shareMovieLink(details.id.value, details.title, details.description, poster, false);
+          shareMovieLink(detailsIdVal, details.title, details.description, poster, false);
         };
       }
       el.modalPoster.src = poster;
@@ -1555,7 +1614,7 @@
       }
 
       // Favorite Button State
-      const isFav = state.favorites.some((f) => f.id.value === details.id.value);
+      const isFav = (state.favorites || []).some((f) => isSameMedia(f, details));
       el.modalFavBtn.classList.toggle('fav-active', isFav);
       el.modalFavBtn.textContent = isFav ? '✓ In My List' : 'Add to List';
 
@@ -1985,8 +2044,8 @@
     let s = parseInt(season, 10) || 0;
     let ep = parseInt(episode, 10) || 0;
 
-    const mediaIdVal = media && media.id ? media.id.value : String(media || '');
-    const hasMatchingDetails = state.currentDetails && state.currentDetails.id && state.currentDetails.id.value === mediaIdVal;
+    const mediaIdVal = getMediaIdValue(media);
+    const hasMatchingDetails = isSameMedia(state.currentDetails, media);
     const titleLooksSeries = /\bS\d+(-S\d+)?\b/i.test(media.title || '') || /\bSeason\s*\d+\b/i.test(media.title || '');
     const isSeries = media.media_type === 'series'
       || s > 0
@@ -2042,7 +2101,8 @@
     }
 
     // Immediate pre-warm for instant playback (0ms wait)
-    const immediateTarget = (media && (media.tmdb_id || media.tm_id)) || (mediaIdVal.startsWith('tt') ? mediaIdVal : null) || (state.currentDetails && (state.currentDetails.tmdb_id || state.currentDetails.tm_id)) || (state.currentDetails && state.currentDetails.id && state.currentDetails.id.value && state.currentDetails.id.value.startsWith('tt') ? state.currentDetails.id.value : null);
+    const detailsIdVal = getMediaIdValue(state.currentDetails);
+    const immediateTarget = (media && (media.tmdb_id || media.tm_id)) || (mediaIdVal.startsWith('tt') ? mediaIdVal : null) || (state.currentDetails && (state.currentDetails.tmdb_id || state.currentDetails.tm_id)) || (detailsIdVal.startsWith('tt') ? detailsIdVal : null);
     if (immediateTarget) {
       state.embedUrls = [
         {
@@ -2106,8 +2166,8 @@
       ensureAudioEngine();
 
       // Check Saved Timestamp
-      const historyItem = state.history.find(
-        (h) => h.id.value === mediaIdVal && h.season === s && h.episode === ep
+      const historyItem = (state.history || []).find(
+        (h) => isSameMedia(h, media) && (parseInt(h.season, 10) || 0) === s && (parseInt(h.episode, 10) || 0) === ep
       );
       const resumeTime = historyItem ? historyItem.currentTime : 0;
 
@@ -2183,22 +2243,23 @@
   }
 
   async function setupWatchEpisodesPanel(media, activeSeason, activeEpisode, knownSeries = true, reqId = state.playbackRequestSeq) {
-    const mediaIdVal = media && media.id ? media.id.value : (typeof media === 'string' ? media : '');
+    const mediaIdVal = getMediaIdValue(media);
     let details = (media && media.seasons && media.seasons.length > 0) ? media : state.currentDetails;
-    const isMatchingId = details && details.id && details.id.value === mediaIdVal;
-    const hasValidSeasons = isMatchingId && details.seasons && details.seasons.length > 0;
+    const isMatchingId = isSameMedia(details, media);
+    const hasValidSeasons = isMatchingId && details && details.seasons && details.seasons.length > 0;
 
     // Immediately render with whatever seasons we already have so the UI responds right away
     if (knownSeries) {
       renderWatchEpisodes(hasValidSeasons ? details : media, activeSeason, activeEpisode);
     }
 
-    if (!hasValidSeasons) {
+    if (!hasValidSeasons && mediaIdVal) {
       try {
         const titleParam = media && media.title ? `&title=${encodeURIComponent(media.title)}` : '';
-        const providerParam = media && media.id && media.id.provider ? `&provider=${media.id.provider}` : '';
+        const providerVal = getMediaProvider(media);
+        const providerParam = providerVal ? `&provider=${encodeURIComponent(providerVal)}` : '';
         const typeParam = knownSeries ? 'type=tv' : '';
-        const res = await fetch(`/api/details/${mediaIdVal}?${typeParam}${titleParam}${providerParam}`);
+        const res = await fetch(`/api/details/${encodeURIComponent(mediaIdVal)}?${typeParam}${titleParam}${providerParam}`);
         if (reqId !== state.playbackRequestSeq) return;
         if (res.ok) {
           details = await res.json();
@@ -2432,9 +2493,10 @@
 
         el.downloadStreamsList.appendChild(card);
       });
-    } else if (details?.id?.value && !state.downloadModalStreamsLoading) {
+    } else if (getMediaIdValue(details) && !state.downloadModalStreamsLoading) {
       state.downloadModalStreamsLoading = true;
-      fetch(`/api/streams/${details.id.value}?season=${s}&episode=${ep}&title=${encodeURIComponent(rawTitle)}`)
+      const detailsStreamId = getMediaIdValue(details);
+      fetch(`/api/streams/${encodeURIComponent(detailsStreamId)}?season=${s}&episode=${ep}&title=${encodeURIComponent(rawTitle)}`)
         .then(r => r.json())
         .then(data => {
           state.downloadModalStreamsLoading = false;
@@ -2959,27 +3021,32 @@
   }
 
   function saveToHistory(media, season, episode) {
+    if (!media) return;
     const video = el.videoElement;
+    const s = parseInt(season, 10) || 0;
+    const ep = parseInt(episode, 10) || 0;
     const historyItem = {
-      id: media.id,
-      title: media.title,
-      poster_url: media.poster_url,
-      media_type: media.media_type,
-      year: media.year,
-      season,
-      episode,
-      currentTime: video.currentTime || 0,
-      duration: video.duration || 0,
+      id: media.id || { provider: getMediaProvider(media), value: getMediaIdValue(media) },
+      title: media.title || '',
+      poster_url: media.poster_url || '',
+      media_type: media.media_type || (s > 0 || ep > 0 ? 'series' : 'movie'),
+      year: media.year || '',
+      season: s,
+      episode: ep,
+      currentTime: video ? (video.currentTime || 0) : 0,
+      duration: video ? (video.duration || 0) : 0,
       timestamp: Date.now(),
     };
 
-    // Filter out existing and unshift
-    state.history = state.history.filter(
-      (h) => !(h.id.value === media.id.value && h.season === season && h.episode === episode)
+    // Filter out existing and unshift safely
+    state.history = (state.history || []).filter(
+      (h) => !(isSameMedia(h, media) && (parseInt(h.season, 10) || 0) === s && (parseInt(h.episode, 10) || 0) === ep)
     );
     state.history.unshift(historyItem);
     if (state.history.length > 30) state.history.pop();
-    localStorage.setItem('netmirror_history', JSON.stringify(state.history));
+    try {
+      localStorage.setItem('netmirror_history', JSON.stringify(state.history));
+    } catch (_) {}
   }
 
   // Periodic history timestamp saving while playing
@@ -3112,7 +3179,7 @@
       div.onclick = () => {
         el.suggestionsPopover.classList.add('hidden');
         if (el.searchInput) el.searchInput.blur();
-        openDetailsModal(item.id.value, item.id.provider, item.title);
+        openDetailsModal(getMediaIdValue(item), getMediaProvider(item), item?.title || '');
       };
       el.suggestionsPopover.appendChild(div);
     });
@@ -3347,8 +3414,12 @@
       } else {
         if (!append && el.platformGrid) el.platformGrid.innerHTML = '';
         uniqueIncoming.forEach((item, index) => {
-          const card = createMovieCard(item, (append ? state.platformItems.length - uniqueIncoming.length : 0) + index);
-          if (el.platformGrid) el.platformGrid.appendChild(card);
+          try {
+            const card = createMovieCard(item, (append ? state.platformItems.length - uniqueIncoming.length : 0) + index);
+            if (el.platformGrid && card) el.platformGrid.appendChild(card);
+          } catch (e) {
+            console.warn('Error creating platform card:', e, item);
+          }
         });
 
         // Show/hide load more button
@@ -3988,6 +4059,13 @@
       item.classList.toggle('active', item.dataset.nav === target);
     });
 
+    // Clear platform/language hash from URL bar when navigating between main tabs
+    try {
+      if (window.location.hash && target !== 'platform') {
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    } catch (_) {}
+
     if (target === 'home') {
       switchView('rails');
     } else if (target === 'sports') {
@@ -4028,8 +4106,8 @@
     el.mediaGrid.innerHTML = '';
     const seen = new Set();
     const filtered = (items || []).filter((item) => {
-      if (!item || !item.id) return false;
-      const k = getCanonicalKey(item);
+      if (!item) return false;
+      const k = getCanonicalKey(item) || getMediaIdValue(item);
       if (k && seen.has(k)) return false;
       if (k) seen.add(k);
       if (state.activeFilter === 'movie') return item.media_type === 'movie';
@@ -4046,10 +4124,16 @@
       return;
     }
 
+    const fragment = document.createDocumentFragment();
     filtered.forEach((item, index) => {
-      const card = createMovieCard(item, index);
-      el.mediaGrid.appendChild(card);
+      try {
+        const card = createMovieCard(item, index);
+        if (card) fragment.appendChild(card);
+      } catch (e) {
+        console.warn('Error creating grid card:', e, item);
+      }
     });
+    el.mediaGrid.appendChild(fragment);
   }
 
   function renderFavoritesView() {
@@ -4441,7 +4525,7 @@
     el.heroDetailsBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      if (state.heroItem) openDetailsModal(state.heroItem.id.value, state.heroItem.id.provider, state.heroItem.title);
+      if (state.heroItem) openDetailsModal(getMediaIdValue(state.heroItem), getMediaProvider(state.heroItem), state.heroItem?.title || '');
     });
 
     el.heroFavBtn.addEventListener('click', () => {
@@ -4502,7 +4586,7 @@
     el.modalFavBtn.addEventListener('click', () => {
       if (!state.currentDetails) return;
       toggleFavorite(state.currentDetails);
-      const isFav = state.favorites.some((f) => f.id.value === state.currentDetails.id.value);
+      const isFav = (state.favorites || []).some((f) => isSameMedia(f, state.currentDetails));
       el.modalFavBtn.classList.toggle('fav-active', isFav);
       el.modalFavBtn.textContent = isFav ? '✓ In My List' : 'Add to List';
     });
@@ -5195,15 +5279,18 @@
   }
 
   function toggleFavorite(item) {
-    const idx = state.favorites.findIndex((f) => f.id.value === item.id.value);
+    if (!item) return;
+    const idx = (state.favorites || []).findIndex((f) => isSameMedia(f, item));
     if (idx >= 0) {
       state.favorites.splice(idx, 1);
-      showToast(`Removed "${item.title}" from My List`);
+      showToast(`Removed "${item.title || 'Title'}" from My List`);
     } else {
       state.favorites.push(item);
-      showToast(`Added "${item.title}" to My List`);
+      showToast(`Added "${item.title || 'Title'}" to My List`);
     }
-    localStorage.setItem('netmirror_favorites', JSON.stringify(state.favorites));
+    try {
+      localStorage.setItem('netmirror_favorites', JSON.stringify(state.favorites));
+    } catch (_) {}
   }
 
   function handleGlobalKeydown(e) {

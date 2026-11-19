@@ -13,6 +13,7 @@ const el = {
 
 let currentFilter = 'trending';
 let searchDebounceTimer = null;
+let cachedBrowseData = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -64,29 +65,23 @@ function setupEventListeners() {
 
 async function loadCatalog(filter) {
   showLoader();
-  let endpoint = '/api/trending';
   let title = '🔥 Trending Now';
 
   switch (filter) {
     case 'movies':
-      endpoint = '/api/movies?page=1';
       title = '🎬 Popular Movies';
       break;
     case 'series':
-      endpoint = '/api/series?page=1';
       title = '📺 Popular TV Series';
       break;
     case 'sports':
-      endpoint = '/api/sports';
-      title = '⚽ 24/7 Live Sports Channels';
+      title = '⚽ 24/7 Live Sports Broadcasts';
       break;
     case 'dubbed':
-      endpoint = '/api/movies?language=dubbed';
       title = '🎧 Dual Audio & Dubbed';
       break;
     case 'trending':
     default:
-      endpoint = '/api/trending';
       title = '🔥 Trending Now';
       break;
   }
@@ -94,12 +89,45 @@ async function loadCatalog(filter) {
   el.sectionTitle.textContent = title;
 
   try {
-    const res = await fetch(`${BASE_URL}${endpoint}`);
-    if (!res.ok) throw new Error('Failed to load items');
-    const data = await res.json();
-    const items = data.items || data.channels || [];
-    renderItems(items, filter === 'sports');
+    if (filter === 'sports') {
+      const res = await fetch(`${BASE_URL}/api/sports`);
+      if (!res.ok) throw new Error('Failed to load sports');
+      const data = await res.json();
+      const matches = data.matches || [];
+      const items = matches.map(m => ({
+        id: m.id,
+        title: `${m.teams?.home?.name || m.title || 'Match'} vs ${m.teams?.away?.name || ''}`,
+        name: m.title || `${m.teams?.home?.name || 'Match'} vs ${m.teams?.away?.name || ''}`,
+        poster_url: m.poster_url || m.teams?.home?.badge || `${BASE_URL}/favicon.ico`,
+        rating: m.status === 'LIVE' ? '🔴 LIVE' : 'UPCOMING',
+        year: m.league || 'Sports',
+        media_type: 'sports'
+      }));
+      renderItems(items, true);
+      return;
+    }
+
+    if (!cachedBrowseData) {
+      const res = await fetch(`${BASE_URL}/api/browse`);
+      if (!res.ok) throw new Error('Failed to load catalog');
+      cachedBrowseData = await res.json();
+    }
+
+    let items = [];
+    if (filter === 'movies') {
+      items = cachedBrowseData.movies || [];
+    } else if (filter === 'series') {
+      items = cachedBrowseData.series || [];
+    } else if (filter === 'dubbed') {
+      items = (cachedBrowseData.movies || []).slice(0, 10);
+    } else {
+      // trending
+      items = cachedBrowseData.trending || cachedBrowseData.hero_slides || [];
+    }
+
+    renderItems(items, false);
   } catch (err) {
+    console.error('Catalog load error:', err);
     showError('Could not load data. Check internet connection.');
   }
 }
@@ -112,7 +140,7 @@ async function performSearch(query) {
     const res = await fetch(`${BASE_URL}/api/search?q=${encodeURIComponent(query)}`);
     if (!res.ok) throw new Error('Search failed');
     const data = await res.json();
-    const items = data.items || [];
+    const items = Array.isArray(data) ? data : (data.items || data.results || []);
     renderItems(items, false);
   } catch (err) {
     showError('No results found. Try another search.');
@@ -137,10 +165,10 @@ function renderItems(items, isSports = false) {
     card.className = 'media-card';
 
     const title = item.title || item.name || 'Untitled';
-    const poster = item.poster_url || item.logo || `${BASE_URL}/favicon.ico`;
-    const rating = item.rating ? `⭐ ${Number(item.rating).toFixed(1)}` : '⭐ 8.0';
+    const poster = item.poster_url || item.poster || item.logo || `${BASE_URL}/favicon.ico`;
+    const rating = item.rating ? (String(item.rating).includes('LIVE') ? item.rating : `⭐ ${Number(item.rating).toFixed(1)}`) : '⭐ 8.2';
     const year = item.year || (isSports ? 'LIVE' : '4K');
-    const type = isSports ? 'SPORTS' : (item.media_type === 'series' ? 'SERIES' : 'MOVIE');
+    const type = isSports ? 'SPORTS' : (item.media_type === 'series' || item.type === 'tv' ? 'SERIES' : 'MOVIE');
 
     card.innerHTML = `
       <img class="media-poster" src="${poster}" alt="${escapeHtml(title)}" loading="lazy" onerror="this.src='${BASE_URL}/favicon.ico'" />

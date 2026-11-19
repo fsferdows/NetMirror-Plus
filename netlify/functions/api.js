@@ -2323,6 +2323,24 @@ exports.handler = async (event) => {
   if (cleanPath === "/browse") {
     return handleBrowse();
   }
+  if (cleanPath === "/trending" || cleanPath === "/movies" || cleanPath === "/series") {
+    const browseRes = await handleBrowse();
+    if (browseRes.statusCode === 200) {
+      try {
+        const bData = JSON.parse(browseRes.body);
+        let items = [];
+        if (cleanPath === "/trending") items = bData.trending || bData.hero_slides || [];
+        else if (cleanPath === "/movies") items = bData.movies || [];
+        else if (cleanPath === "/series") items = bData.series || [];
+        return {
+          statusCode: 200,
+          headers: browseRes.headers,
+          body: JSON.stringify({ items, total: items.length }),
+        };
+      } catch (_) {}
+    }
+    return browseRes;
+  }
   if (cleanPath === "/homepage") {
     return handleHomepage(params);
   }

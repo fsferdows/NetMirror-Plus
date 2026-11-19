@@ -41,7 +41,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20261119n" />
+  <link rel="stylesheet" href="/styles.css?v=20261119o" />
   <style>
     :root, html, body {
       background-color: #060a14 !important;
@@ -874,8 +874,8 @@
 
           <!-- Zoom In / Fullscreen -->
           <button class="player-action-pill-btn fullscreen-btn" id="watchFullscreenBtn" title="Zoom In / Fullscreen (F)">
-            <svg class="btn-icon" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
-            <span>Zoom In / Fullscreen</span>
+            <svg class="btn-icon" viewBox="0 0 24 24" id="watchFullscreenIcon"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+            <span id="watchFullscreenLabel">Zoom In / Fullscreen</span>
           </button>
         </div>
         <!-- Hidden server menu for compatibility -->
@@ -916,8 +916,8 @@
           <span id="floatingSoundLabel">150%</span>
         </button>
         <button class="floating-action-btn" id="floatingFullscreenBtn" title="Zoom In / Fullscreen (F)">
-          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
-          <span>Fullscreen</span>
+          <svg viewBox="0 0 24 24" id="floatingFullscreenIcon" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+          <span id="floatingFullscreenLabel">Fullscreen</span>
         </button>
       </div>
 
@@ -1576,7 +1576,7 @@
     </div>
   </div>
 
-  <script src="/app.js?v=20261119n"></script>
+  <script src="/app.js?v=20261119o"></script>
 </body>
 </html>
 

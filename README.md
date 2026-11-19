@@ -16,7 +16,7 @@
 ---
 
 ### 🌐 Live Production URL
-**[https://netmirror-plus.netlify.app](https://netmirror-plus.netlify.app)**
+**[https://netmirror-plus.netlify.app](https://netmirror-plus.vercel.app/)**
 
 ---
 

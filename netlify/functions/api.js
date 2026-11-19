@@ -1463,16 +1463,33 @@ async function handleBrowse() {
     fetch("https://api2.imdb3.shop/api/movies/list/filter?page=1&type=2&items_per_page=30", { headers: { "User-Agent": USER_AGENT } }).then(r => r.json()).catch(() => ({})),
   ]);
 
-  const globalSeen = new Set();
+  // Hero slides setup
+  const heroSeen = new Set();
+  const heroSlides = [];
+  const treFlattened = [tre0, tre1].flatMap(r => r?.results || []);
+  for (const raw of treFlattened) {
+    if (!raw || !raw.id || !raw.title) continue;
+    const canon = getCanonical(raw.title);
+    if (!canon || heroSeen.has(canon)) continue;
+    heroSeen.add(canon);
+    const mapped = mapItem(raw);
+    if (mapped) {
+      heroSlides.push(mapped);
+      if (heroSlides.length >= 5) break;
+    }
+  }
+  const hero = heroSlides[0] || null;
 
+  // Deduplicate within each section while avoiding duplicates of the featured hero slide
   function pickUnique(rawLists, maxCount = 14) {
     const list = [];
+    const sectionSeen = new Set(hero ? [getCanonical(hero.title)] : []);
     const flattened = rawLists.flatMap(r => r?.results || []);
     for (const raw of flattened) {
       if (!raw || !raw.id || !raw.title) continue;
       const canon = getCanonical(raw.title);
-      if (!canon || globalSeen.has(canon)) continue;
-      globalSeen.add(canon);
+      if (!canon || sectionSeen.has(canon)) continue;
+      sectionSeen.add(canon);
       const mapped = mapItem(raw);
       if (mapped) {
         list.push(mapped);
@@ -1482,11 +1499,7 @@ async function handleBrowse() {
     return list;
   }
 
-  // 1. Hero Slides: 5 distinct blockbusters
-  const heroSlides = pickUnique([tre0, tre1], 5);
-  const hero = heroSlides[0] || null;
-
-  // 2. Trending Now: next 14 trending blockbusters (zero duplicate with hero!)
+  // 1. Trending Now: 14 trending blockbusters across all networks
   const trending = pickUnique([tre0, tre1], 14);
 
   // 3. Netflix Originals: 14 unique titles (zero duplicate with above, no language dub repeats!)

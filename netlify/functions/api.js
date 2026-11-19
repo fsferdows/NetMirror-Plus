@@ -458,55 +458,63 @@ function buildEmbedUrls({ imdbId, tmdbId, title, id, isSeries, season, episode }
   const embedUrls = [];
 
   // 1. VidLink Cloud (4K Ultra HD) - Cleanest player, zero popups, subtitles, high-speed CDN
-  if (tmdbId) {
+  const vidTargetId = tmdbId || imdbId;
+  if (vidTargetId) {
     embedUrls.push({
       name: "VidLink Cloud (4K)",
       url: isSeries
-        ? `https://vidlink.pro/tv/${tmdbId}/${s}/${ep}?primaryColor=e50914&nextbutton=true`
-        : `https://vidlink.pro/movie/${tmdbId}?primaryColor=e50914`,
+        ? `https://vidlink.pro/tv/${vidTargetId}/${s}/${ep}?primaryColor=e50914&nextbutton=true`
+        : `https://vidlink.pro/movie/${vidTargetId}?primaryColor=e50914`,
     });
   }
 
-  // 2. VidSrc.to (HD) - High quality multi-source mirror
+  // 2. SmashyStream (Cinema HD) - High-speed clean cinema player
+  if (imdbId || tmdbId) {
+    const smashId = imdbId || tmdbId;
+    embedUrls.push({
+      name: "SmashyStream (Cinema HD)",
+      url: isSeries
+        ? `https://embed.smashystream.com/playere.php?imdb=${smashId}&season=${s}&episode=${ep}`
+        : `https://embed.smashystream.com/playere.php?imdb=${smashId}`,
+    });
+  }
+
+  // 3. MultiEmbed (Cloud Fast)
+  if (tmdbId) {
+    embedUrls.push({
+      name: "MultiEmbed (Cloud Fast)",
+      url: isSeries
+        ? `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${s}&e=${ep}`
+        : `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`,
+    });
+  } else if (imdbId) {
+    embedUrls.push({
+      name: "MultiEmbed (Cloud Fast)",
+      url: isSeries
+        ? `https://multiembed.mov/?video_id=${imdbId}&s=${s}&e=${ep}`
+        : `https://multiembed.mov/?video_id=${imdbId}`,
+    });
+  }
+
+  // 4. VidSrc (HD) - High quality multi-source mirror
   if (imdbId || tmdbId) {
     const vidsrcId = imdbId || tmdbId;
     embedUrls.push({
-      name: "VidSrc.to (HD)",
+      name: "VidSrc (HD)",
       url: isSeries
         ? `https://vidsrc.to/embed/tv/${vidsrcId}/${s}/${ep}`
         : `https://vidsrc.to/embed/movie/${vidsrcId}`,
     });
   }
 
-  // 3. VidSrc.pm (Cloud) - Fast cloud player
+  // 5. VidSrc.pm (Backup) - Fast cloud player
   if (imdbId || tmdbId) {
     const vidId = imdbId || tmdbId;
     embedUrls.push({
-      name: "VidSrc.pm (Cloud)",
+      name: "VidSrc.pm (Backup)",
       url: isSeries
         ? `https://vidsrc.pm/embed/tv/${vidId}/${s}/${ep}`
         : `https://vidsrc.pm/embed/movie/${vidId}`,
-    });
-  }
-
-  // 4. SmashyStream (Cinema)
-  if (imdbId) {
-    embedUrls.push({
-      name: "SmashyStream (Cinema)",
-      url: isSeries
-        ? `https://embed.smashystream.com/playere.php?imdb=${imdbId}&season=${s}&episode=${ep}`
-        : `https://embed.smashystream.com/playere.php?imdb=${imdbId}`,
-    });
-  }
-
-  // 5. VidSrc.net (Backup)
-  if (imdbId || tmdbId) {
-    const vidId = imdbId || tmdbId;
-    embedUrls.push({
-      name: "VidSrc.net (Backup)",
-      url: isSeries
-        ? `https://vidsrc.net/embed/tv/${vidId}/${s}/${ep}`
-        : `https://vidsrc.net/embed/movie/${vidId}`,
     });
   } else if (!tmdbId) {
     const cleanTitleStr = encodeURIComponent(

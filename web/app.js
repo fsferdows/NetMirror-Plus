@@ -383,17 +383,27 @@
     if (el.solAddrInput) el.solAddrInput.value = wallets.sol || 'So1... (Configure in monetization-config.js)';
 
     // 4. Render Owner Monetized Banner Ads (ONLY when site owner enables them)
-    if (config.adBanners && config.adBanners.enabled) {
+    if (config.adBanners && config.adBanners.enabled && !state.isVip) {
       if (el.userHeaderAdBanner && config.adBanners.headerBannerHtml) {
         el.userHeaderAdBanner.innerHTML = config.adBanners.headerBannerHtml;
         el.userHeaderAdBanner.classList.remove('hidden');
+        try {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (e) {
+          console.warn('AdSense push failed', e);
+        }
       }
       if (el.userDetailsAdBanner && config.adBanners.detailsBannerHtml) {
         el.userDetailsAdBanner.innerHTML = config.adBanners.detailsBannerHtml;
         el.userDetailsAdBanner.classList.remove('hidden');
+        try {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (e) {
+          console.warn('AdSense push failed', e);
+        }
       }
     } else {
-      // Guarantee zero ads are displayed when not monetized
+      // Guarantee zero ads are displayed when not monetized or for VIP members
       if (el.userHeaderAdBanner) {
         el.userHeaderAdBanner.innerHTML = '';
         el.userHeaderAdBanner.classList.add('hidden');
@@ -1217,6 +1227,13 @@
         startPlayback(details, s, e);
       };
 
+      // AdSense dynamic impression refresh for modal view
+      if (el.userDetailsAdBanner && !el.userDetailsAdBanner.classList.contains('hidden') && !state.isVip) {
+        try {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (e) {}
+      }
+
     } catch (err) {
       console.error(err);
       el.modalOverview.textContent = 'Error loading media details. Please try again.';
@@ -1997,20 +2014,13 @@
     frame.setAttribute('allowfullscreen', 'true');
     frame.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
     frame.setAttribute('referrerpolicy', 'no-referrer');
-
-    // Strict Hardware AdShield Sandbox:
-    // OMIT allow-top-navigation, allow-top-navigation-by-user-activation, and allow-popups
-    // on ALL servers so embedded iframes CAN NEVER redirect the user's tab or open new popup tabs!
-    const sandboxTokens = 'allow-forms allow-scripts allow-same-origin allow-presentation allow-downloads allow-modals';
-
-    frame.setAttribute('sandbox', sandboxTokens);
     frame.src = url;
 
     if (parent) {
       parent.replaceChild(frame, el.embedPlayerIframe);
       el.embedPlayerIframe = frame;
     } else {
-      el.embedPlayerIframe.setAttribute('sandbox', sandboxTokens);
+      el.embedPlayerIframe.removeAttribute('sandbox');
       el.embedPlayerIframe.setAttribute('referrerpolicy', 'no-referrer');
       el.embedPlayerIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
       el.embedPlayerIframe.classList.remove('hidden');
@@ -2082,7 +2092,14 @@
           const isActive = state.isEmbedMode && (state.currentEmbedServerName === emb.name || (el.embedPlayerIframe && el.embedPlayerIframe.src === emb.url));
           pill.className = `server-pill-btn ${isActive ? 'active' : ''}`;
 
-          const displayName = idx === 0 ? 'Multi-Lang Server' : `Server ${idx}`;
+          const serverLabels = [
+            '⚡ Server 1 (Ultra 4K)',
+            'Server 2 (Cinema HD)',
+            'Server 3 (Cloud Fast)',
+            'Server 4 (Multi-Source)',
+            'Server 5 (Backup)'
+          ];
+          const displayName = serverLabels[idx] || `Server ${idx + 1}`;
 
           if (isActive) {
             pill.innerHTML = `<span class="live-signal-bars"><span class="bar b1"></span><span class="bar b2"></span><span class="bar b3"></span></span> ${displayName}`;
@@ -2290,7 +2307,11 @@
     showToast('Subtitles disabled');
   }
 
+  let isInternalNavigation = false;
+
   function closePlayer() {
+    isInternalNavigation = true;
+    setTimeout(() => { isInternalNavigation = false; }, 400);
     state.playbackRequestSeq += 1;
     if (activeStreamFallbackTimer) {
       clearTimeout(activeStreamFallbackTimer);
@@ -3803,6 +3824,28 @@
 
     el.playerBackBtn.addEventListener('click', closePlayer);
     if (el.watchCloseBtn) el.watchCloseBtn.addEventListener('click', closePlayer);
+
+    // Anti-Redirect Shield:
+    // If a cross-origin embed script tries to hijack top-level window location to an ad network,
+    // beforeunload intercepts it and cancels the unauthorized navigation.
+    window.addEventListener('beforeunload', (e) => {
+      if (state.isEmbedMode && !isInternalNavigation) {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+      }
+    });
+
+    // Auto-focus Trap:
+    // If an ad click inside an embed tries to open a popup tab or blur window,
+    // refocus immediately to keep the user in NetMirror Plus.
+    window.addEventListener('blur', () => {
+      if (state.isEmbedMode) {
+        setTimeout(() => {
+          window.focus();
+        }, 80);
+      }
+    });
     if (el.howToDownloadBtn) el.howToDownloadBtn.addEventListener('click', openDownloadGuide);
     if (el.watchDownloadBtn) el.watchDownloadBtn.addEventListener('click', handleDownloadClick);
     if (el.closeDownloadGuideBtn) el.closeDownloadGuideBtn.addEventListener('click', closeDownloadGuide);

@@ -1467,45 +1467,21 @@ fn build_embed_urls(
     let mut embed_urls = Vec::new();
 
     // 1. VidLink Cloud (4K) - Clean, ad-free, 4K streams with subtitles
-    if let Some(tid) = tmdb_id {
+    if let Some(target_id) = tmdb_id.or(imdb_id) {
         embed_urls.push(EmbedSource {
             name: "VidLink Cloud (4K)".to_string(),
             url: if is_series {
-                format!("https://vidlink.pro/tv/{tid}/{s}/{ep}?primaryColor=e50914&nextbutton=true")
+                format!("https://vidlink.pro/tv/{target_id}/{s}/{ep}?primaryColor=e50914&nextbutton=true")
             } else {
-                format!("https://vidlink.pro/movie/{tid}?primaryColor=e50914")
+                format!("https://vidlink.pro/movie/{target_id}?primaryColor=e50914")
             },
         });
     }
 
-    // 2. VidSrc.to (HD) - High quality clean player
-    if let Some(vidsrc_id) = imdb_id.or(tmdb_id) {
-        embed_urls.push(EmbedSource {
-            name: "VidSrc.to (HD)".to_string(),
-            url: if is_series {
-                format!("https://vidsrc.to/embed/tv/{vidsrc_id}/{s}/{ep}")
-            } else {
-                format!("https://vidsrc.to/embed/movie/{vidsrc_id}")
-            },
-        });
-    }
-
-    // 3. VidSrc.pm (Cloud) - Fast cloud mirror
+    // 2. SmashyStream (Cinema HD) - High-speed clean cinema player
     if let Some(iid) = imdb_id.or(tmdb_id) {
         embed_urls.push(EmbedSource {
-            name: "VidSrc.pm (Cloud)".to_string(),
-            url: if is_series {
-                format!("https://vidsrc.pm/embed/tv/{iid}/{s}/{ep}")
-            } else {
-                format!("https://vidsrc.pm/embed/movie/{iid}")
-            },
-        });
-    }
-
-    // 4. SmashyStream (Cinema)
-    if let Some(iid) = imdb_id {
-        embed_urls.push(EmbedSource {
-            name: "SmashyStream (Cinema)".to_string(),
+            name: "SmashyStream (Cinema HD)".to_string(),
             url: if is_series {
                 format!("https://embed.smashystream.com/playere.php?imdb={iid}&season={s}&episode={ep}")
             } else {
@@ -1514,14 +1490,47 @@ fn build_embed_urls(
         });
     }
 
-    // 5. VidSrc.net (Backup)
+    // 3. MultiEmbed (Cloud Fast)
+    if let Some(tid) = tmdb_id {
+        embed_urls.push(EmbedSource {
+            name: "MultiEmbed (Cloud Fast)".to_string(),
+            url: if is_series {
+                format!("https://multiembed.mov/?video_id={tid}&tmdb=1&s={s}&e={ep}")
+            } else {
+                format!("https://multiembed.mov/?video_id={tid}&tmdb=1")
+            },
+        });
+    } else if let Some(iid) = imdb_id {
+        embed_urls.push(EmbedSource {
+            name: "MultiEmbed (Cloud Fast)".to_string(),
+            url: if is_series {
+                format!("https://multiembed.mov/?video_id={iid}&s={s}&e={ep}")
+            } else {
+                format!("https://multiembed.mov/?video_id={iid}")
+            },
+        });
+    }
+
+    // 4. VidSrc (HD)
+    if let Some(vidsrc_id) = imdb_id.or(tmdb_id) {
+        embed_urls.push(EmbedSource {
+            name: "VidSrc (HD)".to_string(),
+            url: if is_series {
+                format!("https://vidsrc.to/embed/tv/{vidsrc_id}/{s}/{ep}")
+            } else {
+                format!("https://vidsrc.to/embed/movie/{vidsrc_id}")
+            },
+        });
+    }
+
+    // 5. VidSrc.pm (Backup)
     if let Some(iid) = imdb_id.or(tmdb_id) {
         embed_urls.push(EmbedSource {
-            name: "VidSrc.net (Backup)".to_string(),
+            name: "VidSrc.pm (Backup)".to_string(),
             url: if is_series {
-                format!("https://vidsrc.net/embed/tv/{iid}/{s}/{ep}")
+                format!("https://vidsrc.pm/embed/tv/{iid}/{s}/{ep}")
             } else {
-                format!("https://vidsrc.net/embed/movie/{iid}")
+                format!("https://vidsrc.pm/embed/movie/{iid}")
             },
         });
     } else if tmdb_id.is_none() {

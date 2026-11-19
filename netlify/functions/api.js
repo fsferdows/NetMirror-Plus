@@ -501,24 +501,6 @@ function buildEmbedUrls({ imdbId, tmdbId, title, id, isSeries, season, episode }
     });
   }
 
-  // 4. VidSrc.pm (VIP Backup) - Fast cloud player, no motorcycle captchas
-  if (imdbId || tmdbId) {
-    const vidId = imdbId || tmdbId;
-    embedUrls.push({
-      name: "VidSrc.pm (VIP Backup)",
-      url: isSeries
-        ? `https://vidsrc.pm/embed/tv/${vidId}/${s}/${ep}`
-        : `https://vidsrc.pm/embed/movie/${vidId}`,
-    });
-  } else if (!tmdbId && cleanTitleStr) {
-    embedUrls.push({
-      name: "VidSrc.pm (VIP Backup)",
-      url: isSeries
-        ? `https://vidsrc.pm/embed/tv?title=${cleanTitleStr}&season=${s}&episode=${ep}`
-        : `https://vidsrc.pm/embed/movie?title=${cleanTitleStr}`,
-    });
-  }
-
   return embedUrls;
 }
 
@@ -1009,7 +991,11 @@ async function handleSports(params) {
   } catch (err) {
     return {
       statusCode: 500,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache, no-store, must-revalidate"
+    },
       body: JSON.stringify({ error: err.message }),
     };
   }
@@ -1018,7 +1004,11 @@ async function handleSports(params) {
 async function handlePlatforms() {
   return {
     statusCode: 200,
-    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache, no-store, must-revalidate"
+    },
     body: JSON.stringify(PLATFORMS),
   };
 }
@@ -1194,7 +1184,11 @@ async function handlePlatformContent(params) {
   if (validJsons.length === 0) {
     return {
       statusCode: 502,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache, no-store, must-revalidate"
+    },
       body: JSON.stringify({ error: "Failed to fetch platform items" }),
     };
   }
@@ -1567,7 +1561,11 @@ async function handleSearch(params) {
   if (!q) {
     return {
       statusCode: 200,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache, no-store, must-revalidate"
+    },
       body: JSON.stringify([]),
     };
   }
@@ -1602,7 +1600,11 @@ async function handleSearch(params) {
 
   return {
     statusCode: 200,
-    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache, no-store, must-revalidate"
+    },
     body: JSON.stringify(items),
   };
 }
@@ -1612,7 +1614,11 @@ async function handleSuggest(params) {
   if (!q) {
     return {
       statusCode: 200,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache, no-store, must-revalidate"
+    },
       body: JSON.stringify([]),
     };
   }
@@ -1657,7 +1663,11 @@ async function handleSuggest(params) {
 
   return {
     statusCode: 200,
-    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache, no-store, must-revalidate"
+    },
     body: JSON.stringify(suggestions),
   };
 }
@@ -1707,7 +1717,11 @@ async function handleDetails(id, params = {}) {
 
         return {
           statusCode: 200,
-          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+          headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache, no-store, must-revalidate"
+    },
           body: JSON.stringify({
             id: { provider: "moviebox", value: id },
             title,
@@ -1785,7 +1799,11 @@ async function handleDetails(id, params = {}) {
 
           return {
             statusCode: 200,
-            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+            headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache, no-store, must-revalidate"
+    },
             body: JSON.stringify({
               id: { provider: "moviebox", value: id },
               title,
@@ -1831,7 +1849,11 @@ async function handleDetails(id, params = {}) {
       }
       return {
         statusCode: 200,
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+        headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache, no-store, must-revalidate"
+    },
         body: JSON.stringify({
           id: { provider: "moviebox", value: top.id.value },
           title: top.title,
@@ -1856,7 +1878,11 @@ async function handleDetails(id, params = {}) {
 
   return {
     statusCode: 404,
-    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache, no-store, must-revalidate"
+    },
     body: JSON.stringify({ error: "Details not found" }),
   };
 }
@@ -2163,7 +2189,11 @@ async function handleStreams(id, params) {
 
   return {
     statusCode: 200,
-    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache, no-store, must-revalidate"
+    },
     body: JSON.stringify({
       releases: [],
       streams: directStreams,
@@ -2212,7 +2242,11 @@ exports.handler = async (event) => {
     }
     return {
       statusCode: 400,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache, no-store, must-revalidate"
+    },
       body: JSON.stringify({ error: "Missing stream url" }),
     };
   }
@@ -2258,7 +2292,11 @@ exports.handler = async (event) => {
 
   return {
     statusCode: 404,
-    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache, no-store, must-revalidate"
+    },
     body: JSON.stringify({ error: `Not found: ${cleanPath}` }),
   };
 };

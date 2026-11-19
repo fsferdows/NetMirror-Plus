@@ -1471,7 +1471,7 @@ async fn resolve_cinemeta_meta(imdb_id: &str, prefer_series: bool) -> (Option<St
 fn build_embed_urls(
     imdb_id: Option<&str>,
     tmdb_id: Option<&str>,
-    clean_title: &str,
+    _clean_title: &str,
     is_series: bool,
     season: usize,
     episode: usize,
@@ -1521,30 +1521,6 @@ fn build_embed_urls(
                 format!("https://multiembed.mov/?video_id={iid}&s={s}&e={ep}")
             } else {
                 format!("https://multiembed.mov/?video_id={iid}")
-            },
-        });
-    }
-
-    // 4. VidSrc.pm (VIP Backup) - High speed, no captcha mirror
-    if let Some(iid) = imdb_id.or(tmdb_id) {
-        embed_urls.push(EmbedSource {
-            name: "VidSrc.pm (VIP Backup)".to_string(),
-            url: if is_series {
-                format!("https://vidsrc.pm/embed/tv/{iid}/{s}/{ep}")
-            } else {
-                format!("https://vidsrc.pm/embed/movie/{iid}")
-            },
-        });
-    } else if tmdb_id.is_none() {
-        let encoded_title =
-            percent_encoding::utf8_percent_encode(clean_title, percent_encoding::NON_ALPHANUMERIC)
-                .to_string();
-        embed_urls.push(EmbedSource {
-            name: "VidSrc Cloud (Backup)".to_string(),
-            url: if is_series {
-                format!("https://vidsrc.pm/embed/tv?title={encoded_title}&season={s}&episode={ep}")
-            } else {
-                format!("https://vidsrc.pm/embed/movie?title={encoded_title}")
             },
         });
     }

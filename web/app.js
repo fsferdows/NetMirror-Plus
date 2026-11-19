@@ -596,22 +596,19 @@
           console.warn('[AdShield] Blocked blank popup window attempt');
           return dummyWindow;
         }
+
+        // Strictly block ALL popups and new tabs when video player is active or when user is streaming
+        if (state.isEmbedMode || (el.playerOverlay && !el.playerOverlay.classList.contains('hidden'))) {
+          console.warn('[AdShield] Blocked popup/tab redirect during playback:', url);
+          return dummyWindow;
+        }
+
         const lower = url.toLowerCase();
         const isSafe =
           url.startsWith('/') ||
           lower.includes(window.location.hostname) ||
           lower.includes('vercel.app') ||
           lower.includes('netlify.app') ||
-          lower.includes('google.com') ||
-          lower.includes('googlesyndication.com') ||
-          lower.includes('googleadservices.com') ||
-          lower.includes('doubleclick.net') ||
-          lower.includes('nordvpn.com') ||
-          lower.includes('twitter.com') ||
-          lower.includes('x.com') ||
-          lower.includes('facebook.com') ||
-          lower.includes('t.me') ||
-          lower.includes('wa.me') ||
           lower.includes('github.com') ||
           lower.includes('buymeacoffee.com') ||
           lower.includes('ko-fi.com') ||
@@ -623,11 +620,15 @@
         return nativeOpen.call(window, url, target, features);
       };
 
-      // 2. Intercept rogue external link clicks triggered while playing video
-      document.addEventListener('click', (e) => {
-        if (!state.isEmbedMode && (!el.playerOverlay || el.playerOverlay.classList.contains('hidden'))) {
-          return;
+      // 2. Prevent rogue beforeunload / frame-busting redirects while video player is active
+      window.addEventListener('beforeunload', (e) => {
+        if (el.playerOverlay && !el.playerOverlay.classList.contains('hidden') && !state.allowAppNavigation) {
+          console.warn('[AdShield] Prevented rogue tab navigation away from player');
         }
+      });
+
+      // 3. Intercept rogue external link clicks triggered while playing video
+      document.addEventListener('click', (e) => {
         const link = e.target && e.target.closest ? e.target.closest('a') : null;
         if (link && link.href) {
           const href = link.getAttribute('href') || '';
@@ -637,35 +638,33 @@
               lower.includes(window.location.hostname) ||
               lower.includes('vercel.app') ||
               lower.includes('netlify.app') ||
-              lower.includes('google.com') ||
-              lower.includes('googlesyndication.com') ||
-              lower.includes('googleadservices.com') ||
-              lower.includes('doubleclick.net') ||
-              lower.includes('nordvpn.com') ||
-              lower.includes('twitter.com') ||
-              lower.includes('x.com') ||
-              lower.includes('facebook.com') ||
-              lower.includes('t.me') ||
-              lower.includes('wa.me') ||
               lower.includes('github.com') ||
               lower.includes('buymeacoffee.com') ||
               lower.includes('ko-fi.com') ||
               lower.includes('paypal.me');
-            if (!isSafe) {
-              e.preventDefault();
-              e.stopImmediatePropagation();
-              console.warn('[AdShield] Blocked rogue link click during video playback:', href);
+
+            // If player overlay is active, block any non-safe link click (or rogue ad links)
+            if (el.playerOverlay && !el.playerOverlay.classList.contains('hidden')) {
+              // Only allow explicit user buttons like direct download link
+              if (!link.classList.contains('download-action-btn') && !link.classList.contains('modal-close-btn')) {
+                if (!isSafe) {
+                  e.preventDefault();
+                  e.stopImmediatePropagation();
+                  console.warn('[AdShield] Blocked rogue link click during video playback:', href);
+                  return false;
+                }
+              }
             }
           }
         }
       }, true);
 
-      // 3. Connect Player AdShield Pill
+      // 4. Connect Player AdShield Pill
       const pill = document.getElementById('playerAdShieldPill');
       if (pill) {
         pill.style.cursor = 'pointer';
         pill.addEventListener('click', () => {
-          showToast('🛡️ AdShield Active: Player sandbox enabled. Tab-redirects and popups are blocked.');
+          showToast('🛡️ AdShield Active: Zero redirects, zero popups. 100% clean streaming.');
         });
       }
     } catch (_) {}
@@ -1454,6 +1453,13 @@
   };
 
   function ensureAudioEngine() {
+    if (el.videoElement) {
+      el.videoElement.muted = false;
+      if (el.videoElement.volume <= 0.05) {
+        el.videoElement.volume = 1.0;
+      }
+    }
+
     if (isAudioEngineReady) {
       if (audioCtx && audioCtx.state === 'suspended') {
         audioCtx.resume().catch(() => {});
@@ -1461,74 +1467,19 @@
       return;
     }
 
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextClass) return;
-
     try {
-      if (!audioCtx) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioContextClass && !audioCtx) {
         audioCtx = new AudioContextClass();
       }
-
-      if (!sourceNode) {
-        sourceNode = audioCtx.createMediaElementSource(el.videoElement);
-      }
-
-      if (!bassNode) {
-        bassNode = audioCtx.createBiquadFilter();
-        bassNode.type = 'lowshelf';
-        bassNode.frequency.value = 120;
-      }
-
-      if (!voiceNode) {
-        voiceNode = audioCtx.createBiquadFilter();
-        voiceNode.type = 'peaking';
-        voiceNode.frequency.value = 2600;
-        voiceNode.Q.value = 1.2;
-      }
-
-      if (!trebleNode) {
-        trebleNode = audioCtx.createBiquadFilter();
-        trebleNode.type = 'highshelf';
-        trebleNode.frequency.value = 7500;
-      }
-
-      if (!compressorNode) {
-        compressorNode = audioCtx.createDynamicsCompressor();
-      }
-
-      if (!boostGainNode) {
-        boostGainNode = audioCtx.createGain();
-      }
-
-      if (!limiterNode) {
-        limiterNode = audioCtx.createDynamicsCompressor();
-        limiterNode.threshold.value = -1.0;
-        limiterNode.knee.value = 0;
-        limiterNode.ratio.value = 20;
-        limiterNode.attack.value = 0.001;
-        limiterNode.release.value = 0.1;
-      }
-
-      // Connect audio processing pipeline
-      sourceNode.connect(bassNode);
-      bassNode.connect(voiceNode);
-      voiceNode.connect(trebleNode);
-      trebleNode.connect(compressorNode);
-      compressorNode.connect(boostGainNode);
-      boostGainNode.connect(limiterNode);
-      limiterNode.connect(audioCtx.destination);
-
       isAudioEngineReady = true;
-
-      // Apply initial saved preferences
       applyAudioProfile(state.audioProfile || 'cinema', false);
       setVolumeBoost(state.audioBoost || 1.5, false);
-
-      if (audioCtx.state === 'suspended') {
+      if (audioCtx && audioCtx.state === 'suspended') {
         audioCtx.resume().catch(() => {});
       }
     } catch (err) {
-      console.warn('Web Audio Studio Engine note:', err);
+      console.warn('Audio Engine note:', err);
     }
   }
 
@@ -2269,20 +2220,30 @@
     // 1. Populate Top Bar Pills (matching reference interface)
     if (el.serverPillsList) {
       el.serverPillsList.innerHTML = '';
+      let serverCounter = 1;
 
-      // Direct streams
+      // Direct streams (HTML5 native video player - ad-free, 300% sound booster, direct CDN)
       if (streams && streams.length > 0) {
         streams.forEach((stream, idx) => {
           const pill = document.createElement('button');
           pill.type = 'button';
           const isActive = idx === state.currentStreamIndex && !state.isEmbedMode;
           pill.className = `server-pill-btn ${isActive ? 'active' : ''}`;
-          const label = stream.server || `Server ${idx + 1}`;
-          const pillText = stream.quality && !label.includes(stream.quality) ? `${label} (${stream.quality})` : label;
-          if (isActive) {
-            pill.innerHTML = `<span class="live-signal-bars"><span class="bar b1"></span><span class="bar b2"></span><span class="bar b3"></span></span> ${pillText}`;
+          
+          let displayName = `Server ${serverCounter}`;
+          if (serverCounter === 1) {
+            displayName = `⚡ Server 1 (Direct 4K/HD)`;
+          } else if (stream.server && stream.server.includes('(')) {
+            displayName = `Server ${serverCounter} ${stream.server.replace('MovieBox ', '')}`;
           } else {
-            pill.textContent = pillText;
+            displayName = `Server ${serverCounter} (${stream.quality || 'HD'})`;
+          }
+          serverCounter++;
+
+          if (isActive) {
+            pill.innerHTML = `<span class="live-signal-bars"><span class="bar b1"></span><span class="bar b2"></span><span class="bar b3"></span></span> ${displayName}`;
+          } else {
+            pill.textContent = displayName;
           }
 
           pill.addEventListener('click', () => {
@@ -2309,13 +2270,13 @@
           const isActive = state.isEmbedMode && (state.currentEmbedServerName === emb.name || (el.embedPlayerIframe && el.embedPlayerIframe.src === emb.url));
           pill.className = `server-pill-btn ${isActive ? 'active' : ''}`;
 
-          const serverLabels = [
-            '⚡ Server 1 (Ultra 4K)',
-            'Server 2 (Cinema HD)',
-            'Server 3 (Cloud Fast)',
-            'Server 4 (VIP Backup)'
-          ];
-          const displayName = serverLabels[idx] || `Server ${idx + 1}`;
+          let displayName = `Server ${serverCounter}`;
+          if (serverCounter === 1) {
+            displayName = `⚡ Server 1 (${emb.name.replace(/\(.*?\)/g, '').trim()})`;
+          } else {
+            displayName = `Server ${serverCounter} (${emb.name.replace(/\(.*?\)/g, '').trim()})`;
+          }
+          serverCounter++;
 
           if (isActive) {
             pill.innerHTML = `<span class="live-signal-bars"><span class="bar b1"></span><span class="bar b2"></span><span class="bar b3"></span></span> ${displayName}`;
@@ -4023,11 +3984,15 @@
     });
 
     // Hero Action Buttons
-    el.heroPlayBtn.addEventListener('click', () => {
+    el.heroPlayBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       if (state.heroItem) openPlayerDirect(state.heroItem);
     });
 
-    el.heroDetailsBtn.addEventListener('click', () => {
+    el.heroDetailsBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       if (state.heroItem) openDetailsModal(state.heroItem.id.value, state.heroItem.id.provider, state.heroItem.title);
     });
 

@@ -2477,6 +2477,155 @@ body {
   box-shadow: 0 6px 18px rgba(229, 9, 20, 0.5);
 }
 
+/* 4K & 8K Ultra HD Download Center Modal */
+.download-hub-card {
+  max-width: 580px;
+  width: 95%;
+  background: #0b1120;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 16px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+.download-media-header {
+  display: flex;
+  gap: 16px;
+  padding: 18px 22px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  align-items: center;
+}
+.download-media-poster {
+  width: 60px;
+  height: 90px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+.download-media-title {
+  font-size: 16.5px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+.download-media-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.download-badge-uhd {
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  color: #000;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+.download-body-scroll {
+  padding: 18px 22px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.download-quality-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.download-quality-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  gap: 12px;
+}
+.download-quality-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+.download-quality-card.uhd-card {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.07);
+}
+.download-quality-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.download-quality-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.download-quality-meta {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+.download-action-btn {
+  background: #e50914;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+.download-action-btn:hover {
+  background: #b20710;
+  transform: scale(1.03);
+}
+.download-action-btn.btn-copy {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.download-action-btn.btn-copy:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+.download-section-heading {
+  font-size: 13px;
+  font-weight: 700;
+  color: #cbd5e1;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.filter-chip-dubbed {
+  border-color: rgba(139, 92, 246, 0.4) !important;
+  color: #c4b5fd !important;
+}
+.filter-chip-dubbed:hover, .filter-chip-dubbed.active {
+  background: #8b5cf6 !important;
+  color: #fff !important;
+}
+
 /* Right / Series Episodes Column */
 .watch-episodes-column {
   width: 330px;
@@ -3780,42 +3929,115 @@ kbd {
   margin-bottom: 24px;
 }
 
-/* Sports Search Bar */
+/* Sports Search Bar & Quick Match Matcher */
+.sports-search-bar-wrap {
+  max-width: 760px;
+  margin-bottom: 22px;
+}
 .sports-search-bar {
   display: flex;
   align-items: center;
-  background: rgba(10, 15, 30, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(15, 23, 42, 0.95);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--radius-pill);
-  padding: 8px 18px;
-  max-width: 640px;
-  margin-bottom: 20px;
+  padding: 6px 8px 6px 18px;
   transition: all var(--transition-fast);
+  gap: 8px;
 }
 .sports-search-bar:focus-within {
   border-color: var(--red);
-  box-shadow: 0 0 16px var(--red-glow);
+  box-shadow: 0 0 20px rgba(229, 9, 20, 0.4);
 }
 .sports-search-bar input {
   flex: 1;
   background: none;
   border: none;
   color: #fff;
-  font-size: 14px;
+  font-size: 14.5px;
   outline: none;
-  padding: 4px 10px;
+  padding: 6px 8px;
+  min-width: 0;
 }
 .sports-search-bar input::placeholder {
   color: var(--text-muted);
+}
+.sports-search-clear-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  color: #cbd5e1;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.sports-search-clear-btn:hover {
+  background: rgba(229, 9, 20, 0.8);
+  color: #fff;
+}
+.sports-search-submit-btn {
+  background: var(--red);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.sports-search-submit-btn:hover {
+  background: #b20710;
+  transform: scale(1.02);
 }
 .sports-matches-count {
   font-size: 11px;
   font-weight: 700;
   color: var(--red);
   background: rgba(229, 9, 20, 0.15);
-  padding: 2px 10px;
+  padding: 4px 10px;
   border-radius: var(--radius-pill);
   white-space: nowrap;
+}
+.sports-quick-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding-left: 4px;
+}
+.quick-tag-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-right: 2px;
+}
+.sports-tag-chip {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #cbd5e1;
+  border-radius: 14px;
+  padding: 4px 11px;
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+.sports-tag-chip:hover, .sports-tag-chip.active {
+  background: rgba(229, 9, 20, 0.25);
+  border-color: var(--red);
+  color: #fff;
 }
 
 /* Category Filters */

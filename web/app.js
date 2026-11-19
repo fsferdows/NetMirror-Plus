@@ -126,6 +126,9 @@
     sportsHeroHeader: document.querySelector('.sports-hero-header'),
     sportsBackBtn: document.getElementById('sportsBackBtn'),
     sportsSearchInput: document.getElementById('sportsSearchInput'),
+    sportsSearchClearBtn: document.getElementById('sportsSearchClearBtn'),
+    sportsSearchSubmitBtn: document.getElementById('sportsSearchSubmitBtn'),
+    sportsQuickTags: document.getElementById('sportsQuickTags'),
     sportsLiveCount: document.getElementById('sportsLiveCount'),
     sportsCategoryFilters: document.getElementById('sportsCategoryFilters'),
     sportsStatusTabs: document.getElementById('sportsStatusTabs'),
@@ -256,6 +259,13 @@
     downloadGuideModal: document.getElementById('downloadGuideModal'),
     closeDownloadGuideBtn: document.getElementById('closeDownloadGuideBtn'),
     gotItDownloadGuideBtn: document.getElementById('gotItDownloadGuideBtn'),
+    downloadPosterImg: document.getElementById('downloadPosterImg'),
+    downloadTitleText: document.getElementById('downloadTitleText'),
+    downloadMetaText: document.getElementById('downloadMetaText'),
+    downloadSeasonEpBadge: document.getElementById('downloadSeasonEpBadge'),
+    downloadStreamsList: document.getElementById('downloadStreamsList'),
+    copyDirectStreamUrlBtn: document.getElementById('copyDirectStreamUrlBtn'),
+    directBrowserDownloadBtn: document.getElementById('directBrowserDownloadBtn'),
 
     // Modern Watch Actions: Fullscreen, Sound Booster, Audio Dubs
     watchAudioDubsBtn: document.getElementById('watchAudioDubsBtn'),
@@ -1927,31 +1937,177 @@
     }
   }
 
-  function handleDownloadClick() {
-    const s = state.currentSeason || 1;
-    const ep = state.currentEpisode || 1;
-    const isSeries = state.currentDetails?.media_type === 'series' || s > 0;
-    const rawTitle = state.currentDetails?.title || 'Video';
-    const cleanTitle = rawTitle.replace(/[^a-zA-Z0-9_-]/g, '_');
-    const fileName = isSeries ? `${cleanTitle}_S${s}E${ep}.mp4` : `${cleanTitle}.mp4`;
+  function formatBytes(bytes) {
+    if (!bytes || bytes <= 0) return '';
+    const gb = bytes / (1024 * 1024 * 1024);
+    if (gb >= 1) return `${gb.toFixed(2)} GB`;
+    const mb = bytes / (1024 * 1024);
+    return `${mb.toFixed(0)} MB`;
+  }
 
-    if (state.currentStreams && state.currentStreams.length > 0) {
-      const stream = state.currentStreams[state.currentStreamIndex] || state.currentStreams[0];
-      const a = document.createElement('a');
-      a.href = stream.proxy_url;
-      a.download = fileName;
-      a.target = '_blank';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      showToast(`Starting direct download for ${fileName}...`);
+  function copyTextToClipboard(text) {
+    if (!text) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).catch(() => {
+        fallbackCopy(text);
+      });
     } else {
-      openDownloadGuide();
+      fallbackCopy(text);
     }
   }
 
+  function fallbackCopy(text) {
+    const dummy = document.createElement('input');
+    dummy.style.position = 'fixed';
+    dummy.style.opacity = '0';
+    document.body.appendChild(dummy);
+    dummy.value = text;
+    dummy.select();
+    document.execCommand('copy');
+    document.body.removeChild(dummy);
+  }
+
+  function renderDownloadModal() {
+    if (!el.downloadGuideModal) return;
+    const details = state.currentDetails;
+    const s = state.currentSeason || 1;
+    const ep = state.currentEpisode || 1;
+    const isSeries = details?.media_type === 'series' || s > 0;
+    const rawTitle = details?.title || 'Video Title';
+    const cleanTitle = rawTitle.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const fileName = isSeries ? `${cleanTitle}_S${s}E${ep}` : cleanTitle;
+
+    if (el.downloadTitleText) {
+      el.downloadTitleText.textContent = rawTitle;
+    }
+    if (el.downloadPosterImg && details?.poster_url) {
+      el.downloadPosterImg.src = details.poster_url;
+    }
+    if (el.downloadSeasonEpBadge) {
+      el.downloadSeasonEpBadge.textContent = isSeries ? `Season ${s} • Episode ${ep}` : (details?.year ? `${details.year} Movie` : 'Feature Film');
+    }
+
+    if (!el.downloadStreamsList) {
+      el.downloadGuideModal.classList.remove('hidden');
+      return;
+    }
+
+    el.downloadStreamsList.innerHTML = '';
+
+    // If direct streams exist in state.currentStreams, list each quality
+    const directStreams = state.currentStreams || [];
+    let bestStreamUrl = null;
+
+    if (directStreams.length > 0) {
+      const heading = document.createElement('div');
+      heading.className = 'download-section-heading';
+      heading.textContent = '🚀 Direct High-Speed Download Streams';
+      el.downloadStreamsList.appendChild(heading);
+
+      directStreams.forEach((stream) => {
+        const qual = stream.quality || 'HD';
+        const isUhd = /2160|4k|uhd|4320|8k/i.test(qual) || /ultra/i.test(stream.server);
+        const isFhd = /1080/i.test(qual);
+        const card = document.createElement('div');
+        card.className = `download-quality-card ${isUhd ? 'uhd-card' : ''}`;
+
+        const sizeStr = stream.size_bytes ? ` • ${formatBytes(stream.size_bytes)}` : '';
+        const codecStr = stream.codec ? ` • ${stream.codec.toUpperCase()}` : '';
+        const streamFile = `${fileName}_${qual}.mp4`;
+        const downloadUrl = stream.proxy_url || stream.direct_url;
+        if (!bestStreamUrl && downloadUrl) bestStreamUrl = downloadUrl;
+
+        card.innerHTML = `
+          <div class="download-quality-info">
+            <div class="download-quality-name">
+              <span>${isUhd ? '⚡' : isFhd ? '🎬' : '📱'} ${qual} ${isUhd ? 'Ultra HD' : isFhd ? 'Full HD' : 'HD'}</span>
+              ${isUhd ? '<span class="download-badge-uhd">4K UHD</span>' : ''}
+            </div>
+            <div class="download-quality-meta">${stream.server}${codecStr}${sizeStr} • Direct CDN</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button type="button" class="download-action-btn btn-copy" title="Copy Stream Link for IDM/VLC">
+              📋 Copy Link
+            </button>
+            <a href="${downloadUrl}" download="${streamFile}" target="_blank" class="download-action-btn">
+              ⬇ Download
+            </a>
+          </div>
+        `;
+
+        card.querySelector('.btn-copy').addEventListener('click', () => {
+          copyTextToClipboard(downloadUrl);
+          showToast('📋 Stream URL copied! Paste into IDM, ADM or VLC for max speed.');
+        });
+
+        el.downloadStreamsList.appendChild(card);
+      });
+    }
+
+    // Always provide 8K & 4K Ultra HD Cloud Downloader options
+    const cloudHeading = document.createElement('div');
+    cloudHeading.className = 'download-section-heading';
+    cloudHeading.style.marginTop = '10px';
+    cloudHeading.textContent = '⚡ 4K & 8K Ultra HD Cloud Multi-Mirror Downloader';
+    el.downloadStreamsList.appendChild(cloudHeading);
+
+    const cloudOptions = [
+      { name: '4K Ultra HD Cloud Stream (2160p HDR)', badge: '4K UHD', server: 'VidLink Cloud 4K (Ultra Fast)', icon: '⚡' },
+      { name: '1080p Cinema Full HD Stream', badge: '1080P', server: 'SmashyStream Cinema HD', icon: '🎬' },
+      { name: '720p Fast Mobile Download', badge: '720P', server: 'MultiEmbed Cloud Mirror', icon: '📱' },
+    ];
+
+    cloudOptions.forEach((opt, idx) => {
+      const card = document.createElement('div');
+      card.className = `download-quality-card ${idx === 0 ? 'uhd-card' : ''}`;
+      const mirrorUrl = state.embedUrls && state.embedUrls[idx] ? state.embedUrls[idx].url : '#';
+
+      card.innerHTML = `
+        <div class="download-quality-info">
+          <div class="download-quality-name">
+            <span>${opt.icon} ${opt.name}</span>
+            <span class="badge" style="background:rgba(255,255,255,0.1);font-size:10px;">${opt.badge}</span>
+          </div>
+          <div class="download-quality-meta">${opt.server} • Multi-Language Audio Dubs & Subtitles</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <a href="${mirrorUrl}" target="_blank" class="download-action-btn" style="background:#3b82f6;">
+            Open & Download ›
+          </a>
+        </div>
+      `;
+      el.downloadStreamsList.appendChild(card);
+    });
+
+    // Wire global copy button
+    if (el.copyDirectStreamUrlBtn) {
+      el.copyDirectStreamUrlBtn.onclick = () => {
+        const url = bestStreamUrl || (state.embedUrls && state.embedUrls[0] ? state.embedUrls[0].url : window.location.href);
+        copyTextToClipboard(url);
+        showToast('📋 4K Link copied! Paste into IDM, ADM or VLC.');
+      };
+    }
+
+    // Wire global direct browser download button
+    if (el.directBrowserDownloadBtn) {
+      if (bestStreamUrl) {
+        el.directBrowserDownloadBtn.href = bestStreamUrl;
+        el.directBrowserDownloadBtn.setAttribute('download', `${fileName}.mp4`);
+      } else if (state.embedUrls && state.embedUrls[0]) {
+        el.directBrowserDownloadBtn.href = state.embedUrls[0].url;
+        el.directBrowserDownloadBtn.removeAttribute('download');
+      }
+    }
+
+    el.downloadGuideModal.classList.remove('hidden');
+  }
+
+  function handleDownloadClick() {
+    renderDownloadModal();
+  }
+
   function openDownloadGuide() {
-    if (el.downloadGuideModal) el.downloadGuideModal.classList.remove('hidden');
+    renderDownloadModal();
   }
 
   function closeDownloadGuide() {
@@ -2623,6 +2779,7 @@
     bollywood: { name: 'Bollywood Blockbusters', badge: 'BOLLYWOOD', color: '#eab308', desc: 'Massive Hindi cinema blockbusters, music, romantic classics, and star-studded releases.' },
     hollywood: { name: 'Hollywood Hits', badge: 'HOLLYWOOD', color: '#06b6d4', desc: 'Worldwide box office hits, theatrical releases, Hollywood action blockbusters, and classics.' },
     boxoffice: { name: 'Top All-Time Box Office', badge: 'BOX OFFICE', color: '#10b981', desc: 'Highest grossing cinema movies of all time: Avatar, Avengers, Titanic, Star Wars, and more.' },
+    dubbed: { name: 'All Dubbed Series & Multi-Audio', badge: 'DUBBED SERIES', color: '#8b5cf6', desc: 'Binge top worldwide TV series, K-Dramas, and Anime with multi-language audio dubs (English, Hindi, Spanish, French, Bengali, and more).' },
 
     // Multi-Language Worldwide Cinema Catalogs
     hindi: { name: 'Hindi Cinema (Bollywood)', badge: 'BOLLYWOOD / हिन्दी', color: '#eab308', desc: 'Stream blockbuster Bollywood movies, Hindi originals, and top Indian drama series.' },
@@ -3049,26 +3206,25 @@
         });
       });
 
-      el.sportsMatchesGrid.appendChild(hubCard);
-      if (el.sportsMatchesCount) {
-        el.sportsMatchesCount.textContent = '4 Cricket Networks Live';
+      if (!query) {
+        el.sportsMatchesGrid.appendChild(hubCard);
       }
-      return;
     }
 
     let filtered = state.sportsMatches.filter((m) => {
-      // Category filter
-      if (cat !== 'all') {
+      // Category filter (ignored when user enters a specific text query)
+      if (cat !== 'all' && !query) {
         const sp = (m.sport || '').toLowerCase();
         if (cat === 'Soccer' && !sp.includes('soccer') && !sp.includes('football')) return false;
         else if (cat === 'NBA' && !sp.includes('nba') && !sp.includes('basketball') && !sp.includes('ncaa')) return false;
         else if (cat === 'NFL' && !sp.includes('nfl') && !sp.includes('american football')) return false;
         else if (cat === 'Motorsport' && !sp.includes('motor') && !sp.includes('f1') && !sp.includes('formula')) return false;
         else if (cat === 'combat' && !sp.includes('ufc') && !sp.includes('mma') && !sp.includes('boxing') && !sp.includes('wwe')) return false;
+        else if (cat === 'Cricket' && !sp.includes('cricket')) return false;
         else if (cat === 'Tennis' && !sp.includes('tennis')) return false;
         else if (cat === 'Golf' && !sp.includes('golf')) return false;
         else if (cat === 'channels') return false;
-        else if (cat !== 'Soccer' && cat !== 'NBA' && cat !== 'NFL' && cat !== 'Motorsport' && cat !== 'combat' && cat !== 'Tennis' && cat !== 'Golf') {
+        else if (cat !== 'Soccer' && cat !== 'NBA' && cat !== 'NFL' && cat !== 'Motorsport' && cat !== 'combat' && cat !== 'Cricket' && cat !== 'Tennis' && cat !== 'Golf') {
           if (!sp.includes(cat.toLowerCase())) return false;
         }
       }
@@ -3080,10 +3236,11 @@
         if (m.status === 'LIVE') return false;
       }
 
-      // Search query filter
+      // Search query filter (matches event, teams, tournament, sport, country, and channel names)
       if (query) {
         const text = `${m.event || ''} ${m.home_team || ''} ${m.away_team || ''} ${m.tournament || ''} ${m.sport || ''} ${m.country || ''}`.toLowerCase();
-        if (!text.includes(query)) return false;
+        const chNames = (m.channels || []).map((c) => c.name || '').join(' ').toLowerCase();
+        if (!text.includes(query) && !chNames.includes(query)) return false;
       }
 
       return true;
@@ -3099,6 +3256,15 @@
 
     if (el.sportsMatchesCount) {
       el.sportsMatchesCount.textContent = `${filtered.length} Fixtures`;
+    }
+
+    if (el.sportsLiveCount) {
+      if (query) {
+        el.sportsLiveCount.textContent = `${filtered.length} matches found for "${query}"`;
+      } else {
+        const liveCount = state.sportsMatches.filter((m) => m.has_stream || m.status === 'LIVE').length;
+        el.sportsLiveCount.textContent = `${liveCount || state.sportsMatches.length} Live/Streaming • ${state.sportsChannels.length} Channels`;
+      }
     }
 
     if (filtered.length === 0) {
@@ -3228,8 +3394,12 @@
     }
 
     const cat = state.sportsActiveCat;
+    const query = (state.sportsSearchQuery || '').toLowerCase().trim();
     let list = state.sportsChannels;
-    if (cat === 'Cricket') {
+
+    if (query) {
+      list = state.sportsChannels.filter((c) => (c.name || '').toLowerCase().includes(query));
+    } else if (cat === 'Cricket') {
       list = state.sportsChannels.filter((c) => /cricket|willow/i.test(c.name));
     } else if (cat === 'Soccer') {
       list = state.sportsChannels.filter((c) => /football|soccer|premier|bundesliga|golazo|laliga|serie|bein|tnt/i.test(c.name));
@@ -3245,7 +3415,7 @@
       list = state.sportsChannels.filter((c) => /nba|basketball|espn/i.test(c.name));
     }
 
-    if (list.length === 0) {
+    if (list.length === 0 && !query) {
       list = state.sportsChannels;
     }
 
@@ -3435,6 +3605,10 @@
       if (k) seen.add(k);
       if (state.activeFilter === 'movie') return item.media_type === 'movie';
       if (state.activeFilter === 'series') return item.media_type === 'series';
+      if (state.activeFilter === 'dubbed') {
+        const titleLower = (item.title || '').toLowerCase();
+        return item.media_type === 'series' || titleLower.includes('dub') || titleLower.includes('dual') || titleLower.includes('hindi');
+      }
       return true;
     });
 
@@ -3690,10 +3864,58 @@
       });
     }
 
+    const triggerSportsSearch = (val) => {
+      state.sportsSearchQuery = (val || '').trim();
+      if (el.sportsSearchClearBtn) {
+        el.sportsSearchClearBtn.classList.toggle('hidden', !state.sportsSearchQuery);
+      }
+      renderSportsMatches();
+      renderSportsChannels();
+    };
+
     if (el.sportsSearchInput) {
       el.sportsSearchInput.addEventListener('input', (e) => {
-        state.sportsSearchQuery = e.target.value;
-        renderSportsMatches();
+        triggerSportsSearch(e.target.value);
+      });
+      el.sportsSearchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          triggerSportsSearch(el.sportsSearchInput.value);
+          if (el.sportsMatchesGrid) {
+            el.sportsMatchesGrid.scrollIntoView({ behavior: 'smooth' });
+          }
+        }
+      });
+    }
+
+    if (el.sportsSearchClearBtn) {
+      el.sportsSearchClearBtn.addEventListener('click', () => {
+        if (el.sportsSearchInput) el.sportsSearchInput.value = '';
+        triggerSportsSearch('');
+      });
+    }
+
+    if (el.sportsSearchSubmitBtn) {
+      el.sportsSearchSubmitBtn.addEventListener('click', () => {
+        const val = el.sportsSearchInput ? el.sportsSearchInput.value : '';
+        triggerSportsSearch(val);
+        if (el.sportsMatchesGrid) {
+          el.sportsMatchesGrid.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    }
+
+    if (el.sportsQuickTags) {
+      el.sportsQuickTags.querySelectorAll('.sports-tag-chip').forEach((chip) => {
+        chip.addEventListener('click', () => {
+          const q = chip.dataset.search || '';
+          if (el.sportsSearchInput) el.sportsSearchInput.value = q;
+          el.sportsQuickTags.querySelectorAll('.sports-tag-chip').forEach((c) => c.classList.remove('active'));
+          chip.classList.add('active');
+          triggerSportsSearch(q);
+          if (el.sportsMatchesGrid) {
+            el.sportsMatchesGrid.scrollIntoView({ behavior: 'smooth' });
+          }
+        });
       });
     }
 
@@ -3822,12 +4044,18 @@
       showToast('Watch history cleared');
     });
 
-    // Grid Filters (All, Movies, TV Shows)
+    // Grid Filters (All, Movies, TV Shows, Dubbed Series)
     el.gridFilters.querySelectorAll('.filter-chip').forEach((chip) => {
       chip.addEventListener('click', () => {
         el.gridFilters.querySelectorAll('.filter-chip').forEach((c) => c.classList.remove('active'));
         chip.classList.add('active');
         state.activeFilter = chip.dataset.filter;
+        if (state.activeFilter === 'dubbed') {
+          if (!state.currentQuery && (!state.gridItems || state.gridItems.length < 5)) {
+            openPlatformView('dubbed', 'All Dubbed Series & Multi-Audio', '#8b5cf6');
+            return;
+          }
+        }
         renderGridItems(state.gridItems);
       });
     });

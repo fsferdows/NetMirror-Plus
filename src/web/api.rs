@@ -188,6 +188,15 @@ pub async fn get_platforms() -> Json<Vec<PlatformInfo>> {
             color: "#C1121F".to_string(),
             bg_gradient: "linear-gradient(135deg, rgba(193,18,31,0.35) 0%, rgba(41,14,16,0.92) 100%)".to_string(),
         },
+        PlatformInfo {
+            key: "dubbed".to_string(),
+            name: "Dubbed Series".to_string(),
+            subtitle: "Multi-Audio & Dubbed Shows".to_string(),
+            badge: "Dubbed & Dual Audio".to_string(),
+            count_label: "Popular Dubbed".to_string(),
+            color: "#8B5CF6".to_string(),
+            bg_gradient: "linear-gradient(135deg, rgba(139,92,246,0.35) 0%, rgba(20,15,35,0.92) 100%)".to_string(),
+        },
     ])
 }
 
@@ -388,6 +397,11 @@ pub async fn get_platform_content(
             format!("https://api2.imdb3.shop/api/tranding?id=44&items_per_page=18&page={page_idx}"),
             "Top All-Time Box Office".to_string(),
             "boxoffice".to_string(),
+        ),
+        "dubbed" | "dubbed_series" | "dubbedseries" => (
+            format!("https://api2.imdb3.shop/api/movies/list/filter?page={page_idx}&type=2&items_per_page=30"),
+            "All Dubbed Series & Multi-Audio".to_string(),
+            "dubbed".to_string(),
         ),
         // Multi-Language Worldwide Cinema
         "hindi" => (

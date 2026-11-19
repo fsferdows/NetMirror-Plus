@@ -1076,6 +1076,10 @@ function getPlatformUrl(platformKey, pageIdx, params) {
     case "boxoffice":
       url = `https://api2.imdb3.shop/api/tranding?id=44&items_per_page=18&page=${pageIdx}`;
       break;
+    case "dubbed":
+    case "dubbed_series":
+      url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&type=2&items_per_page=30`;
+      break;
     default:
       url = `https://api2.imdb3.shop/api/movies/list/filter?page=${pageIdx}&platform=${platformKey}&items_per_page=30`;
   }

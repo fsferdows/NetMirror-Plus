@@ -41,7 +41,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20261119k" />
+  <link rel="stylesheet" href="/styles.css?v=20261119l" />
   <style>
     :root, html, body {
       background-color: #060a14 !important;
@@ -907,6 +907,10 @@
 
       <!-- Floating Quick-Action Overlay (Permanently available on both embed iframes and HTML5) -->
       <div class="player-floating-actions" id="playerFloatingActions">
+        <button class="floating-action-btn hidden" id="floatingAudioBtn" title="Audio Dubs / Tracks">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>
+          <span id="floatingAudioLabel">Dubs</span>
+        </button>
         <button class="floating-action-btn" id="floatingSoundBtn" title="300% Studio Sound Booster">
           <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
           <span id="floatingSoundLabel">150%</span>
@@ -1130,7 +1134,11 @@
         <div class="watch-footer-actions">
           <button class="btn btn-danger watch-download-btn" id="watchDownloadBtn">
             <svg viewBox="0 0 24 24" class="btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            <span>Download</span>
+            <span>Download (4K/HD)</span>
+          </button>
+          <button class="btn watch-guide-btn" id="watchGuideSecondaryBtn" title="How to download movies and series">
+            <svg viewBox="0 0 24 24" class="btn-icon"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span>How To Download</span>
           </button>
         </div>
       </div>
@@ -1564,7 +1572,7 @@
     </div>
   </div>
 
-  <script src="/app.js?v=20261119k"></script>
+  <script src="/app.js?v=20261119l"></script>
 </body>
 </html>
 

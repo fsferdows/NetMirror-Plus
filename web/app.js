@@ -277,6 +277,9 @@
     floatingSoundBtn: document.getElementById('floatingSoundBtn'),
     floatingSoundLabel: document.getElementById('floatingSoundLabel'),
     floatingFullscreenBtn: document.getElementById('floatingFullscreenBtn'),
+    floatingAudioBtn: document.getElementById('floatingAudioBtn'),
+    floatingAudioLabel: document.getElementById('floatingAudioLabel'),
+    watchGuideSecondaryBtn: document.getElementById('watchGuideSecondaryBtn'),
 
     // Standalone Modals for Sound Booster & Audio Dubs
     soundBoosterModal: document.getElementById('soundBoosterModal'),
@@ -1713,6 +1716,16 @@
       // Populate Server Menu & Top Server Pills Bar
       populateServerMenu(state.currentStreams, state.embedUrls);
 
+      // Toggle floating dubs button on player if audio tracks / dubs are available
+      if (el.floatingAudioBtn) {
+        const hasDubs = (state.currentDetails?.dubs && state.currentDetails.dubs.length > 0) || (media && media.dubs && media.dubs.length > 0);
+        if (hasDubs) {
+          el.floatingAudioBtn.classList.remove('hidden');
+        } else {
+          el.floatingAudioBtn.classList.add('hidden');
+        }
+      }
+
       if (state.userLockedEmbedServer && state.embedUrls.length > 0) {
         // If user explicitly chose an embed provider, stay on that mirror for the new episode!
         const matchingEmbed = state.embedUrls.find(e => e.name === state.currentEmbedServerName) || state.embedUrls[state.currentEmbedIndex] || state.embedUrls[0];
@@ -2232,7 +2245,7 @@
           
           let displayName = `Server ${serverCounter}`;
           if (serverCounter === 1) {
-            displayName = `⚡ Server 1 (Direct 4K/HD)`;
+            displayName = `⚡ Server 1 (${stream.quality || '4K'})`;
           } else if (stream.server && stream.server.includes('(')) {
             displayName = `Server ${serverCounter} ${stream.server.replace('MovieBox ', '')}`;
           } else {
@@ -2271,10 +2284,18 @@
           pill.className = `server-pill-btn ${isActive ? 'active' : ''}`;
 
           let displayName = `Server ${serverCounter}`;
+          const isVidLink = emb.name.includes('VidLink') || emb.name.includes('4K');
+          const isSmashy = emb.name.includes('Smashy') || emb.name.includes('Cinema');
+          const isMulti = emb.name.includes('Multi') || emb.name.includes('Fast');
+
           if (serverCounter === 1) {
-            displayName = `⚡ Server 1 (${emb.name.replace(/\(.*?\)/g, '').trim()})`;
+            displayName = isVidLink ? '⚡ Server 1 (4K)' : '⚡ Server 1';
+          } else if (isSmashy) {
+            displayName = `Server ${serverCounter} (Cinema)`;
+          } else if (isMulti) {
+            displayName = `Server ${serverCounter} (Fast)`;
           } else {
-            displayName = `Server ${serverCounter} (${emb.name.replace(/\(.*?\)/g, '').trim()})`;
+            displayName = `Server ${serverCounter} (${emb.name.replace(/\(.*?\)/g, '').trim() || 'HD'})`;
           }
           serverCounter++;
 
@@ -4429,6 +4450,8 @@
 
     // Audio Dubs / Languages
     if (el.watchAudioDubsBtn) el.watchAudioDubsBtn.addEventListener('click', openAudioDubsModal);
+    if (el.floatingAudioBtn) el.floatingAudioBtn.addEventListener('click', openAudioDubsModal);
+    if (el.watchGuideSecondaryBtn) el.watchGuideSecondaryBtn.addEventListener('click', openDownloadGuide);
     if (el.closeAudioDubsBtn) el.closeAudioDubsBtn.addEventListener('click', closeAudioDubsModal);
     if (el.doneAudioDubsBtn) el.doneAudioDubsBtn.addEventListener('click', closeAudioDubsModal);
     if (el.audioDubsModal) {

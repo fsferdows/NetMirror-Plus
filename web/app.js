@@ -74,6 +74,14 @@
     languagesDropdownMenu: document.getElementById('languagesDropdownMenu'),
     userHeaderAdBanner: document.getElementById('userHeaderAdBanner'),
     userDetailsAdBanner: document.getElementById('userDetailsAdBanner'),
+    userCatalogFeedAdBanner: document.getElementById('userCatalogFeedAdBanner'),
+    userGridTopAdBanner: document.getElementById('userGridTopAdBanner'),
+    userSportsTopAdBanner: document.getElementById('userSportsTopAdBanner'),
+    userPlatformTopAdBanner: document.getElementById('userPlatformTopAdBanner'),
+    userPlayerBottomAdBanner: document.getElementById('userPlayerBottomAdBanner'),
+    userPlayerEpisodesAdBanner: document.getElementById('userPlayerEpisodesAdBanner'),
+    userDownloadAdBanner: document.getElementById('userDownloadAdBanner'),
+    userFooterAdBanner: document.getElementById('userFooterAdBanner'),
     searchInput: document.getElementById('searchInput'),
     searchWrapper: document.getElementById('searchWrapper'),
     clearSearchBtn: document.getElementById('clearSearchBtn'),
@@ -459,36 +467,13 @@
     if (el.btcAddrInput) el.btcAddrInput.value = wallets.btc || 'bc1... (Configure in monetization-config.js)';
     if (el.solAddrInput) el.solAddrInput.value = wallets.sol || 'So1... (Configure in monetization-config.js)';
 
-    // 4. Render Owner Monetized Banner Ads (ONLY when site owner enables them)
+    // 4. Render Owner Monetized Banner Ads (Google AdSense everywhere)
     if (config.adBanners && config.adBanners.enabled && !state.isVip) {
-      if (el.userHeaderAdBanner && config.adBanners.headerBannerHtml) {
-        el.userHeaderAdBanner.innerHTML = config.adBanners.headerBannerHtml;
-        el.userHeaderAdBanner.classList.remove('hidden');
-        try {
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
-        } catch (e) {
-          console.warn('AdSense push failed', e);
-        }
-      }
-      if (el.userDetailsAdBanner && config.adBanners.detailsBannerHtml) {
-        el.userDetailsAdBanner.innerHTML = config.adBanners.detailsBannerHtml;
-        el.userDetailsAdBanner.classList.remove('hidden');
-        try {
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
-        } catch (e) {
-          console.warn('AdSense push failed', e);
-        }
-      }
+      loadAdSenseUnit(el.userHeaderAdBanner, config.adBanners.headerBannerHtml);
+      loadAdSenseUnit(el.userCatalogFeedAdBanner, config.adBanners.infeedBannerHtml);
+      loadAdSenseUnit(el.userFooterAdBanner, config.adBanners.footerBannerHtml);
     } else {
-      // Guarantee zero ads are displayed when not monetized or for VIP members
-      if (el.userHeaderAdBanner) {
-        el.userHeaderAdBanner.innerHTML = '';
-        el.userHeaderAdBanner.classList.add('hidden');
-      }
-      if (el.userDetailsAdBanner) {
-        el.userDetailsAdBanner.innerHTML = '';
-        el.userDetailsAdBanner.classList.add('hidden');
-      }
+      hideAllAdUnits();
     }
 
     // 5. Update VIP Status UI
@@ -496,6 +481,60 @@
 
     // 6. Setup VIP & Monetization Listeners
     setupMonetizationListeners();
+  }
+
+  function loadAdSenseUnit(container, customHtml) {
+    if (!container) return;
+    if (state.isVip) {
+      container.innerHTML = '';
+      container.classList.add('hidden');
+      container.style.display = 'none';
+      return;
+    }
+    const config = window.NETMIRROR_MONETIZATION || {};
+    if (!config.adBanners || !config.adBanners.enabled) {
+      container.classList.add('hidden');
+      container.style.display = 'none';
+      return;
+    }
+    const html = customHtml || config.adBanners.headerBannerHtml || '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="auto" data-full-width-responsive="true"></ins>';
+
+    const existingIns = container.querySelector('ins.adsbygoogle');
+    if (!existingIns) {
+      container.innerHTML = html;
+    }
+    container.classList.remove('hidden');
+    container.style.display = '';
+
+    try {
+      const ins = container.querySelector('ins.adsbygoogle');
+      if (ins && !ins.getAttribute('data-adsbygoogle-status')) {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      }
+    } catch (e) {
+      console.debug('[AdSense] Push notice:', e);
+    }
+  }
+
+  function hideAllAdUnits() {
+    [
+      el.userHeaderAdBanner,
+      el.userDetailsAdBanner,
+      el.userCatalogFeedAdBanner,
+      el.userGridTopAdBanner,
+      el.userSportsTopAdBanner,
+      el.userPlatformTopAdBanner,
+      el.userPlayerBottomAdBanner,
+      el.userPlayerEpisodesAdBanner,
+      el.userDownloadAdBanner,
+      el.userFooterAdBanner,
+    ].forEach((b) => {
+      if (b) {
+        b.innerHTML = '';
+        b.classList.add('hidden');
+        b.style.display = 'none';
+      }
+    });
   }
 
   function updateVipStatusUI() {
@@ -513,12 +552,7 @@
       if (el.playerSponsorPill) {
         el.playerSponsorPill.style.display = 'none';
       }
-      if (el.userHeaderAdBanner) {
-        el.userHeaderAdBanner.style.display = 'none';
-      }
-      if (el.userDetailsAdBanner) {
-        el.userDetailsAdBanner.style.display = 'none';
-      }
+      hideAllAdUnits();
     }
   }
 
@@ -641,15 +675,23 @@
           return dummyWindow;
         }
 
-        // Strictly block ALL popups and new tabs when video player is active or when user is streaming
-        if (state.isEmbedMode || (el.playerOverlay && !el.playerOverlay.classList.contains('hidden'))) {
+        const lower = url.toLowerCase();
+        const isGoogleAd =
+          lower.includes('google.com') ||
+          lower.includes('googlesyndication.com') ||
+          lower.includes('doubleclick.net') ||
+          lower.includes('googleadservices.com') ||
+          lower.includes('adservice.google.');
+
+        // Strictly block rogue popups when player is active UNLESS it is an authorized Google AdSense ad click
+        if (!isGoogleAd && (state.isEmbedMode || (el.playerOverlay && !el.playerOverlay.classList.contains('hidden')))) {
           console.warn('[AdShield] Blocked popup/tab redirect during playback:', url);
           return dummyWindow;
         }
 
-        const lower = url.toLowerCase();
         const isSafe =
           url.startsWith('/') ||
+          isGoogleAd ||
           lower.includes(window.location.hostname) ||
           lower.includes('vercel.app') ||
           lower.includes('netlify.app') ||
@@ -675,10 +717,22 @@
       document.addEventListener('click', (e) => {
         const link = e.target && e.target.closest ? e.target.closest('a') : null;
         if (link && link.href) {
+          // Explicitly permit clicks on official Google AdSense ads and banners
+          if (link.closest('.user-ad-banner') || link.closest('ins.adsbygoogle') || link.closest('[id*="google_ads"]')) {
+            return true;
+          }
+
           const href = link.getAttribute('href') || '';
           const lower = href.toLowerCase();
           if (href.startsWith('http://') || href.startsWith('https://')) {
+            const isGoogleAd =
+              lower.includes('google.com') ||
+              lower.includes('googlesyndication.com') ||
+              lower.includes('doubleclick.net') ||
+              lower.includes('googleadservices.com') ||
+              lower.includes('adservice.google.');
             const isSafe =
+              isGoogleAd ||
               lower.includes(window.location.hostname) ||
               lower.includes('vercel.app') ||
               lower.includes('netlify.app') ||
@@ -1532,11 +1586,8 @@
       };
 
       // AdSense dynamic impression refresh for modal view
-      if (el.userDetailsAdBanner && !el.userDetailsAdBanner.classList.contains('hidden') && !state.isVip) {
-        try {
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
-        } catch (e) {}
-      }
+      const monConfig = window.NETMIRROR_MONETIZATION || {};
+      loadAdSenseUnit(el.userDetailsAdBanner, monConfig.adBanners?.detailsBannerHtml);
 
     } catch (err) {
       console.error(err);
@@ -1984,15 +2035,20 @@
     state.currentStreamIndex = 0;
 
     // Configure Series Episode Selection Panel (and verify series metadata asynchronously if needed)
+    const monConfig = window.NETMIRROR_MONETIZATION || {};
     if (isSeries) {
       if (el.watchEpisodesColumn) el.watchEpisodesColumn.classList.remove('hidden');
       setupWatchEpisodesPanel(media, s, ep, true, reqId);
+      loadAdSenseUnit(el.userPlayerEpisodesAdBanner, monConfig.adBanners?.playerSidebarBannerHtml);
     } else {
       if (el.watchEpisodesColumn) el.watchEpisodesColumn.classList.add('hidden');
       if (!hasMatchingDetails) {
         setupWatchEpisodesPanel(media, s, ep, false, reqId);
       }
     }
+
+    // Render Google AdSense in watch player view
+    loadAdSenseUnit(el.userPlayerBottomAdBanner, monConfig.adBanners?.playerBannerHtml);
 
     // Update Browser URL so every watch stream has its own unique, shareable watch URL
     updateWatchUrl(mediaIdVal, s, ep, media.title, true);
@@ -2351,6 +2407,8 @@
 
     if (!el.downloadStreamsList) {
       el.downloadGuideModal.classList.remove('hidden');
+    const monConfig = window.NETMIRROR_MONETIZATION || {};
+    loadAdSenseUnit(el.userDownloadAdBanner, monConfig.adBanners?.downloadBannerHtml);
       return;
     }
 
@@ -2474,6 +2532,8 @@
     }
 
     el.downloadGuideModal.classList.remove('hidden');
+    const monConfig = window.NETMIRROR_MONETIZATION || {};
+    loadAdSenseUnit(el.userDownloadAdBanner, monConfig.adBanners?.downloadBannerHtml);
   }
 
   function handleDownloadClick() {
@@ -3132,31 +3192,38 @@
   // NAVIGATION & VIEWS
   // ==========================================================================
   function switchView(viewName) {
+    const monConfig = window.NETMIRROR_MONETIZATION || {};
     if (viewName === 'rails') {
       el.railsView.classList.remove('hidden');
       el.heroSection.classList.remove('hidden');
       el.gridView.classList.add('hidden');
       if (el.platformView) el.platformView.classList.add('hidden');
       if (el.sportsView) el.sportsView.classList.add('hidden');
+      loadAdSenseUnit(el.userHeaderAdBanner, monConfig.adBanners?.headerBannerHtml);
+      loadAdSenseUnit(el.userCatalogFeedAdBanner, monConfig.adBanners?.infeedBannerHtml);
     } else if (viewName === 'platform') {
       el.railsView.classList.add('hidden');
       el.heroSection.classList.add('hidden');
       el.gridView.classList.add('hidden');
       if (el.platformView) el.platformView.classList.remove('hidden');
       if (el.sportsView) el.sportsView.classList.add('hidden');
+      loadAdSenseUnit(el.userPlatformTopAdBanner, monConfig.adBanners?.gridBannerHtml);
     } else if (viewName === 'sports') {
       el.railsView.classList.add('hidden');
       el.heroSection.classList.add('hidden');
       el.gridView.classList.add('hidden');
       if (el.platformView) el.platformView.classList.add('hidden');
       if (el.sportsView) el.sportsView.classList.remove('hidden');
+      loadAdSenseUnit(el.userSportsTopAdBanner, monConfig.adBanners?.gridBannerHtml);
     } else {
       el.railsView.classList.add('hidden');
       el.heroSection.classList.add('hidden');
       el.gridView.classList.remove('hidden');
       if (el.platformView) el.platformView.classList.add('hidden');
       if (el.sportsView) el.sportsView.classList.add('hidden');
+      loadAdSenseUnit(el.userGridTopAdBanner, monConfig.adBanners?.gridBannerHtml);
     }
+    loadAdSenseUnit(el.userFooterAdBanner, monConfig.adBanners?.footerBannerHtml);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 

@@ -48,8 +48,20 @@ window.NETMIRROR_MONETIZATION = {
     enabled: true,
     // Google AdSense Responsive Display Unit for Header
     headerBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="auto" data-full-width-responsive="true"></ins>',
-    // Google AdSense Responsive Display Unit for Movie/Show Details
-    detailsBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="rectangle" data-full-width-responsive="true"></ins>'
+    // Google AdSense Responsive Display Unit for Movie/Show Details Modal
+    detailsBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="rectangle" data-full-width-responsive="true"></ins>',
+    // Google AdSense Responsive Display Unit for Watch Player Screen (Below Video)
+    playerBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="auto" data-full-width-responsive="true"></ins>',
+    // Google AdSense Display Unit for Watch Series Episodes Sidebar
+    playerSidebarBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="rectangle" data-full-width-responsive="true"></ins>',
+    // Google AdSense In-Feed / Browse Rails Unit
+    infeedBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="auto" data-full-width-responsive="true"></ins>',
+    // Google AdSense Grid Top Unit (Movies / TV Shows / Trending / Sports / Search)
+    gridBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="auto" data-full-width-responsive="true"></ins>',
+    // Google AdSense Download Center Modal Unit
+    downloadBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="rectangle" data-full-width-responsive="true"></ins>',
+    // Google AdSense Footer Unit
+    footerBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="auto" data-full-width-responsive="true"></ins>'
   }
 };
 

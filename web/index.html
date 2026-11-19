@@ -495,6 +495,9 @@
         </div>
       </section>
 
+      <!-- In-Feed Google AdSense Sponsored Rail Banner -->
+      <div id="userCatalogFeedAdBanner" class="user-ad-banner hidden" aria-label="Sponsored Content"></div>
+
       <!-- Continue Watching Rail (if history exists) -->
       <section class="rail-section hidden" id="continueWatchingSection">
         <div class="rail-header">
@@ -671,6 +674,9 @@
         </div>
       </div>
 
+      <!-- Platform View Google AdSense Banner -->
+      <div id="userPlatformTopAdBanner" class="user-ad-banner hidden" aria-label="Sponsored Content"></div>
+
       <!-- Platform Media Grid -->
       <div class="media-grid" id="platformGrid"></div>
 
@@ -757,6 +763,9 @@
         </div>
       </div>
 
+      <!-- Live Sports Google AdSense Banner -->
+      <div id="userSportsTopAdBanner" class="user-ad-banner hidden" aria-label="Sponsored Content"></div>
+
       <!-- Live Matches Section -->
       <section class="sports-section" id="sportsMatchesSection">
         <div class="sports-section-header">
@@ -814,6 +823,8 @@
         <button class="lang-filter-chip" data-lang="tagalog">🇵🇭 Tagalog</button>
         <button class="lang-filter-chip" data-lang="portuguese">🇵🇹 Portuguese</button>
       </div>
+      <!-- Grid View Google AdSense Banner (Movies, Series, Trending, Search) -->
+      <div id="userGridTopAdBanner" class="user-ad-banner hidden" aria-label="Sponsored Content"></div>
       <div class="media-grid" id="mediaGrid"></div>
       <div class="grid-pagination" id="gridPagination">
         <button class="btn btn-secondary" id="loadMoreBtn">Load More</button>
@@ -1451,6 +1462,8 @@
                 <!-- Video Below Helpers: Ads Note & Download Button (Matching Reference) -->
                 <div class="watch-video-footer" id="watchVideoFooter">
                   <p class="watch-ads-note">Ads will stop when the video is in full screen.</p>
+                  <!-- Google AdSense Video Below Player Banner -->
+                  <div id="userPlayerBottomAdBanner" class="user-ad-banner hidden" aria-label="Sponsored Content"></div>
                   <div class="watch-fallback-helper" id="watchFallbackHelper">
                     <span>💡 Playback issue or server busy? Click another server above (<b>Server 1</b>, <b>Server
                         2</b>,
@@ -1490,6 +1503,8 @@
                 <div class="watch-selected-ep-card" id="watchSelectedEpCard">
                   Season 1 Selected Episode: 1
                 </div>
+                <!-- Google AdSense Episodes Sidebar Banner -->
+                <div id="userPlayerEpisodesAdBanner" class="user-ad-banner ad-banner-square hidden" aria-label="Sponsored Content"></div>
               </div>
             </div>
           </div>
@@ -1551,6 +1566,9 @@
                   </a>
                 </div>
               </div>
+
+              <!-- Google AdSense 4K Download Center Banner -->
+              <div id="userDownloadAdBanner" class="user-ad-banner hidden" aria-label="Sponsored Content"></div>
             </div>
 
             <div class="modal-footer"
@@ -1696,6 +1714,9 @@
 
         <!-- Toast Notification Container -->
         <div class="toast-container" id="toastContainer"></div>
+
+        <!-- Google AdSense Footer Leaderboard Banner -->
+        <div id="userFooterAdBanner" class="user-ad-banner hidden" aria-label="Sponsored Content"></div>
 
         <!-- Footer -->
         <footer class="footer">
@@ -2284,12 +2305,12 @@
   </div>
 </div>
 
-<script src="/app.js?v=20261120a"></script>
+<script src="/app.js?v=20261120_ads"></script>
 <!-- Progressive Web App (PWA) Service Worker Registration -->
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js?v=20261120a')
+      navigator.serviceWorker.register('/sw.js?v=20261120_ads')
         .then((reg) => console.log('MovieBox PWA ServiceWorker active:', reg.scope))
         .catch((err) => console.warn('PWA registration error:', err));
     });

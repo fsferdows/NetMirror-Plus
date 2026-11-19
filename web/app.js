@@ -74,13 +74,6 @@
     languagesDropdownMenu: document.getElementById('languagesDropdownMenu'),
     userHeaderAdBanner: document.getElementById('userHeaderAdBanner'),
     userDetailsAdBanner: document.getElementById('userDetailsAdBanner'),
-    userCatalogFeedAdBanner: document.getElementById('userCatalogFeedAdBanner'),
-    userGridTopAdBanner: document.getElementById('userGridTopAdBanner'),
-    userSportsTopAdBanner: document.getElementById('userSportsTopAdBanner'),
-    userPlatformTopAdBanner: document.getElementById('userPlatformTopAdBanner'),
-    userPlayerBottomAdBanner: document.getElementById('userPlayerBottomAdBanner'),
-    userPlayerEpisodesAdBanner: document.getElementById('userPlayerEpisodesAdBanner'),
-    userDownloadAdBanner: document.getElementById('userDownloadAdBanner'),
     userFooterAdBanner: document.getElementById('userFooterAdBanner'),
     searchInput: document.getElementById('searchInput'),
     searchWrapper: document.getElementById('searchWrapper'),
@@ -467,10 +460,9 @@
     if (el.btcAddrInput) el.btcAddrInput.value = wallets.btc || 'bc1... (Configure in monetization-config.js)';
     if (el.solAddrInput) el.solAddrInput.value = wallets.sol || 'So1... (Configure in monetization-config.js)';
 
-    // 4. Render Owner Monetized Banner Ads (Google AdSense everywhere)
+    // 4. Render Owner Monetized Banner Ads (Google AdSense)
     if (config.adBanners && config.adBanners.enabled && !state.isVip) {
       loadAdSenseUnit(el.userHeaderAdBanner, config.adBanners.headerBannerHtml);
-      loadAdSenseUnit(el.userCatalogFeedAdBanner, config.adBanners.infeedBannerHtml);
       loadAdSenseUnit(el.userFooterAdBanner, config.adBanners.footerBannerHtml);
     } else {
       hideAllAdUnits();
@@ -504,7 +496,6 @@
       container.innerHTML = html;
     }
     container.classList.remove('hidden');
-    container.style.display = '';
 
     try {
       const ins = container.querySelector('ins.adsbygoogle');
@@ -520,13 +511,6 @@
     [
       el.userHeaderAdBanner,
       el.userDetailsAdBanner,
-      el.userCatalogFeedAdBanner,
-      el.userGridTopAdBanner,
-      el.userSportsTopAdBanner,
-      el.userPlatformTopAdBanner,
-      el.userPlayerBottomAdBanner,
-      el.userPlayerEpisodesAdBanner,
-      el.userDownloadAdBanner,
       el.userFooterAdBanner,
     ].forEach((b) => {
       if (b) {
@@ -1243,7 +1227,6 @@
         <div class="card-meta">
           <span>${year}</span>
           <span>${mediaTypeLabel}</span>
-          ${item.duration ? `<span class="card-duration">⏱️ ${formatDisplayDuration(item.duration, item.media_type === 'series')}</span>` : ''}
         </div>
       </div>
     `;
@@ -1392,17 +1375,16 @@
         if (res.ok) {
           const details = await res.json();
           state.currentDetails = details;
-          if (details && details.duration) {
+          if (details) {
             const isSer = details.media_type === 'series' || (details.seasons && details.seasons.length > 0);
-            const durBadge = ` • ⏱️ ${formatDisplayDuration(details.duration, isSer)}`;
             const targetS = activeSeason > 0 ? activeSeason : 1;
             const targetEp = activeEpisode > 0 ? activeEpisode : 1;
             if (isSer) {
-              el.playerMediaSubtitle.textContent = `Season ${targetS} • Episode ${targetEp}${durBadge}`;
+              el.playerMediaSubtitle.textContent = `Season ${targetS} • Episode ${targetEp}`;
             } else {
-              el.playerMediaSubtitle.textContent = `${details.year || 'Movie'}${durBadge}`;
+              el.playerMediaSubtitle.textContent = details.year || 'Movie';
             }
-            if (el.durationTime && (!el.videoElement.duration || isNaN(el.videoElement.duration) || el.videoElement.duration === 0)) {
+            if (details.duration && el.durationTime && (!el.videoElement.duration || isNaN(el.videoElement.duration) || el.videoElement.duration === 0)) {
               const parsedSecs = parseDurationToSeconds(details.duration);
               if (parsedSecs > 0) el.durationTime.textContent = formatTime(parsedSecs);
             }
@@ -2015,14 +1997,13 @@
 
     // Set Header Info
     el.playerMediaTitle.textContent = media.title;
-    const durBadge = media.duration ? ` • ⏱️ ${formatDisplayDuration(media.duration, isSeries)}` : '';
     if (isSeries) {
       if (s <= 0) s = 1;
       if (ep <= 0) ep = 1;
-      el.playerMediaSubtitle.textContent = `Season ${s} • Episode ${ep}${durBadge}`;
+      el.playerMediaSubtitle.textContent = `Season ${s} • Episode ${ep}`;
       el.nextEpisodeControlBtn.classList.remove('hidden');
     } else {
-      el.playerMediaSubtitle.textContent = `${media.year || 'Movie'}${durBadge}`;
+      el.playerMediaSubtitle.textContent = media.year || 'Movie';
       el.nextEpisodeControlBtn.classList.add('hidden');
     }
     if (media.duration && el.durationTime) {
@@ -2035,20 +2016,15 @@
     state.currentStreamIndex = 0;
 
     // Configure Series Episode Selection Panel (and verify series metadata asynchronously if needed)
-    const monConfig = window.NETMIRROR_MONETIZATION || {};
     if (isSeries) {
       if (el.watchEpisodesColumn) el.watchEpisodesColumn.classList.remove('hidden');
       setupWatchEpisodesPanel(media, s, ep, true, reqId);
-      loadAdSenseUnit(el.userPlayerEpisodesAdBanner, monConfig.adBanners?.playerSidebarBannerHtml);
     } else {
       if (el.watchEpisodesColumn) el.watchEpisodesColumn.classList.add('hidden');
       if (!hasMatchingDetails) {
         setupWatchEpisodesPanel(media, s, ep, false, reqId);
       }
     }
-
-    // Render Google AdSense in watch player view
-    loadAdSenseUnit(el.userPlayerBottomAdBanner, monConfig.adBanners?.playerBannerHtml);
 
     // Update Browser URL so every watch stream has its own unique, shareable watch URL
     updateWatchUrl(mediaIdVal, s, ep, media.title, true);
@@ -2228,17 +2204,16 @@
           details = await res.json();
           if (reqId !== state.playbackRequestSeq) return;
           state.currentDetails = details;
-          if (details && details.duration) {
+          if (details) {
             const isSer = details.media_type === 'series' || (details.seasons && details.seasons.length > 0);
-            const durBadge = ` • ⏱️ ${formatDisplayDuration(details.duration, isSer)}`;
             const targetS = activeSeason > 0 ? activeSeason : 1;
             const targetEp = activeEpisode > 0 ? activeEpisode : 1;
             if (isSer) {
-              el.playerMediaSubtitle.textContent = `Season ${targetS} • Episode ${targetEp}${durBadge}`;
+              el.playerMediaSubtitle.textContent = `Season ${targetS} • Episode ${targetEp}`;
             } else {
-              el.playerMediaSubtitle.textContent = `${details.year || 'Movie'}${durBadge}`;
+              el.playerMediaSubtitle.textContent = details.year || 'Movie';
             }
-            if (el.durationTime && (!el.videoElement.duration || isNaN(el.videoElement.duration) || el.videoElement.duration === 0)) {
+            if (details.duration && el.durationTime && (!el.videoElement.duration || isNaN(el.videoElement.duration) || el.videoElement.duration === 0)) {
               const parsedSecs = parseDurationToSeconds(details.duration);
               if (parsedSecs > 0) el.durationTime.textContent = formatTime(parsedSecs);
             }
@@ -2348,9 +2323,7 @@
 
     // Update Selected Episode Card (matching screenshot format)
     if (el.watchSelectedEpCard) {
-      const epObj = (activeSeasonObj && activeSeasonObj.episodes) ? activeSeasonObj.episodes.find(e => (parseInt(e.number ?? e.episode_number ?? 1, 10)) === epNumActive) : null;
-      const durLabel = epObj?.duration ? ` • ⏱️ ${formatDisplayDuration(epObj.duration, true)}` : (details?.duration ? ` • ⏱️ ${formatDisplayDuration(details.duration, true)}` : '');
-      el.watchSelectedEpCard.textContent = `Season ${sNum} Selected Episode: ${epNumActive}${durLabel}`;
+      el.watchSelectedEpCard.textContent = `Season ${sNum} Selected Episode: ${epNumActive}`;
     }
   }
 
@@ -2401,14 +2374,11 @@
       el.downloadPosterImg.src = details.poster_url;
     }
     if (el.downloadSeasonEpBadge) {
-      const durLabel = details?.duration ? ` • ⏱️ ${formatDisplayDuration(details.duration, isSeries)}` : '';
-      el.downloadSeasonEpBadge.textContent = (isSeries ? `Season ${s} • Episode ${ep}` : (details?.year ? `${details.year} Movie` : 'Feature Film')) + durLabel;
+      el.downloadSeasonEpBadge.textContent = isSeries ? `Season ${s} • Episode ${ep}` : (details?.year ? `${details.year} Movie` : 'Feature Film');
     }
 
     if (!el.downloadStreamsList) {
       el.downloadGuideModal.classList.remove('hidden');
-    const monConfig = window.NETMIRROR_MONETIZATION || {};
-    loadAdSenseUnit(el.userDownloadAdBanner, monConfig.adBanners?.downloadBannerHtml);
       return;
     }
 
@@ -2532,8 +2502,6 @@
     }
 
     el.downloadGuideModal.classList.remove('hidden');
-    const monConfig = window.NETMIRROR_MONETIZATION || {};
-    loadAdSenseUnit(el.userDownloadAdBanner, monConfig.adBanners?.downloadBannerHtml);
   }
 
   function handleDownloadClick() {
@@ -3192,38 +3160,31 @@
   // NAVIGATION & VIEWS
   // ==========================================================================
   function switchView(viewName) {
-    const monConfig = window.NETMIRROR_MONETIZATION || {};
     if (viewName === 'rails') {
       el.railsView.classList.remove('hidden');
       el.heroSection.classList.remove('hidden');
       el.gridView.classList.add('hidden');
       if (el.platformView) el.platformView.classList.add('hidden');
       if (el.sportsView) el.sportsView.classList.add('hidden');
-      loadAdSenseUnit(el.userHeaderAdBanner, monConfig.adBanners?.headerBannerHtml);
-      loadAdSenseUnit(el.userCatalogFeedAdBanner, monConfig.adBanners?.infeedBannerHtml);
     } else if (viewName === 'platform') {
       el.railsView.classList.add('hidden');
       el.heroSection.classList.add('hidden');
       el.gridView.classList.add('hidden');
       if (el.platformView) el.platformView.classList.remove('hidden');
       if (el.sportsView) el.sportsView.classList.add('hidden');
-      loadAdSenseUnit(el.userPlatformTopAdBanner, monConfig.adBanners?.gridBannerHtml);
     } else if (viewName === 'sports') {
       el.railsView.classList.add('hidden');
       el.heroSection.classList.add('hidden');
       el.gridView.classList.add('hidden');
       if (el.platformView) el.platformView.classList.add('hidden');
       if (el.sportsView) el.sportsView.classList.remove('hidden');
-      loadAdSenseUnit(el.userSportsTopAdBanner, monConfig.adBanners?.gridBannerHtml);
     } else {
       el.railsView.classList.add('hidden');
       el.heroSection.classList.add('hidden');
       el.gridView.classList.remove('hidden');
       if (el.platformView) el.platformView.classList.add('hidden');
       if (el.sportsView) el.sportsView.classList.add('hidden');
-      loadAdSenseUnit(el.userGridTopAdBanner, monConfig.adBanners?.gridBannerHtml);
     }
-    loadAdSenseUnit(el.userFooterAdBanner, monConfig.adBanners?.footerBannerHtml);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 

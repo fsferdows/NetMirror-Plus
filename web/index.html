@@ -495,9 +495,6 @@
         </div>
       </section>
 
-      <!-- In-Feed Google AdSense Sponsored Rail Banner -->
-      <div id="userCatalogFeedAdBanner" class="user-ad-banner hidden" aria-label="Sponsored Content"></div>
-
       <!-- Continue Watching Rail (if history exists) -->
       <section class="rail-section hidden" id="continueWatchingSection">
         <div class="rail-header">
@@ -674,9 +671,6 @@
         </div>
       </div>
 
-      <!-- Platform View Google AdSense Banner -->
-      <div id="userPlatformTopAdBanner" class="user-ad-banner hidden" aria-label="Sponsored Content"></div>
-
       <!-- Platform Media Grid -->
       <div class="media-grid" id="platformGrid"></div>
 
@@ -763,9 +757,6 @@
         </div>
       </div>
 
-      <!-- Live Sports Google AdSense Banner -->
-      <div id="userSportsTopAdBanner" class="user-ad-banner hidden" aria-label="Sponsored Content"></div>
-
       <!-- Live Matches Section -->
       <section class="sports-section" id="sportsMatchesSection">
         <div class="sports-section-header">
@@ -823,8 +814,6 @@
         <button class="lang-filter-chip" data-lang="tagalog">🇵🇭 Tagalog</button>
         <button class="lang-filter-chip" data-lang="portuguese">🇵🇹 Portuguese</button>
       </div>
-      <!-- Grid View Google AdSense Banner (Movies, Series, Trending, Search) -->
-      <div id="userGridTopAdBanner" class="user-ad-banner hidden" aria-label="Sponsored Content"></div>
       <div class="media-grid" id="mediaGrid"></div>
       <div class="grid-pagination" id="gridPagination">
         <button class="btn btn-secondary" id="loadMoreBtn">Load More</button>
@@ -1462,8 +1451,6 @@
                 <!-- Video Below Helpers: Ads Note & Download Button (Matching Reference) -->
                 <div class="watch-video-footer" id="watchVideoFooter">
                   <p class="watch-ads-note">Ads will stop when the video is in full screen.</p>
-                  <!-- Google AdSense Video Below Player Banner -->
-                  <div id="userPlayerBottomAdBanner" class="user-ad-banner hidden" aria-label="Sponsored Content"></div>
                   <div class="watch-fallback-helper" id="watchFallbackHelper">
                     <span>💡 Playback issue or server busy? Click another server above (<b>Server 1</b>, <b>Server
                         2</b>,
@@ -1503,515 +1490,510 @@
                 <div class="watch-selected-ep-card" id="watchSelectedEpCard">
                   Season 1 Selected Episode: 1
                 </div>
-                <!-- Google AdSense Episodes Sidebar Banner -->
-                <div id="userPlayerEpisodesAdBanner" class="user-ad-banner ad-banner-square hidden" aria-label="Sponsored Content"></div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-        <!-- 4K & 8K Ultra HD Download Center Modal -->
-        <div class="modal-backdrop hidden" id="downloadGuideModal" style="z-index: 10010;">
-          <div class="download-hub-card">
-            <div class="modal-header"
-              style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;align-items:center;">
-              <h3 class="modal-title" style="display:flex;align-items:center;gap:8px;font-size:16px;font-weight:800;">
-                <span>📥 4K & 8K Ultra HD Download Center</span>
-              </h3>
-              <button class="modal-close-btn" id="closeDownloadGuideBtn">✕</button>
-            </div>
+      <!-- 4K & 8K Ultra HD Download Center Modal -->
+      <div class="modal-backdrop hidden" id="downloadGuideModal" style="z-index: 10010;">
+        <div class="download-hub-card">
+          <div class="modal-header"
+            style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;align-items:center;">
+            <h3 class="modal-title" style="display:flex;align-items:center;gap:8px;font-size:16px;font-weight:800;">
+              <span>📥 4K & 8K Ultra HD Download Center</span>
+            </h3>
+            <button class="modal-close-btn" id="closeDownloadGuideBtn">✕</button>
+          </div>
 
-            <!-- Dynamic Movie/Episode Info Header -->
-            <div class="download-media-header" id="downloadMediaHeader">
-              <img id="downloadPosterImg" class="download-media-poster" src="/favicon.svg" alt="" />
-              <div>
-                <div class="download-media-title" id="downloadTitleText">Select Quality to Download</div>
-                <div class="download-media-meta" id="downloadMetaText">
-                  <span class="download-badge-uhd">4K UHD</span>
-                  <span id="downloadSeasonEpBadge">Movie</span>
-                  <span>•</span>
-                  <span>Multi-Audio Dubs</span>
-                </div>
+          <!-- Dynamic Movie/Episode Info Header -->
+          <div class="download-media-header" id="downloadMediaHeader">
+            <img id="downloadPosterImg" class="download-media-poster" src="/favicon.svg" alt="" />
+            <div>
+              <div class="download-media-title" id="downloadTitleText">Select Quality to Download</div>
+              <div class="download-media-meta" id="downloadMetaText">
+                <span class="download-badge-uhd">4K UHD</span>
+                <span id="downloadSeasonEpBadge">Movie</span>
+                <span>•</span>
+                <span>Multi-Audio Dubs</span>
               </div>
             </div>
+          </div>
 
-            <!-- Download Options Body -->
-            <div class="download-body-scroll" id="downloadBodyScroll">
-              <div id="downloadStreamsList" class="download-quality-list">
-                <!-- Dynamically injected quality options (4K/8K, 1080p, 720p, etc.) -->
-              </div>
+          <!-- Download Options Body -->
+          <div class="download-body-scroll" id="downloadBodyScroll">
+            <div id="downloadStreamsList" class="download-quality-list">
+              <!-- Dynamically injected quality options (4K/8K, 1080p, 720p, etc.) -->
+            </div>
 
-              <!-- Quick Stream Link Copy for Download Managers (IDM / ADM / VLC) -->
+            <!-- Quick Stream Link Copy for Download Managers (IDM / ADM / VLC) -->
+            <div
+              style="margin-top:4px;padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;">
               <div
-                style="margin-top:4px;padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;">
-                <div
-                  style="font-size:12.5px;font-weight:700;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
-                  <span>⚡ High-Speed Download Accelerator</span>
-                  <span class="badge" style="background:rgba(34,197,94,0.2);color:#22c55e;font-size:10px;">IDM & VLC
-                    Compatible</span>
-                </div>
-                <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;line-height:1.4;">
-                  Use Internet Download Manager (IDM), 1DM/ADM (Android), or VLC Media Player for maximum
-                  multi-connection
-                  download speed in 4K/8K.
-                </div>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                  <button type="button" class="download-action-btn btn-copy" id="copyDirectStreamUrlBtn">
-                    📋 Copy 4K Stream Link
-                  </button>
-                  <a href="#" target="_blank" class="download-action-btn" id="directBrowserDownloadBtn"
-                    style="background:#22c55e;">
-                    🚀 Instant Direct Download
-                  </a>
-                </div>
+                style="font-size:12.5px;font-weight:700;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+                <span>⚡ High-Speed Download Accelerator</span>
+                <span class="badge" style="background:rgba(34,197,94,0.2);color:#22c55e;font-size:10px;">IDM & VLC
+                  Compatible</span>
               </div>
-
-              <!-- Google AdSense 4K Download Center Banner -->
-              <div id="userDownloadAdBanner" class="user-ad-banner hidden" aria-label="Sponsored Content"></div>
-            </div>
-
-            <div class="modal-footer"
-              style="padding:12px 20px;border-top:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;align-items:center;">
-              <span style="font-size:11.5px;color:var(--text-muted);">🛡️ 100% Virus-Free • High-Speed CDN Direct
-                Links</span>
-              <button class="btn btn-secondary btn-sm" id="gotItDownloadGuideBtn">Close</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- VIP Access & Monetization Modal -->
-        <div class="modal-backdrop hidden" id="vipModal">
-          <div class="vip-modal-card">
-            <div class="modal-sheet-indicator"></div>
-            <button class="modal-close-btn" id="vipCloseBtn">&times;</button>
-            <div class="vip-modal-header">
-              <div class="vip-crown-badge">
-                <svg viewBox="0 0 24 24">
-                  <path d="M2 4l3 12h14l3-12-6 7-4-11-4 11-6-7zm3 16h14v2H5v-2z" />
-                </svg>
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;line-height:1.4;">
+                Use Internet Download Manager (IDM), 1DM/ADM (Android), or VLC Media Player for maximum
+                multi-connection
+                download speed in 4K/8K.
               </div>
-              <h2>MovieBox VIP Supporter Pass</h2>
-              <p class="vip-subtitle">Support development & unlock ultra-fast dedicated 4K streaming servers, zero ads,
-                and
-                VIP cinema privileges.</p>
-            </div>
-
-            <!-- VIP Perks Grid -->
-            <div class="vip-perks-grid">
-              <div class="vip-perk-item">
-                <div class="vip-perk-icon">⚡</div>
-                <div class="vip-perk-text">
-                  <h4>Ultra 4K Direct Speed</h4>
-                  <p>Dedicated high-bandwidth stream CDN with zero buffering or wait times.</p>
-                </div>
-              </div>
-              <div class="vip-perk-item">
-                <div class="vip-perk-icon">🛡️</div>
-                <div class="vip-perk-text">
-                  <h4>100% Ad-Free Cinema</h4>
-                  <p>Enjoy uninterrupted cinema without third-party popups or redirects.</p>
-                </div>
-              </div>
-              <div class="vip-perk-item">
-                <div class="vip-perk-icon">🔊</div>
-                <div class="vip-perk-text">
-                  <h4>Studio Sound & 300% Boost</h4>
-                  <p>Permanently unlocked dialogue clarity EQ and 3x audio booster.</p>
-                </div>
-              </div>
-              <div class="vip-perk-item">
-                <div class="vip-perk-icon">🚀</div>
-                <div class="vip-perk-text">
-                  <h4>Priority Content Requests</h4>
-                  <p>Request any worldwide movie or series and get it added within 24 hours.</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Ways to Support / Pay -->
-            <div class="vip-ways-to-pay">
-              <h4 class="vip-section-title">Support & Unlock VIP Pass</h4>
-              <div class="vip-pay-buttons">
-                <a href="https://buymeacoffee.com" target="_blank" rel="noopener noreferrer"
-                  class="vip-pay-btn bmac-btn" id="vipBmacLink">
-                  <span class="pay-btn-icon">☕</span>
-                  <span>Buy Me a Coffee ($5)</span>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button type="button" class="download-action-btn btn-copy" id="copyDirectStreamUrlBtn">
+                  📋 Copy 4K Stream Link
+                </button>
+                <a href="#" target="_blank" class="download-action-btn" id="directBrowserDownloadBtn"
+                  style="background:#22c55e;">
+                  🚀 Instant Direct Download
                 </a>
-                <a href="https://ko-fi.com" target="_blank" rel="noopener noreferrer" class="vip-pay-btn kofi-btn"
-                  id="vipKofiLink">
-                  <span class="pay-btn-icon">❤️</span>
-                  <span>Support on Ko-fi</span>
-                </a>
-                <a href="https://paypal.me" target="_blank" rel="noopener noreferrer" class="vip-pay-btn paypal-btn"
-                  id="vipPaypalLink">
-                  <span class="pay-btn-icon">🅿️</span>
-                  <span>Tip via PayPal</span>
-                </a>
-              </div>
-
-              <!-- Crypto Tipping Section -->
-              <div class="vip-crypto-section">
-                <div class="vip-crypto-header">
-                  <span>🪙 Instant Crypto Tip (USDT / BTC / ETH / SOL)</span>
-                </div>
-                <div class="crypto-addresses-list" id="cryptoAddressesList">
-                  <div class="crypto-addr-row">
-                    <span class="crypto-coin">USDT (TRC20)</span>
-                    <input type="text" class="crypto-addr-input" readonly value="Loading..." id="usdtAddrInput" />
-                    <button class="btn-copy-crypto" data-target="usdtAddrInput">Copy</button>
-                  </div>
-                  <div class="crypto-addr-row">
-                    <span class="crypto-coin">Bitcoin</span>
-                    <input type="text" class="crypto-addr-input" readonly value="Loading..." id="btcAddrInput" />
-                    <button class="btn-copy-crypto" data-target="btcAddrInput">Copy</button>
-                  </div>
-                  <div class="crypto-addr-row">
-                    <span class="crypto-coin">Solana</span>
-                    <input type="text" class="crypto-addr-input" readonly value="Loading..." id="solAddrInput" />
-                    <button class="btn-copy-crypto" data-target="solAddrInput">Copy</button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Enter VIP Passcode / License Key -->
-              <div class="vip-license-section">
-                <h4 class="vip-section-title">Already Have a Supporter Passcode?</h4>
-                <p class="vip-license-desc">Enter your supporter passcode to unlock VIP status instantly on this device:
-                </p>
-                <div class="vip-code-input-row">
-                  <input type="text" id="vipPasscodeInput" class="vip-code-input"
-                    placeholder="Enter VIP Passcode (e.g. VIP2026)" />
-                  <button class="btn btn-primary" id="activateVipBtn">Activate VIP</button>
-                </div>
-                <div class="vip-status-message hidden" id="vipStatusMsg"></div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Keyboard Shortcuts Modal -->
-        <div class="modal-backdrop hidden" id="shortcutsModal">
-          <div class="shortcuts-card">
-            <div class="shortcuts-header">
-              <h3>Keyboard Shortcuts</h3>
-              <button class="modal-close-btn" id="shortcutsCloseBtn">&times;</button>
+          <div class="modal-footer"
+            style="padding:12px 20px;border-top:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:11.5px;color:var(--text-muted);">🛡️ 100% Virus-Free • High-Speed CDN Direct
+              Links</span>
+            <button class="btn btn-secondary btn-sm" id="gotItDownloadGuideBtn">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIP Access & Monetization Modal -->
+      <div class="modal-backdrop hidden" id="vipModal">
+        <div class="vip-modal-card">
+          <div class="modal-sheet-indicator"></div>
+          <button class="modal-close-btn" id="vipCloseBtn">&times;</button>
+          <div class="vip-modal-header">
+            <div class="vip-crown-badge">
+              <svg viewBox="0 0 24 24">
+                <path d="M2 4l3 12h14l3-12-6 7-4-11-4 11-6-7zm3 16h14v2H5v-2z" />
+              </svg>
             </div>
-            <div class="shortcuts-grid">
-              <div class="shortcut-item"><kbd>Space</kbd> / <kbd>K</kbd> <span>Play / Pause</span></div>
-              <div class="shortcut-item"><kbd>F</kbd> <span>Toggle Fullscreen</span></div>
-              <div class="shortcut-item"><kbd>M</kbd> <span>Mute / Unmute</span></div>
-              <div class="shortcut-item"><kbd>←</kbd> / <kbd>J</kbd> <span>Seek Backward 10s</span></div>
-              <div class="shortcut-item"><kbd>→</kbd> / <kbd>L</kbd> <span>Seek Forward 10s</span></div>
-              <div class="shortcut-item"><kbd>↑</kbd> / <kbd>↓</kbd> <span>Volume Up / Down (up to 300% Boost)</span>
+            <h2>MovieBox VIP Supporter Pass</h2>
+            <p class="vip-subtitle">Support development & unlock ultra-fast dedicated 4K streaming servers, zero ads,
+              and
+              VIP cinema privileges.</p>
+          </div>
+
+          <!-- VIP Perks Grid -->
+          <div class="vip-perks-grid">
+            <div class="vip-perk-item">
+              <div class="vip-perk-icon">⚡</div>
+              <div class="vip-perk-text">
+                <h4>Ultra 4K Direct Speed</h4>
+                <p>Dedicated high-bandwidth stream CDN with zero buffering or wait times.</p>
               </div>
-              <div class="shortcut-item"><kbd>B</kbd> <span>Cycle Sound Profile & Volume Boost</span></div>
-              <div class="shortcut-item"><kbd>/</kbd> <span>Focus Search Bar</span></div>
-              <div class="shortcut-item"><kbd>Esc</kbd> <span>Close Player / Modals</span></div>
+            </div>
+            <div class="vip-perk-item">
+              <div class="vip-perk-icon">🛡️</div>
+              <div class="vip-perk-text">
+                <h4>100% Ad-Free Cinema</h4>
+                <p>Enjoy uninterrupted cinema without third-party popups or redirects.</p>
+              </div>
+            </div>
+            <div class="vip-perk-item">
+              <div class="vip-perk-icon">🔊</div>
+              <div class="vip-perk-text">
+                <h4>Studio Sound & 300% Boost</h4>
+                <p>Permanently unlocked dialogue clarity EQ and 3x audio booster.</p>
+              </div>
+            </div>
+            <div class="vip-perk-item">
+              <div class="vip-perk-icon">🚀</div>
+              <div class="vip-perk-text">
+                <h4>Priority Content Requests</h4>
+                <p>Request any worldwide movie or series and get it added within 24 hours.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ways to Support / Pay -->
+          <div class="vip-ways-to-pay">
+            <h4 class="vip-section-title">Support & Unlock VIP Pass</h4>
+            <div class="vip-pay-buttons">
+              <a href="https://buymeacoffee.com" target="_blank" rel="noopener noreferrer" class="vip-pay-btn bmac-btn"
+                id="vipBmacLink">
+                <span class="pay-btn-icon">☕</span>
+                <span>Buy Me a Coffee ($5)</span>
+              </a>
+              <a href="https://ko-fi.com" target="_blank" rel="noopener noreferrer" class="vip-pay-btn kofi-btn"
+                id="vipKofiLink">
+                <span class="pay-btn-icon">❤️</span>
+                <span>Support on Ko-fi</span>
+              </a>
+              <a href="https://paypal.me" target="_blank" rel="noopener noreferrer" class="vip-pay-btn paypal-btn"
+                id="vipPaypalLink">
+                <span class="pay-btn-icon">🅿️</span>
+                <span>Tip via PayPal</span>
+              </a>
+            </div>
+
+            <!-- Crypto Tipping Section -->
+            <div class="vip-crypto-section">
+              <div class="vip-crypto-header">
+                <span>🪙 Instant Crypto Tip (USDT / BTC / ETH / SOL)</span>
+              </div>
+              <div class="crypto-addresses-list" id="cryptoAddressesList">
+                <div class="crypto-addr-row">
+                  <span class="crypto-coin">USDT (TRC20)</span>
+                  <input type="text" class="crypto-addr-input" readonly value="Loading..." id="usdtAddrInput" />
+                  <button class="btn-copy-crypto" data-target="usdtAddrInput">Copy</button>
+                </div>
+                <div class="crypto-addr-row">
+                  <span class="crypto-coin">Bitcoin</span>
+                  <input type="text" class="crypto-addr-input" readonly value="Loading..." id="btcAddrInput" />
+                  <button class="btn-copy-crypto" data-target="btcAddrInput">Copy</button>
+                </div>
+                <div class="crypto-addr-row">
+                  <span class="crypto-coin">Solana</span>
+                  <input type="text" class="crypto-addr-input" readonly value="Loading..." id="solAddrInput" />
+                  <button class="btn-copy-crypto" data-target="solAddrInput">Copy</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Enter VIP Passcode / License Key -->
+            <div class="vip-license-section">
+              <h4 class="vip-section-title">Already Have a Supporter Passcode?</h4>
+              <p class="vip-license-desc">Enter your supporter passcode to unlock VIP status instantly on this device:
+              </p>
+              <div class="vip-code-input-row">
+                <input type="text" id="vipPasscodeInput" class="vip-code-input"
+                  placeholder="Enter VIP Passcode (e.g. VIP2026)" />
+                <button class="btn btn-primary" id="activateVipBtn">Activate VIP</button>
+              </div>
+              <div class="vip-status-message hidden" id="vipStatusMsg"></div>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Toast Notification Container -->
-        <div class="toast-container" id="toastContainer"></div>
+      <!-- Keyboard Shortcuts Modal -->
+      <div class="modal-backdrop hidden" id="shortcutsModal">
+        <div class="shortcuts-card">
+          <div class="shortcuts-header">
+            <h3>Keyboard Shortcuts</h3>
+            <button class="modal-close-btn" id="shortcutsCloseBtn">&times;</button>
+          </div>
+          <div class="shortcuts-grid">
+            <div class="shortcut-item"><kbd>Space</kbd> / <kbd>K</kbd> <span>Play / Pause</span></div>
+            <div class="shortcut-item"><kbd>F</kbd> <span>Toggle Fullscreen</span></div>
+            <div class="shortcut-item"><kbd>M</kbd> <span>Mute / Unmute</span></div>
+            <div class="shortcut-item"><kbd>←</kbd> / <kbd>J</kbd> <span>Seek Backward 10s</span></div>
+            <div class="shortcut-item"><kbd>→</kbd> / <kbd>L</kbd> <span>Seek Forward 10s</span></div>
+            <div class="shortcut-item"><kbd>↑</kbd> / <kbd>↓</kbd> <span>Volume Up / Down (up to 300% Boost)</span>
+            </div>
+            <div class="shortcut-item"><kbd>B</kbd> <span>Cycle Sound Profile & Volume Boost</span></div>
+            <div class="shortcut-item"><kbd>/</kbd> <span>Focus Search Bar</span></div>
+            <div class="shortcut-item"><kbd>Esc</kbd> <span>Close Player / Modals</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toast Notification Container -->
+      <div class="toast-container" id="toastContainer"></div>
 
         <!-- Google AdSense Footer Leaderboard Banner -->
         <div id="userFooterAdBanner" class="user-ad-banner hidden" aria-label="Sponsored Content"></div>
 
-        <!-- Footer -->
-        <footer class="footer">
-          <div class="footer-content">
-            <!-- Platform Brand Column -->
-            <div class="footer-brand">
-              <a href="#" class="logo" style="margin-bottom: 12px; display: inline-flex;">
-                <span class="logo-badge">M</span>
-                <span class="logo-text">MOVIEBOX</span>
-                <span class="logo-tag">PLUS</span>
-              </a>
-              <p class="footer-desc">Next-generation cinema & live sports streaming platform. Stream 4,500+ worldwide
-                movies,
-                TV series, anime across 16+ languages with active ad-shielding protection.</p>
-              <div class="footer-badges">
-                <span class="footer-badge">⚡ 4K UHD / HD</span>
-                <span class="footer-badge">🛡️ AdShield Active</span>
-                <span class="footer-badge">🌍 16 Languages</span>
-              </div>
-            </div>
-
-            <!-- Quick Links Column -->
-            <div class="footer-col">
-              <h4 class="footer-heading">Explore & Watch</h4>
-              <div class="footer-links-vertical">
-                <a href="#" data-nav="home">🏠 Home Cinema</a>
-                <a href="#" data-nav="movies">🎬 Movies Catalog</a>
-                <a href="#" data-nav="series">📺 TV Shows & Dramas</a>
-                <a href="#" data-nav="trending">🔥 Trending Now</a>
-                <a href="#" data-nav="sports">⚽ Live Sports Broadcasts</a>
-                <a href="#" id="footerVipLink" class="footer-vip-highlight">👑 VIP Pass & Support</a>
-              </div>
-            </div>
-
-            <!-- Developer Details Column: FS FERDOWS -->
-            <div class="footer-col footer-dev-col">
-              <h4 class="footer-heading">Developer Details</h4>
-              <div class="developer-card">
-                <div class="developer-header">
-                  <div class="developer-avatar">FF</div>
-                  <div class="developer-meta">
-                    <span class="developer-name">FS FERDOWS</span>
-                    <span class="developer-role">Lead Architect & Developer</span>
-                  </div>
-                </div>
-                <p class="developer-bio">Architected and engineered MovieBox Plus — built with high-performance
-                  in-browser
-                  streaming, automated multi-language transliteration, and robust ad-shielding protections.</p>
-                <div class="developer-links">
-                  <a href="mailto:fsferdows04@gmail.com" class="dev-link-btn dev-email-btn"
-                    title="Contact Developer via Email">
-                    <svg viewBox="0 0 24 24" class="dev-icon">
-                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                      <polyline points="22,6 12,13 2,6" />
-                    </svg>
-                    <span>fsferdows04@gmail.com</span>
-                  </a>
-                  <a href="https://github.com/fsferdows" target="_blank" rel="noopener noreferrer"
-                    class="dev-link-btn dev-github-btn" title="Developer GitHub Profile">
-                    <svg viewBox="0 0 24 24" class="dev-icon">
-                      <path
-                        d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
-                    </svg>
-                    <span>github.com/fsferdows</span>
-                  </a>
-                </div>
-              </div>
+      <!-- Footer -->
+      <footer class="footer">
+        <div class="footer-content">
+          <!-- Platform Brand Column -->
+          <div class="footer-brand">
+            <a href="#" class="logo" style="margin-bottom: 12px; display: inline-flex;">
+              <span class="logo-badge">M</span>
+              <span class="logo-text">MOVIEBOX</span>
+              <span class="logo-tag">PLUS</span>
+            </a>
+            <p class="footer-desc">Next-generation cinema & live sports streaming platform. Stream 4,500+ worldwide
+              movies,
+              TV series, anime across 16+ languages with active ad-shielding protection.</p>
+            <div class="footer-badges">
+              <span class="footer-badge">⚡ 4K UHD / HD</span>
+              <span class="footer-badge">🛡️ AdShield Active</span>
+              <span class="footer-badge">🌍 16 Languages</span>
             </div>
           </div>
 
-          <!-- Bottom Copyright & Credit Strip -->
-          <div class="footer-bottom">
-            <div class="footer-bottom-inner">
-              <p>© 2026 <strong>MovieBox Plus</strong> • Developed & Engineered with pride by <span
-                  class="credit-highlight">FS FERDOWS</span>.</p>
-              <p class="footer-contact-note">Direct Inquiries: <a href="mailto:fsferdows04@gmail.com"
-                  class="credit-email">fsferdows04@gmail.com</a> • Free & Open Streaming Architecture.</p>
+          <!-- Quick Links Column -->
+          <div class="footer-col">
+            <h4 class="footer-heading">Explore & Watch</h4>
+            <div class="footer-links-vertical">
+              <a href="#" data-nav="home">🏠 Home Cinema</a>
+              <a href="#" data-nav="movies">🎬 Movies Catalog</a>
+              <a href="#" data-nav="series">📺 TV Shows & Dramas</a>
+              <a href="#" data-nav="trending">🔥 Trending Now</a>
+              <a href="#" data-nav="sports">⚽ Live Sports Broadcasts</a>
+              <a href="#" id="footerVipLink" class="footer-vip-highlight">👑 VIP Pass & Support</a>
             </div>
           </div>
-        </footer>
 
-        <!-- Mobile Bottom Navigation Bar -->
-        <nav class="mobile-bottom-nav" id="mobileBottomNav">
-          <a href="#" class="mobile-nav-item active" data-nav="home">
-            <svg viewBox="0 0 24 24">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
-            <span>Home</span>
-          </a>
-          <a href="#" class="mobile-nav-item" data-nav="movies">
-            <svg viewBox="0 0 24 24">
-              <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" />
-              <line x1="7" y1="2" x2="7" y2="22" />
-              <line x1="17" y1="2" x2="17" y2="22" />
-              <line x1="2" y1="12" x2="22" y2="12" />
-              <line x1="2" y1="7" x2="7" y2="7" />
-              <line x1="2" y1="17" x2="7" y2="17" />
-              <line x1="17" y1="17" x2="22" y2="17" />
-              <line x1="17" y1="7" x2="22" y2="7" />
-            </svg>
-            <span>Movies</span>
-          </a>
-          <a href="#" class="mobile-nav-item" data-nav="series">
-            <svg viewBox="0 0 24 24">
-              <rect x="2" y="7" width="20" height="15" rx="2" ry="2" />
-              <polyline points="17 2 12 7 7 2" />
-            </svg>
-            <span>Series</span>
-          </a>
-          <a href="#" class="mobile-nav-item mobile-nav-sports" data-nav="sports">
-            <div class="sports-nav-icon-wrap">
-              <svg viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
-                <path d="M2 12h20" />
-              </svg>
-              <span class="sports-live-pip"></span>
-            </div>
-            <span>Sports</span>
-          </a>
-          <button class="mobile-nav-item" id="mobilePlatformsBtn" type="button">
-            <svg viewBox="0 0 24 24">
-              <polygon points="12 2 2 7 12 12 22 7 12 2" />
-              <polyline points="2 17 12 22 22 17" />
-              <polyline points="2 12 12 17 22 12" />
-            </svg>
-            <span>Platforms</span>
-          </button>
-        </nav>
-
-        <!-- Mobile Platforms Sheet / Drawer -->
-        <div class="mobile-platforms-sheet hidden" id="mobilePlatformsSheet">
-          <div class="mobile-sheet-backdrop" id="mobileSheetBackdrop"></div>
-          <div class="mobile-sheet-content">
-            <div class="mobile-sheet-header">
-              <div class="sheet-indicator"></div>
-              <div class="sheet-title-row">
-                <h3>Browse By Platform</h3>
-                <button class="sheet-close-btn" id="mobileSheetCloseBtn" type="button">✕</button>
-              </div>
-            </div>
-            <div class="mobile-platforms-grid">
-              <button class="mobile-plat-btn" data-ott="netflix" style="--c:#e50914">Netflix</button>
-              <button class="mobile-plat-btn" data-ott="primeVideo" style="--c:#00a8e1">Prime Video</button>
-              <button class="mobile-plat-btn" data-ott="disney" style="--c:#3b82f6">Disney+</button>
-              <button class="mobile-plat-btn" data-ott="appleTV" style="--c:#a3a3a3">Apple TV+</button>
-              <button class="mobile-plat-btn" data-ott="hulu" style="--c:#1ce783">Hulu</button>
-              <button class="mobile-plat-btn" data-ott="zee5" style="--c:#a855f7">Zee5</button>
-              <button class="mobile-plat-btn" data-ott="viu" style="--c:#f59e0b">Viu</button>
-              <button class="mobile-plat-btn" data-ott="vivamax" style="--c:#f97316">Vivamax</button>
-              <button class="mobile-plat-btn" data-ott="hoichoi" style="--c:#ef4444">Hoichoi</button>
-              <button class="mobile-plat-btn" data-ott="marvel" style="--c:#ed1d24">Marvel</button>
-              <button class="mobile-plat-btn" data-ott="dc" style="--c:#0476f2">DC</button>
-              <button class="mobile-plat-btn" data-ott="anime" style="--c:#ec4899">Anime</button>
-              <button class="mobile-plat-btn" data-ott="kdrama" style="--c:#f43f5e">K-Drama</button>
-              <button class="mobile-plat-btn" data-ott="bollywood" style="--c:#eab308">Bollywood</button>
-              <button class="mobile-plat-btn" data-ott="boxoffice" style="--c:#10b981">Box Office</button>
-            </div>
-
-            <div class="sheet-title-row"
-              style="margin-top: 18px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px;">
-              <h3>Browse By Language</h3>
-            </div>
-            <div class="mobile-platforms-grid mobile-languages-grid">
-              <button class="mobile-plat-btn" data-lang="hindi" style="--c:#eab308">🇮🇳 Hindi</button>
-              <button class="mobile-plat-btn" data-lang="japanese" style="--c:#ec4899">🇯🇵 Anime</button>
-              <button class="mobile-plat-btn" data-lang="korean" style="--c:#f43f5e">🇰🇷 Korean</button>
-              <button class="mobile-plat-btn" data-lang="english" style="--c:#06b6d4">🇺🇸 English</button>
-              <button class="mobile-plat-btn" data-lang="spanish" style="--c:#f59e0b">🇪🇸 Spanish</button>
-              <button class="mobile-plat-btn" data-lang="french" style="--c:#3b82f6">🇫🇷 French</button>
-              <button class="mobile-plat-btn" data-lang="tamil_telugu" style="--c:#f97316">🇮🇳 South</button>
-              <button class="mobile-plat-btn" data-lang="bengali" style="--c:#10b981">🇧🇩 Bengali</button>
-              <button class="mobile-plat-btn" data-lang="german" style="--c:#6366f1">🇩🇪 German</button>
-              <button class="mobile-plat-btn" data-lang="italian" style="--c:#14b8a6">🇮🇹 Italian</button>
-              <button class="mobile-plat-btn" data-lang="arabic" style="--c:#84cc16">🇸🇦 Arabic</button>
-              <button class="mobile-plat-btn" data-lang="turkish" style="--c:#e11d48">🇹🇷 Turkish</button>
-              <button class="mobile-plat-btn" data-lang="chinese" style="--c:#d97706">🇨🇳 Chinese</button>
-              <button class="mobile-plat-btn" data-lang="russian" style="--c:#8b5cf6">🇷🇺 Russian</button>
-              <button class="mobile-plat-btn" data-lang="tagalog" style="--c:#ea580c">🇵🇭 Tagalog</button>
-              <button class="mobile-plat-btn" data-lang="portuguese" style="--c:#059669">🇵🇹 Portuguese</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Sound Booster & Studio EQ Modal -->
-        <div class="modal-backdrop hidden" id="soundBoosterModal" style="z-index: 10005;">
-          <div class="modal-card" style="max-width: 480px;">
-            <div class="modal-header">
-              <h3 class="modal-title">🔊 Studio Sound Booster & EQ</h3>
-              <button class="modal-close-btn" id="closeSoundBoosterBtn">✕</button>
-            </div>
-            <div class="modal-body">
-              <div id="soundBoosterModeHint"></div>
-              <div style="margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                  <label style="font-weight: 600; font-size: 14px;">Volume Boost Multiplier</label>
-                  <span class="badge" id="modalBoostLevelLabel"
-                    style="background: rgba(234, 179, 8, 0.2); color: #eab308; font-weight: 700; padding: 4px 10px; border-radius: 6px;">150%
-                    (Recommended)</span>
-                </div>
-                <input type="range" id="modalBoostRangeSlider" min="0.5" max="3.0" step="0.1" value="1.5"
-                  style="width: 100%; accent-color: #e50914; height: 6px; cursor: pointer;" />
-                <div
-                  style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 4px;">
-                  <span>50%</span>
-                  <span>100% (Normal)</span>
-                  <span>200%</span>
-                  <span>300% (Max Boost)</span>
+          <!-- Developer Details Column: FS FERDOWS -->
+          <div class="footer-col footer-dev-col">
+            <h4 class="footer-heading">Developer Details</h4>
+            <div class="developer-card">
+              <div class="developer-header">
+                <div class="developer-avatar">FF</div>
+                <div class="developer-meta">
+                  <span class="developer-name">FS FERDOWS</span>
+                  <span class="developer-role">Lead Architect & Developer</span>
                 </div>
               </div>
-
-              <div style="margin-bottom: 20px;">
-                <label
-                  style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 8px; color: var(--text-secondary);">Quick
-                  Boost Presets</label>
-                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
-                  <button type="button" class="btn btn-secondary modal-boost-chip" data-boost="1.0"
-                    style="padding: 8px 4px; font-size: 12px; font-weight: 600;">100%</button>
-                  <button type="button" class="btn btn-secondary modal-boost-chip" data-boost="1.5"
-                    style="padding: 8px 4px; font-size: 12px; font-weight: 600;">150%</button>
-                  <button type="button" class="btn btn-secondary modal-boost-chip" data-boost="2.0"
-                    style="padding: 8px 4px; font-size: 12px; font-weight: 600;">200%</button>
-                  <button type="button" class="btn btn-secondary modal-boost-chip" data-boost="3.0"
-                    style="padding: 8px 4px; font-size: 12px; font-weight: 600;">300% 🔥</button>
-                </div>
-              </div>
-
-              <div>
-                <label
-                  style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 8px; color: var(--text-secondary);">Cinema
-                  Audio Profiles (DSP EQ)</label>
-                <div id="modalPresetsList" style="display: flex; flex-direction: column; gap: 6px;">
-                  <button type="button" class="menu-item preset-item active" data-preset="cinema"
-                    style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06); cursor: pointer;">
-                    <span>🎬 Cinema Theater</span>
-                    <span style="font-size: 11px; color: var(--text-muted);">Dolby Atmos simulated curve (150%)</span>
-                  </button>
-                  <button type="button" class="menu-item preset-item" data-preset="balanced"
-                    style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06); cursor: pointer;">
-                    <span>⚖️ Studio Balanced</span>
-                    <span style="font-size: 11px; color: var(--text-muted);">Neutral clean acoustics (100%)</span>
-                  </button>
-                  <button type="button" class="menu-item preset-item" data-preset="vocal"
-                    style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06); cursor: pointer;">
-                    <span>🗣️ Vocal & Dialogue Clarity</span>
-                    <span style="font-size: 11px; color: var(--text-muted);">Boosts whispered speech (160%)</span>
-                  </button>
-                  <button type="button" class="menu-item preset-item" data-preset="bass"
-                    style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06); cursor: pointer;">
-                    <span>💣 Action Bass Blast</span>
-                    <span style="font-size: 11px; color: var(--text-muted);">Sub-bass +8dB for explosions (150%)</span>
-                  </button>
-                  <button type="button" class="menu-item preset-item" data-preset="night"
-                    style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06); cursor: pointer;">
-                    <span>🌙 Late Night Mode</span>
-                    <span style="font-size: 11px; color: var(--text-muted);">Dynamic compression, quiet explosions
-                      (130%)</span>
-                  </button>
-                  <button type="button" class="menu-item preset-item" data-preset="loud"
-                    style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06); cursor: pointer;">
-                    <span>🔥 Maximum Loudness</span>
-                    <span style="font-size: 11px; color: var(--text-muted);">Full 300% loudness amplifier</span>
-                  </button>
-                </div>
-              </div>
-
-              <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
-                <button type="button" class="btn btn-primary" id="doneSoundBoosterBtn"
-                  style="padding: 8px 24px;">Done</button>
+              <p class="developer-bio">Architected and engineered MovieBox Plus — built with high-performance
+                in-browser
+                streaming, automated multi-language transliteration, and robust ad-shielding protections.</p>
+              <div class="developer-links">
+                <a href="mailto:fsferdows04@gmail.com" class="dev-link-btn dev-email-btn"
+                  title="Contact Developer via Email">
+                  <svg viewBox="0 0 24 24" class="dev-icon">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                    <polyline points="22,6 12,13 2,6" />
+                  </svg>
+                  <span>fsferdows04@gmail.com</span>
+                </a>
+                <a href="https://github.com/fsferdows" target="_blank" rel="noopener noreferrer"
+                  class="dev-link-btn dev-github-btn" title="Developer GitHub Profile">
+                  <svg viewBox="0 0 24 24" class="dev-icon">
+                    <path
+                      d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+                  </svg>
+                  <span>github.com/fsferdows</span>
+                </a>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Audio Dubs / Multi-Language Modal -->
-        <div class="modal-backdrop hidden" id="audioDubsModal" style="z-index: 10005;">
-          <div class="modal-card" style="max-width: 440px;">
-            <div class="modal-header">
-              <h3 class="modal-title">🎧 Select Audio Track / Dub</h3>
-              <button class="modal-close-btn" id="closeAudioDubsBtn">✕</button>
+        <!-- Bottom Copyright & Credit Strip -->
+        <div class="footer-bottom">
+          <div class="footer-bottom-inner">
+            <p>© 2026 <strong>MovieBox Plus</strong> • Developed & Engineered with pride by <span
+                class="credit-highlight">FS FERDOWS</span>.</p>
+            <p class="footer-contact-note">Direct Inquiries: <a href="mailto:fsferdows04@gmail.com"
+                class="credit-email">fsferdows04@gmail.com</a> • Free & Open Streaming Architecture.</p>
+          </div>
+        </div>
+      </footer>
+
+      <!-- Mobile Bottom Navigation Bar -->
+      <nav class="mobile-bottom-nav" id="mobileBottomNav">
+        <a href="#" class="mobile-nav-item active" data-nav="home">
+          <svg viewBox="0 0 24 24">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>
+          <span>Home</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-nav="movies">
+          <svg viewBox="0 0 24 24">
+            <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" />
+            <line x1="7" y1="2" x2="7" y2="22" />
+            <line x1="17" y1="2" x2="17" y2="22" />
+            <line x1="2" y1="12" x2="22" y2="12" />
+            <line x1="2" y1="7" x2="7" y2="7" />
+            <line x1="2" y1="17" x2="7" y2="17" />
+            <line x1="17" y1="17" x2="22" y2="17" />
+            <line x1="17" y1="7" x2="22" y2="7" />
+          </svg>
+          <span>Movies</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-nav="series">
+          <svg viewBox="0 0 24 24">
+            <rect x="2" y="7" width="20" height="15" rx="2" ry="2" />
+            <polyline points="17 2 12 7 7 2" />
+          </svg>
+          <span>Series</span>
+        </a>
+        <a href="#" class="mobile-nav-item mobile-nav-sports" data-nav="sports">
+          <div class="sports-nav-icon-wrap">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+              <path d="M2 12h20" />
+            </svg>
+            <span class="sports-live-pip"></span>
+          </div>
+          <span>Sports</span>
+        </a>
+        <button class="mobile-nav-item" id="mobilePlatformsBtn" type="button">
+          <svg viewBox="0 0 24 24">
+            <polygon points="12 2 2 7 12 12 22 7 12 2" />
+            <polyline points="2 17 12 22 22 17" />
+            <polyline points="2 12 12 17 22 12" />
+          </svg>
+          <span>Platforms</span>
+        </button>
+      </nav>
+
+      <!-- Mobile Platforms Sheet / Drawer -->
+      <div class="mobile-platforms-sheet hidden" id="mobilePlatformsSheet">
+        <div class="mobile-sheet-backdrop" id="mobileSheetBackdrop"></div>
+        <div class="mobile-sheet-content">
+          <div class="mobile-sheet-header">
+            <div class="sheet-indicator"></div>
+            <div class="sheet-title-row">
+              <h3>Browse By Platform</h3>
+              <button class="sheet-close-btn" id="mobileSheetCloseBtn" type="button">✕</button>
             </div>
-            <div class="modal-body">
-              <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;">Select your preferred audio
-                language track or dub:</p>
-              <div id="audioDubsListContainer"></div>
-              <div style="margin-top: 18px; display: flex; justify-content: flex-end;">
-                <button type="button" class="btn btn-primary" id="doneAudioDubsBtn"
-                  style="padding: 8px 24px;">Done</button>
+          </div>
+          <div class="mobile-platforms-grid">
+            <button class="mobile-plat-btn" data-ott="netflix" style="--c:#e50914">Netflix</button>
+            <button class="mobile-plat-btn" data-ott="primeVideo" style="--c:#00a8e1">Prime Video</button>
+            <button class="mobile-plat-btn" data-ott="disney" style="--c:#3b82f6">Disney+</button>
+            <button class="mobile-plat-btn" data-ott="appleTV" style="--c:#a3a3a3">Apple TV+</button>
+            <button class="mobile-plat-btn" data-ott="hulu" style="--c:#1ce783">Hulu</button>
+            <button class="mobile-plat-btn" data-ott="zee5" style="--c:#a855f7">Zee5</button>
+            <button class="mobile-plat-btn" data-ott="viu" style="--c:#f59e0b">Viu</button>
+            <button class="mobile-plat-btn" data-ott="vivamax" style="--c:#f97316">Vivamax</button>
+            <button class="mobile-plat-btn" data-ott="hoichoi" style="--c:#ef4444">Hoichoi</button>
+            <button class="mobile-plat-btn" data-ott="marvel" style="--c:#ed1d24">Marvel</button>
+            <button class="mobile-plat-btn" data-ott="dc" style="--c:#0476f2">DC</button>
+            <button class="mobile-plat-btn" data-ott="anime" style="--c:#ec4899">Anime</button>
+            <button class="mobile-plat-btn" data-ott="kdrama" style="--c:#f43f5e">K-Drama</button>
+            <button class="mobile-plat-btn" data-ott="bollywood" style="--c:#eab308">Bollywood</button>
+            <button class="mobile-plat-btn" data-ott="boxoffice" style="--c:#10b981">Box Office</button>
+          </div>
+
+          <div class="sheet-title-row"
+            style="margin-top: 18px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px;">
+            <h3>Browse By Language</h3>
+          </div>
+          <div class="mobile-platforms-grid mobile-languages-grid">
+            <button class="mobile-plat-btn" data-lang="hindi" style="--c:#eab308">🇮🇳 Hindi</button>
+            <button class="mobile-plat-btn" data-lang="japanese" style="--c:#ec4899">🇯🇵 Anime</button>
+            <button class="mobile-plat-btn" data-lang="korean" style="--c:#f43f5e">🇰🇷 Korean</button>
+            <button class="mobile-plat-btn" data-lang="english" style="--c:#06b6d4">🇺🇸 English</button>
+            <button class="mobile-plat-btn" data-lang="spanish" style="--c:#f59e0b">🇪🇸 Spanish</button>
+            <button class="mobile-plat-btn" data-lang="french" style="--c:#3b82f6">🇫🇷 French</button>
+            <button class="mobile-plat-btn" data-lang="tamil_telugu" style="--c:#f97316">🇮🇳 South</button>
+            <button class="mobile-plat-btn" data-lang="bengali" style="--c:#10b981">🇧🇩 Bengali</button>
+            <button class="mobile-plat-btn" data-lang="german" style="--c:#6366f1">🇩🇪 German</button>
+            <button class="mobile-plat-btn" data-lang="italian" style="--c:#14b8a6">🇮🇹 Italian</button>
+            <button class="mobile-plat-btn" data-lang="arabic" style="--c:#84cc16">🇸🇦 Arabic</button>
+            <button class="mobile-plat-btn" data-lang="turkish" style="--c:#e11d48">🇹🇷 Turkish</button>
+            <button class="mobile-plat-btn" data-lang="chinese" style="--c:#d97706">🇨🇳 Chinese</button>
+            <button class="mobile-plat-btn" data-lang="russian" style="--c:#8b5cf6">🇷🇺 Russian</button>
+            <button class="mobile-plat-btn" data-lang="tagalog" style="--c:#ea580c">🇵🇭 Tagalog</button>
+            <button class="mobile-plat-btn" data-lang="portuguese" style="--c:#059669">🇵🇹 Portuguese</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sound Booster & Studio EQ Modal -->
+      <div class="modal-backdrop hidden" id="soundBoosterModal" style="z-index: 10005;">
+        <div class="modal-card" style="max-width: 480px;">
+          <div class="modal-header">
+            <h3 class="modal-title">🔊 Studio Sound Booster & EQ</h3>
+            <button class="modal-close-btn" id="closeSoundBoosterBtn">✕</button>
+          </div>
+          <div class="modal-body">
+            <div id="soundBoosterModeHint"></div>
+            <div style="margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <label style="font-weight: 600; font-size: 14px;">Volume Boost Multiplier</label>
+                <span class="badge" id="modalBoostLevelLabel"
+                  style="background: rgba(234, 179, 8, 0.2); color: #eab308; font-weight: 700; padding: 4px 10px; border-radius: 6px;">150%
+                  (Recommended)</span>
               </div>
+              <input type="range" id="modalBoostRangeSlider" min="0.5" max="3.0" step="0.1" value="1.5"
+                style="width: 100%; accent-color: #e50914; height: 6px; cursor: pointer;" />
+              <div
+                style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+                <span>50%</span>
+                <span>100% (Normal)</span>
+                <span>200%</span>
+                <span>300% (Max Boost)</span>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+              <label
+                style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 8px; color: var(--text-secondary);">Quick
+                Boost Presets</label>
+              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+                <button type="button" class="btn btn-secondary modal-boost-chip" data-boost="1.0"
+                  style="padding: 8px 4px; font-size: 12px; font-weight: 600;">100%</button>
+                <button type="button" class="btn btn-secondary modal-boost-chip" data-boost="1.5"
+                  style="padding: 8px 4px; font-size: 12px; font-weight: 600;">150%</button>
+                <button type="button" class="btn btn-secondary modal-boost-chip" data-boost="2.0"
+                  style="padding: 8px 4px; font-size: 12px; font-weight: 600;">200%</button>
+                <button type="button" class="btn btn-secondary modal-boost-chip" data-boost="3.0"
+                  style="padding: 8px 4px; font-size: 12px; font-weight: 600;">300% 🔥</button>
+              </div>
+            </div>
+
+            <div>
+              <label
+                style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 8px; color: var(--text-secondary);">Cinema
+                Audio Profiles (DSP EQ)</label>
+              <div id="modalPresetsList" style="display: flex; flex-direction: column; gap: 6px;">
+                <button type="button" class="menu-item preset-item active" data-preset="cinema"
+                  style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06); cursor: pointer;">
+                  <span>🎬 Cinema Theater</span>
+                  <span style="font-size: 11px; color: var(--text-muted);">Dolby Atmos simulated curve (150%)</span>
+                </button>
+                <button type="button" class="menu-item preset-item" data-preset="balanced"
+                  style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06); cursor: pointer;">
+                  <span>⚖️ Studio Balanced</span>
+                  <span style="font-size: 11px; color: var(--text-muted);">Neutral clean acoustics (100%)</span>
+                </button>
+                <button type="button" class="menu-item preset-item" data-preset="vocal"
+                  style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06); cursor: pointer;">
+                  <span>🗣️ Vocal & Dialogue Clarity</span>
+                  <span style="font-size: 11px; color: var(--text-muted);">Boosts whispered speech (160%)</span>
+                </button>
+                <button type="button" class="menu-item preset-item" data-preset="bass"
+                  style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06); cursor: pointer;">
+                  <span>💣 Action Bass Blast</span>
+                  <span style="font-size: 11px; color: var(--text-muted);">Sub-bass +8dB for explosions (150%)</span>
+                </button>
+                <button type="button" class="menu-item preset-item" data-preset="night"
+                  style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06); cursor: pointer;">
+                  <span>🌙 Late Night Mode</span>
+                  <span style="font-size: 11px; color: var(--text-muted);">Dynamic compression, quiet explosions
+                    (130%)</span>
+                </button>
+                <button type="button" class="menu-item preset-item" data-preset="loud"
+                  style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06); cursor: pointer;">
+                  <span>🔥 Maximum Loudness</span>
+                  <span style="font-size: 11px; color: var(--text-muted);">Full 300% loudness amplifier</span>
+                </button>
+              </div>
+            </div>
+
+            <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+              <button type="button" class="btn btn-primary" id="doneSoundBoosterBtn"
+                style="padding: 8px 24px;">Done</button>
             </div>
           </div>
         </div>
+      </div>
 
-        <script src="/app.js?v=20261119o"></script>
+      <!-- Audio Dubs / Multi-Language Modal -->
+      <div class="modal-backdrop hidden" id="audioDubsModal" style="z-index: 10005;">
+        <div class="modal-card" style="max-width: 440px;">
+          <div class="modal-header">
+            <h3 class="modal-title">🎧 Select Audio Track / Dub</h3>
+            <button class="modal-close-btn" id="closeAudioDubsBtn">✕</button>
+          </div>
+          <div class="modal-body">
+            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;">Select your preferred audio
+              language track or dub:</p>
+            <div id="audioDubsListContainer"></div>
+            <div style="margin-top: 18px; display: flex; justify-content: flex-end;">
+              <button type="button" class="btn btn-primary" id="doneAudioDubsBtn"
+                style="padding: 8px 24px;">Done</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script src="/app.js?v=20261119o"></script>
 </body>
 
 <div>
@@ -2136,9 +2118,11 @@
       <div id="nativeInstallPromptBanner" class="native-install-banner">
         <div class="native-install-info">
           <span class="native-install-badge">DIRECT DOWNLOAD & INSTALL</span>
-          <p style="margin: 4px 0 0; font-size: 13px; font-weight: 600;">Download native software for Mac, Windows, Android, Linux & iPhone</p>
+          <p style="margin: 4px 0 0; font-size: 13px; font-weight: 600;">Download native software for Mac, Windows,
+            Android, Linux & iPhone</p>
         </div>
-        <button type="button" class="btn btn-primary" id="nativeInstallTriggerBtn" style="padding: 10px 20px; font-weight: 700; background: linear-gradient(135deg, #e50914, #b91c1c); box-shadow: 0 0 16px rgba(229,9,20,0.5);">
+        <button type="button" class="btn btn-primary" id="nativeInstallTriggerBtn"
+          style="padding: 10px 20px; font-weight: 700; background: linear-gradient(135deg, #e50914, #b91c1c); box-shadow: 0 0 16px rgba(229,9,20,0.5);">
           ⬇️ Download Mac DMG
         </button>
       </div>
@@ -2157,77 +2141,94 @@
       <div class="install-tab-content hidden" id="tabContent-ios">
         <div class="install-step-card">
           <div class="step-badge">Step 1</div>
-          <div class="step-text">Open this website in <strong>Safari</strong> on your iPhone or iPad, then tap the <strong>Share</strong> button <span class="ios-share-icon">⎋</span> (bottom bar).</div>
+          <div class="step-text">Open this website in <strong>Safari</strong> on your iPhone or iPad, then tap the
+            <strong>Share</strong> button <span class="ios-share-icon">⎋</span> (bottom bar).
+          </div>
         </div>
         <div class="install-step-card">
           <div class="step-badge">Step 2</div>
-          <div class="step-text">Scroll down the share sheet and tap <strong>"Add to Home Screen"</strong> <span class="ios-add-icon">➕</span>.</div>
+          <div class="step-text">Scroll down the share sheet and tap <strong>"Add to Home Screen"</strong> <span
+              class="ios-add-icon">➕</span>.</div>
         </div>
         <div class="install-step-card">
           <div class="step-badge">Step 3</div>
-          <div class="step-text">Tap <strong>"Add"</strong> in the top-right corner. MovieBox Plus will appear on your Home Screen as a standalone fullscreen app!</div>
+          <div class="step-text">Tap <strong>"Add"</strong> in the top-right corner. MovieBox Plus will appear on your
+            Home Screen as a standalone fullscreen app!</div>
         </div>
       </div>
 
       <div class="install-tab-content hidden" id="tabContent-android">
         <!-- Direct Android APK Download -->
-        <div class="download-cta-box" style="background: linear-gradient(135deg, rgba(34,197,94,0.18), rgba(30,41,59,0.85)); border: 1px solid rgba(34,197,94,0.45); border-radius: 10px; padding: 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+        <div class="download-cta-box"
+          style="background: linear-gradient(135deg, rgba(34,197,94,0.18), rgba(30,41,59,0.85)); border: 1px solid rgba(34,197,94,0.45); border-radius: 10px; padding: 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
           <div style="flex: 1; min-width: 180px;">
             <strong style="color: #fff; font-size: 14px; display: block;">🤖 MovieBox Plus for Android</strong>
             <span style="font-size: 12px; color: #94a3b8;">Standalone APK • Phones, Tablets & Android TV</span>
           </div>
-          <a href="/downloads/MovieBox-Plus.apk" download="MovieBox-Plus.apk" class="btn btn-primary" style="padding: 9px 18px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #16a34a, #15803d); box-shadow: 0 0 14px rgba(34,197,94,0.4);">
+          <a href="/downloads/MovieBox-Plus.apk" download="MovieBox-Plus.apk" class="btn btn-primary"
+            style="padding: 9px 18px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #16a34a, #15803d); box-shadow: 0 0 14px rgba(34,197,94,0.4);">
             <span>⬇️ Download Android APK</span>
           </a>
         </div>
 
         <div class="install-step-card">
           <div class="step-badge">Option 1</div>
-          <div class="step-text">Tap the <strong>"Download Android APK"</strong> button above to install the standalone app directly.</div>
+          <div class="step-text">Tap the <strong>"Download Android APK"</strong> button above to install the standalone
+            app directly.</div>
         </div>
         <div class="install-step-card">
           <div class="step-badge">Option 2</div>
-          <div class="step-text">Or tap the Chrome menu (<strong>⋮</strong> top-right) and choose <strong>"Install app"</strong> / <strong>"Add to Home screen"</strong>.</div>
+          <div class="step-text">Or tap the Chrome menu (<strong>⋮</strong> top-right) and choose <strong>"Install
+              app"</strong> / <strong>"Add to Home screen"</strong>.</div>
         </div>
       </div>
 
       <div class="install-tab-content hidden" id="tabContent-windows">
         <!-- Direct Windows Download -->
-        <div class="download-cta-box" style="background: linear-gradient(135deg, rgba(0,120,215,0.18), rgba(30,41,59,0.85)); border: 1px solid rgba(0,120,215,0.45); border-radius: 10px; padding: 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+        <div class="download-cta-box"
+          style="background: linear-gradient(135deg, rgba(0,120,215,0.18), rgba(30,41,59,0.85)); border: 1px solid rgba(0,120,215,0.45); border-radius: 10px; padding: 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
           <div style="flex: 1; min-width: 180px;">
             <strong style="color: #fff; font-size: 14px; display: block;">💻 MovieBox Plus for Windows</strong>
             <span style="font-size: 12px; color: #94a3b8;">Standalone Software (Windows 11 / 10 / 8)</span>
           </div>
-          <a href="/downloads/MovieBox-Plus-Windows.zip" download="MovieBox-Plus-Windows.zip" class="btn btn-primary" style="padding: 9px 18px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #0078d7, #005a9e); box-shadow: 0 0 14px rgba(0,120,215,0.4);">
+          <a href="/downloads/MovieBox-Plus-Windows.zip" download="MovieBox-Plus-Windows.zip" class="btn btn-primary"
+            style="padding: 9px 18px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #0078d7, #005a9e); box-shadow: 0 0 14px rgba(0,120,215,0.4);">
             <span>⬇️ Download for Windows (.zip)</span>
           </a>
         </div>
 
         <div class="install-step-card">
           <div class="step-badge">Step 1</div>
-          <div class="step-text">Download the Windows package above, extract the ZIP, and run <code>Launch-MovieBox-Plus.bat</code>.</div>
+          <div class="step-text">Download the Windows package above, extract the ZIP, and run
+            <code>Launch-MovieBox-Plus.bat</code>.
+          </div>
         </div>
         <div class="install-step-card">
           <div class="step-badge">Step 2</div>
-          <div class="step-text">Double-click <code>Create-Desktop-Shortcut.vbs</code> to pin a native MovieBox Plus shortcut to your Windows Desktop and Taskbar!</div>
+          <div class="step-text">Double-click <code>Create-Desktop-Shortcut.vbs</code> to pin a native MovieBox Plus
+            shortcut to your Windows Desktop and Taskbar!</div>
         </div>
       </div>
 
       <div class="install-tab-content" id="tabContent-mac">
         <!-- Direct Mac Download -->
-        <div class="download-cta-box" style="background: linear-gradient(135deg, rgba(229,9,20,0.18), rgba(30,41,59,0.85)); border: 1px solid rgba(229,9,20,0.45); border-radius: 10px; padding: 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+        <div class="download-cta-box"
+          style="background: linear-gradient(135deg, rgba(229,9,20,0.18), rgba(30,41,59,0.85)); border: 1px solid rgba(229,9,20,0.45); border-radius: 10px; padding: 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
           <div style="flex: 1; min-width: 180px;">
             <strong style="color: #fff; font-size: 14px; display: block;">🍏 MovieBox Plus for Mac</strong>
             <span style="font-size: 12px; color: #94a3b8;">Native macOS Software (Apple Silicon & Intel)</span>
           </div>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <a href="/downloads/MovieBox-Plus-Mac.dmg" download="MovieBox-Plus-Mac.dmg" class="btn btn-primary" style="padding: 9px 16px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #e50914, #b91c1c); box-shadow: 0 0 14px rgba(229,9,20,0.4);">
+            <a href="/downloads/MovieBox-Plus-Mac.dmg" download="MovieBox-Plus-Mac.dmg" class="btn btn-primary"
+              style="padding: 9px 16px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #e50914, #b91c1c); box-shadow: 0 0 14px rgba(229,9,20,0.4);">
               <span>⬇️ Download .DMG</span>
             </a>
-            <a href="/downloads/MovieBox-Plus-Mac.pkg" download="MovieBox-Plus-Mac.pkg" class="btn btn-secondary" style="padding: 9px 14px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; background: rgba(59,130,246,0.2); border: 1px solid rgba(59,130,246,0.4);">
+            <a href="/downloads/MovieBox-Plus-Mac.pkg" download="MovieBox-Plus-Mac.pkg" class="btn btn-secondary"
+              style="padding: 9px 14px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; background: rgba(59,130,246,0.2); border: 1px solid rgba(59,130,246,0.4);">
               <span>⬇️ .PKG Installer</span>
             </a>
-            <a href="/downloads/MovieBox-Plus-Mac.zip" download="MovieBox-Plus-Mac.zip" class="btn btn-secondary" style="padding: 9px 12px; font-size: 13px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+            <a href="/downloads/MovieBox-Plus-Mac.zip" download="MovieBox-Plus-Mac.zip" class="btn btn-secondary"
+              style="padding: 9px 12px; font-size: 13px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
               <span>⬇️ .ZIP</span>
             </a>
           </div>
@@ -2235,48 +2236,58 @@
 
         <div class="install-step-card" style="border-left: 3px solid #22c55e;">
           <div class="step-badge" style="background: #16a34a;">Option 1</div>
-          <div class="step-text">Download <strong>.PKG Installer</strong> above and double-click to install directly into your Applications folder.</div>
+          <div class="step-text">Download <strong>.PKG Installer</strong> above and double-click to install directly
+            into your Applications folder.</div>
         </div>
         <div class="install-step-card">
           <div class="step-badge">Option 2</div>
-          <div class="step-text">Download <strong>.DMG</strong>, open it, and double-click <strong>"Install & Open MovieBox.command"</strong> for instant 1-click automatic setup.</div>
+          <div class="step-text">Download <strong>.DMG</strong>, open it, and double-click <strong>"Install & Open
+              MovieBox.command"</strong> for instant 1-click automatic setup.</div>
         </div>
         <div class="install-step-card">
           <div class="step-badge">Gatekeeper</div>
-          <div class="step-text">If macOS warns about unverified developer: <strong>Right-Click (Control-Click)</strong> the app and select <strong>"Open"</strong> → <strong>"Open"</strong>.</div>
+          <div class="step-text">If macOS warns about unverified developer: <strong>Right-Click (Control-Click)</strong>
+            the app and select <strong>"Open"</strong> → <strong>"Open"</strong>.</div>
         </div>
       </div>
 
       <div class="install-tab-content hidden" id="tabContent-linux">
         <!-- Direct Linux Download -->
-        <div class="download-cta-box" style="background: linear-gradient(135deg, rgba(234,179,8,0.18), rgba(30,41,59,0.85)); border: 1px solid rgba(234,179,8,0.45); border-radius: 10px; padding: 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+        <div class="download-cta-box"
+          style="background: linear-gradient(135deg, rgba(234,179,8,0.18), rgba(30,41,59,0.85)); border: 1px solid rgba(234,179,8,0.45); border-radius: 10px; padding: 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
           <div style="flex: 1; min-width: 180px;">
             <strong style="color: #fff; font-size: 14px; display: block;">🐧 MovieBox Plus for Linux</strong>
             <span style="font-size: 12px; color: #94a3b8;">Ubuntu, Debian, Fedora & Arch Package</span>
           </div>
-          <a href="/downloads/MovieBox-Plus-Linux.tar.gz" download="MovieBox-Plus-Linux.tar.gz" class="btn btn-primary" style="padding: 9px 18px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #ca8a04, #a16207); box-shadow: 0 0 14px rgba(234,179,8,0.4);">
+          <a href="/downloads/MovieBox-Plus-Linux.tar.gz" download="MovieBox-Plus-Linux.tar.gz" class="btn btn-primary"
+            style="padding: 9px 18px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #ca8a04, #a16207); box-shadow: 0 0 14px rgba(234,179,8,0.4);">
             <span>⬇️ Download Linux Package</span>
           </a>
         </div>
 
         <div class="install-step-card">
           <div class="step-badge">Step 1</div>
-          <div class="step-text">Extract the tar.gz package and run <code>./install-desktop-entry.sh</code> to integrate MovieBox Plus into your desktop app menu.</div>
+          <div class="step-text">Extract the tar.gz package and run <code>./install-desktop-entry.sh</code> to integrate
+            MovieBox Plus into your desktop app menu.</div>
         </div>
       </div>
 
       <div class="install-tab-content hidden" id="tabContent-extension">
         <!-- Chrome Extension Download -->
-        <div style="background: rgba(229,9,20,0.1); border: 1px solid rgba(229,9,20,0.3); border-radius: 10px; padding: 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+        <div
+          style="background: rgba(229,9,20,0.1); border: 1px solid rgba(229,9,20,0.3); border-radius: 10px; padding: 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
           <div>
             <strong style="color: #fff; font-size: 14px; display: block;">🧩 Chrome / Brave / Edge Extension</strong>
-            <span style="font-size: 12px; color: var(--text-secondary);">Direct toolbar streaming for Chrome, Brave, Edge & Opera</span>
+            <span style="font-size: 12px; color: var(--text-secondary);">Direct toolbar streaming for Chrome, Brave,
+              Edge & Opera</span>
           </div>
           <div style="display: flex; gap: 8px;">
-            <a href="/downloads/moviebox-extension.zip" download="moviebox-extension.zip" class="btn btn-primary" style="padding: 8px 16px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+            <a href="/downloads/moviebox-extension.zip" download="moviebox-extension.zip" class="btn btn-primary"
+              style="padding: 8px 16px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
               <span>⬇️ Download ZIP</span>
             </a>
-            <a href="/downloads/extension.crx" download="extension.crx" class="btn btn-secondary" style="padding: 8px 14px; font-size: 13px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+            <a href="/downloads/extension.crx" download="extension.crx" class="btn btn-secondary"
+              style="padding: 8px 14px; font-size: 13px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
               <span>⬇️ Download CRX</span>
             </a>
           </div>
@@ -2288,11 +2299,14 @@
         </div>
         <div class="install-step-card">
           <div class="step-badge">Step 2</div>
-          <div class="step-text">Open <code>chrome://extensions</code> (or <code>brave://extensions</code> / <code>edge://extensions</code>) and toggle <strong>Developer mode</strong> (top right).</div>
+          <div class="step-text">Open <code>chrome://extensions</code> (or <code>brave://extensions</code> /
+            <code>edge://extensions</code>) and toggle <strong>Developer mode</strong> (top right).
+          </div>
         </div>
         <div class="install-step-card">
           <div class="step-badge">Step 3</div>
-          <div class="step-text">Click <strong>"Load unpacked"</strong> and select the extracted folder. The MovieBox Plus icon will appear in your browser toolbar!</div>
+          <div class="step-text">Click <strong>"Load unpacked"</strong> and select the extracted folder. The MovieBox
+            Plus icon will appear in your browser toolbar!</div>
         </div>
       </div>
     </div>
@@ -2305,16 +2319,17 @@
   </div>
 </div>
 
-<script src="/app.js?v=20261120_ads"></script>
+<script src="/app.js?v=20261120_clean_ui"></script>
 <!-- Progressive Web App (PWA) Service Worker Registration -->
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js?v=20261120_ads')
+      navigator.serviceWorker.register('/sw.js?v=20261120_clean_ui')
         .then((reg) => console.log('MovieBox PWA ServiceWorker active:', reg.scope))
         .catch((err) => console.warn('PWA registration error:', err));
     });
   }
 </script>
 </body>
+
 </html>

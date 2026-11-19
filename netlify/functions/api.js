@@ -331,8 +331,14 @@ function mapItem(item) {
   };
 }
 
+const imdbResolveCache = new Map();
+
 async function resolveImdbId(title, yearHint, preferSeries = false) {
   if (!title) return null;
+  const cacheKey = `${title}:${yearHint || ""}:${preferSeries}`;
+  if (imdbResolveCache.has(cacheKey)) {
+    return imdbResolveCache.get(cacheKey);
+  }
   const clean = title
     .replace(/\[.*?\]|\(.*?\)|\bSeason\s*\d+(?:\s*-\s*\d+)?|\bS\d+(?:-S?\d+)?\b/gi, "")
     .trim();
@@ -343,7 +349,7 @@ async function resolveImdbId(title, yearHint, preferSeries = false) {
   try {
     const firstChar = term[0] || "a";
     const url = `https://v3.sg.media-imdb.com/suggestion/${firstChar}/${term}.json`;
-    const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+    const res = await fetch(url, { headers: { "User-Agent": USER_AGENT }, signal: AbortSignal.timeout(3000) });
     if (!res.ok) return null;
     const json = await res.json();
     const list = (json.d || []).filter(x => x && typeof x.id === "string" && x.id.startsWith("tt"));
@@ -391,6 +397,7 @@ async function resolveImdbId(title, yearHint, preferSeries = false) {
         bestId = item.id;
       }
     }
+    imdbResolveCache.set(cacheKey, bestId);
     return bestId;
   } catch {
     return null;
@@ -2065,10 +2072,10 @@ async function fetchMovieboxDirectStreams(subjectId, season = 0, episode = 0) {
       }
     }
 
-    // Also look for sibling dubs (e.g. Hindi dub)
+    // Also look for sibling dubs in parallel
     if (Array.isArray(json.data.dubs)) {
       const otherDubs = json.data.dubs.filter(d => !d.original && d.subjectId && d.subjectId !== subjectId).slice(0, 2);
-      for (const dub of otherDubs) {
+      await Promise.allSettled(otherDubs.map(async (dub) => {
         try {
           const dubUrl = `https://api6.aoneroom.com/wefeed-mobile-bff/subject-api/get?subjectId=${dub.subjectId}`;
           const dubTs = Date.now();
@@ -2082,7 +2089,7 @@ async function fetchMovieboxDirectStreams(subjectId, season = 0, episode = 0) {
             "x-forwarded-for": mbRandomSpoofedIp(),
             "authorization": `Bearer ${MOVIEBOX_JWT_TOKEN}`
           };
-          const dubRes = await fetch(dubUrl, { headers: dubHeaders });
+          const dubRes = await fetch(dubUrl, { headers: dubHeaders, signal: AbortSignal.timeout(2500) });
           if (dubRes.ok) {
             const dubJson = await dubRes.json();
             if (dubJson.data && dubJson.data.resourceDetectors) {
@@ -2110,7 +2117,7 @@ async function fetchMovieboxDirectStreams(subjectId, season = 0, episode = 0) {
             }
           }
         } catch (_) {}
-      }
+      }));
     }
 
     streams.sort((a, b) => (parseInt(b.quality, 10) || 0) - (parseInt(a.quality, 10) || 0));
@@ -2121,6 +2128,9 @@ async function fetchMovieboxDirectStreams(subjectId, season = 0, episode = 0) {
   }
 }
 
+const streamsCache = new Map();
+const STREAMS_CACHE_TTL = 3600000; // 1 hour in-memory cache for ultra-fast instant streams
+
 async function handleStreams(id, params) {
   let title = params.title || "";
   let yearHint = null;
@@ -2128,16 +2138,33 @@ async function handleStreams(id, params) {
   const reqEpisode = parseInt(params.episode || params.e || "0", 10) || 0;
   let isSeries = params.type === "tv" || reqSeason > 0 || reqEpisode > 0 || /\bS\d+/i.test(title);
 
+  const cacheKey = `streams:${id}:${reqSeason}:${reqEpisode}:${isSeries ? "tv" : "movie"}`;
+  const cached = streamsCache.get(cacheKey);
+  if (cached && (Date.now() - cached.ts < STREAMS_CACHE_TTL)) {
+    return {
+      statusCode: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400"
+      },
+      body: JSON.stringify(cached.data),
+    };
+  }
+
   let imdbId = id.startsWith("tt") ? id : null;
   let tmdbId = null;
   let subjectId = /^\d{15,20}$/.test(id) ? id : null;
 
   if (!imdbId || !subjectId) {
-    // Fetch title, real media_type, and TMDB ID (tm_id) from Moviebox
+    // Fast path: query expected type first with timeout
     const checkTypes = isSeries ? ["tv", "movie"] : ["movie", "tv"];
     for (const mtype of checkTypes) {
       try {
-        const res = await fetch(`https://api2.imdb3.shop/api/${mtype}/${id}`, { headers: { "User-Agent": USER_AGENT } });
+        const res = await fetch(`https://api2.imdb3.shop/api/${mtype}/${id}`, {
+          headers: { "User-Agent": USER_AGENT },
+          signal: AbortSignal.timeout(2500)
+        });
         if (res.ok) {
           const json = await res.json();
           const first = json.results?.[0];
@@ -2166,12 +2193,15 @@ async function handleStreams(id, params) {
     }
   }
 
-  if (imdbId) {
-    const cmMeta = await resolveCinemetaMeta(imdbId, isSeries);
-    if (cmMeta) {
-      if (cmMeta.tmdbId) tmdbId = cmMeta.tmdbId;
-      if (!isSeries && cmMeta.isSeries) isSeries = true;
-    }
+  // Fetch Cinemeta and Moviebox Direct streams concurrently in parallel
+  const [cmMeta, directStreams] = await Promise.all([
+    (imdbId && !tmdbId) ? resolveCinemetaMeta(imdbId, isSeries).catch(() => null) : Promise.resolve(null),
+    subjectId ? fetchMovieboxDirectStreams(subjectId, reqSeason, reqEpisode).catch(() => []) : Promise.resolve([])
+  ]);
+
+  if (cmMeta) {
+    if (cmMeta.tmdbId && !tmdbId) tmdbId = cmMeta.tmdbId;
+    if (!isSeries && cmMeta.isSeries) isSeries = true;
   }
 
   const season = reqSeason > 0 ? reqSeason : 1;
@@ -2179,28 +2209,27 @@ async function handleStreams(id, params) {
   const isSeriesMode = isSeries || reqSeason > 0 || reqEpisode > 0;
   const embedUrls = buildEmbedUrls({ imdbId, tmdbId, title, id, isSeries: isSeriesMode, season, episode });
 
-  let directStreams = [];
-  if (subjectId) {
-    directStreams = await fetchMovieboxDirectStreams(subjectId, reqSeason, reqEpisode);
-  }
-
   const defaultStreamUrl = directStreams.length > 0 ? directStreams[0].proxy_url || directStreams[0].direct_url : null;
   const primaryResourceId = directStreams.length > 0 ? directStreams[0].resource_id : null;
+
+  const responseData = {
+    releases: [],
+    streams: directStreams,
+    default_stream_url: defaultStreamUrl,
+    resource_id: primaryResourceId,
+    embed_urls: embedUrls,
+  };
+
+  streamsCache.set(cacheKey, { ts: Date.now(), data: responseData });
 
   return {
     statusCode: 200,
     headers: {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
-      "Cache-Control": "no-cache, no-store, must-revalidate"
+      "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400"
     },
-    body: JSON.stringify({
-      releases: [],
-      streams: directStreams,
-      default_stream_url: defaultStreamUrl,
-      resource_id: primaryResourceId,
-      embed_urls: embedUrls,
-    }),
+    body: JSON.stringify(responseData),
   };
 }
 

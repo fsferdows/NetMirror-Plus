@@ -1739,6 +1739,36 @@
       el.videoElement.classList.remove('hidden');
     }
 
+    // Immediate pre-warm for instant playback (0ms wait)
+    const immediateTarget = (media && (media.tmdb_id || media.tm_id)) || (mediaIdVal.startsWith('tt') ? mediaIdVal : null) || (state.currentDetails && (state.currentDetails.tmdb_id || state.currentDetails.tm_id)) || (state.currentDetails && state.currentDetails.id && state.currentDetails.id.value && state.currentDetails.id.value.startsWith('tt') ? state.currentDetails.id.value : null);
+    if (immediateTarget && (!state.embedUrls || state.embedUrls.length === 0)) {
+      state.embedUrls = [
+        {
+          name: 'VidLink Cloud (4K)',
+          url: isSeries
+            ? `https://vidlink.pro/tv/${immediateTarget}/${s}/${ep}?primaryColor=e50914&nextbutton=true`
+            : `https://vidlink.pro/movie/${immediateTarget}?primaryColor=e50914`
+        },
+        {
+          name: 'SmashyStream (Cinema HD)',
+          url: isSeries
+            ? `https://embed.smashystream.com/playere.php?imdb=${immediateTarget}&season=${s}&episode=${ep}`
+            : `https://embed.smashystream.com/playere.php?imdb=${immediateTarget}`
+        },
+        {
+          name: 'MultiEmbed (Cloud Fast)',
+          url: isSeries
+            ? `https://multiembed.mov/?video_id=${immediateTarget}&tmdb=1&s=${s}&e=${ep}`
+            : `https://multiembed.mov/?video_id=${immediateTarget}&tmdb=1`
+        }
+      ];
+      populateServerMenu(state.currentStreams, state.embedUrls);
+      if (state.userLockedEmbedServer) {
+        const preWarmEmbed = state.embedUrls.find(e => e.name === state.currentEmbedServerName) || state.embedUrls[0];
+        playEmbedUrl(preWarmEmbed.url, preWarmEmbed.name);
+      }
+    }
+
     try {
       const titleParam = encodeURIComponent(media.title || '');
       const providerParam = media.id && media.id.provider ? `&provider=${media.id.provider}` : '';
@@ -2211,10 +2241,10 @@
 
     activeStreamFallbackTimer = setTimeout(() => {
       if (reqAtStart === state.playbackRequestSeq && !state.isEmbedMode && video.readyState < 2) {
-        console.warn('Direct stream buffered slowly, trying fallback mirror');
+        console.warn('Direct stream buffered slowly, auto-switching to high-speed mirror');
         triggerFallback();
       }
-    }, 15000);
+    }, 2500);
 
     video.onerror = () => {
       console.warn('Video element reported error for:', video.src);
@@ -2251,7 +2281,13 @@
     frame.setAttribute('allowfullscreen', 'true');
     frame.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
     frame.setAttribute('referrerpolicy', 'no-referrer');
+    frame.setAttribute('loading', 'eager');
+    frame.setAttribute('fetchpriority', 'high');
     frame.src = url;
+
+    frame.addEventListener('load', () => {
+      if (el.playerSpinner) el.playerSpinner.classList.add('hidden');
+    });
 
     if (parent) {
       parent.replaceChild(frame, el.embedPlayerIframe);
@@ -2260,9 +2296,12 @@
       el.embedPlayerIframe.removeAttribute('sandbox');
       el.embedPlayerIframe.setAttribute('referrerpolicy', 'no-referrer');
       el.embedPlayerIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
+      el.embedPlayerIframe.setAttribute('loading', 'eager');
+      el.embedPlayerIframe.setAttribute('fetchpriority', 'high');
       el.embedPlayerIframe.classList.remove('hidden');
       el.embedPlayerIframe.src = url;
     }
+    if (el.playerSpinner) el.playerSpinner.classList.add('hidden');
   }
 
   function playEmbedUrl(url, serverName = 'Embed Player') {

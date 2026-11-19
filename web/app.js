@@ -1569,7 +1569,7 @@
   }
 
   function setVolumeBoost(multiplier, save = true) {
-    const clamped = Math.max(1.0, Math.min(3.0, parseFloat(multiplier) || 1.5));
+    const clamped = Math.max(0.5, Math.min(3.0, parseFloat(multiplier) || 1.5));
     state.audioBoost = clamped;
     if (save) {
       localStorage.setItem('moviebox_audio_boost', String(clamped));
@@ -4333,6 +4333,10 @@
     if (el.audioEnhancerBtn && el.audioEnhancerMenu) {
       el.audioEnhancerBtn.addEventListener('click', () => {
         ensureAudioEngine();
+        if (window.innerWidth <= 768) {
+          openSoundBoosterModal();
+          return;
+        }
         el.audioEnhancerMenu.classList.toggle('hidden');
         if (el.serverMenu) el.serverMenu.classList.add('hidden');
         if (el.qualityMenu) el.qualityMenu.classList.add('hidden');

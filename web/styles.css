@@ -5895,7 +5895,7 @@ kbd {
     background: rgba(0, 0, 0, 0.88) !important;
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
-    z-index: 2000 !important;
+    z-index: 10005 !important;
   }
 
   .modal-sheet-indicator {
@@ -6652,8 +6652,14 @@ kbd {
   /* Dialog Bottom Sheet styling for Sound Booster & Audio Dubs Modals */
   #soundBoosterModal,
   #audioDubsModal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
     align-items: flex-end !important;
     padding: 0 !important;
+    z-index: 10005 !important;
   }
 
   #soundBoosterModal .modal-card,
@@ -6687,7 +6693,7 @@ kbd {
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
     border-bottom: none !important;
     box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.95) !important;
-    z-index: 1000 !important;
+    z-index: 10010 !important;
     padding: 18px 16px calc(20px + env(safe-area-inset-bottom, 12px)) 16px !important;
     animation: slideUpSheet 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
     overflow-y: auto !important;

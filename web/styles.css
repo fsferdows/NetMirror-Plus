@@ -2380,6 +2380,26 @@ body {
   stroke-width: 2;
 }
 
+@media (max-width: 640px) {
+  .watch-servers-bar {
+    gap: 8px;
+  }
+  .watch-actions-group {
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .watch-actions-group::-webkit-scrollbar {
+    display: none;
+  }
+  .player-action-pill-btn {
+    padding: 5px 11px;
+    font-size: 11.5px;
+  }
+}
+
 /* How To Download Button (aligned cleanly on right of server bar, never blocking player controls) */
 .how-to-download-btn {
   flex-shrink: 0;

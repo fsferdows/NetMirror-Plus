@@ -41,7 +41,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20261119d" />
+  <link rel="stylesheet" href="/styles.css?v=20261119e" />
+  <style>
+    :root, html, body {
+      background-color: #060a14 !important;
+      color: #f8fafc !important;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+  </style>
   <script src="/monetization-config.js"></script>
   <!-- Google AdSense (ca-pub-4512671475286537) -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4512671475286537" crossorigin="anonymous"></script>
@@ -826,6 +835,25 @@
         <button class="how-to-download-btn" id="howToDownloadBtn" title="How to download movies and series">
           How To Download
         </button>
+        <div class="watch-actions-group">
+          <!-- Audio Dubs Switcher -->
+          <button class="player-action-pill-btn" id="watchAudioDubsBtn" title="Switch Audio Track / Dub">
+            <svg class="btn-icon" viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>
+            <span id="watchAudioDubsLabel">Audio / Dub</span>
+          </button>
+
+          <!-- 300% Studio Sound Booster -->
+          <button class="player-action-pill-btn sound-boost-btn" id="watchSoundBoosterBtn" title="300% Sound Booster & Studio EQ">
+            <svg class="btn-icon" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            <span id="watchSoundBoosterLabel">Sound (150%)</span>
+          </button>
+
+          <!-- Zoom In / Fullscreen -->
+          <button class="player-action-pill-btn fullscreen-btn" id="watchFullscreenBtn" title="Zoom In / Fullscreen (F)">
+            <svg class="btn-icon" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+            <span>Zoom In / Fullscreen</span>
+          </button>
+        </div>
         <!-- Hidden server menu for compatibility -->
         <div class="player-menu-wrapper hidden" id="serverMenuWrapper">
           <button class="player-btn player-text-btn" id="serverMenuBtn" title="Streaming Server">
@@ -852,6 +880,18 @@
 
       <!-- Universal Fallback Web Embed Player with Anti-Ad Shield & No-Referrer Protection -->
       <iframe id="embedPlayerIframe" class="embed-player-iframe hidden" allowfullscreen allow="autoplay; fullscreen; picture-in-picture; encrypted-media" referrerpolicy="no-referrer"></iframe>
+
+      <!-- Floating Quick-Action Overlay (Permanently available on both embed iframes and HTML5) -->
+      <div class="player-floating-actions" id="playerFloatingActions">
+        <button class="floating-action-btn" id="floatingSoundBtn" title="300% Studio Sound Booster">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+          <span id="floatingSoundLabel">150%</span>
+        </button>
+        <button class="floating-action-btn" id="floatingFullscreenBtn" title="Zoom In / Fullscreen (F)">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+          <span>Fullscreen</span>
+        </button>
+      </div>
 
       <!-- Center Big Splash Icon (on play/pause) -->
       <div class="player-center-icon hidden" id="playerCenterIcon">
@@ -1382,7 +1422,89 @@
     </div>
   </div>
 
-  <script src="/app.js?v=20261119d"></script>
+  <!-- Sound Booster & Studio EQ Modal -->
+  <div class="modal hidden" id="soundBoosterModal" style="z-index: 10005;">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 class="modal-title">🔊 Studio Sound Booster & EQ</h3>
+        <button class="modal-close-btn" id="closeSoundBoosterBtn">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <label style="font-weight: 600; font-size: 14px;">Volume Boost Multiplier</label>
+            <span class="badge" id="modalBoostLevelLabel" style="background: rgba(234, 179, 8, 0.2); color: #eab308; font-weight: 700; padding: 4px 10px; border-radius: 6px;">150% (Recommended)</span>
+          </div>
+          <input type="range" id="modalBoostRangeSlider" min="0.5" max="3.0" step="0.1" value="1.5" style="width: 100%; accent-color: #e50914; height: 6px; cursor: pointer;" />
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+            <span>50%</span>
+            <span>100% (Normal)</span>
+            <span>200%</span>
+            <span>300% (Max Boost)</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 8px; color: var(--text-secondary);">Quick Boost Presets</label>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+            <button type="button" class="btn btn-secondary modal-boost-chip" data-boost="1.0" style="padding: 8px 4px; font-size: 12px; font-weight: 600;">100%</button>
+            <button type="button" class="btn btn-secondary modal-boost-chip" data-boost="1.5" style="padding: 8px 4px; font-size: 12px; font-weight: 600;">150%</button>
+            <button type="button" class="btn btn-secondary modal-boost-chip" data-boost="2.0" style="padding: 8px 4px; font-size: 12px; font-weight: 600;">200%</button>
+            <button type="button" class="btn btn-secondary modal-boost-chip" data-boost="3.0" style="padding: 8px 4px; font-size: 12px; font-weight: 600;">300% 🔥</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 8px; color: var(--text-secondary);">Cinema Audio Profiles (DSP EQ)</label>
+          <div id="modalPresetsList" style="display: flex; flex-direction: column; gap: 6px;">
+            <button type="button" class="menu-item preset-item active" data-preset="balanced" style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06);">
+              <span>⚖️ Studio Balanced</span>
+              <span style="font-size: 11px; color: var(--text-muted);">Neutral clean acoustics</span>
+            </button>
+            <button type="button" class="menu-item preset-item" data-preset="theater" style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06);">
+              <span>🎬 Cinema Theater</span>
+              <span style="font-size: 11px; color: var(--text-muted);">Dolby Atmos simulated curve</span>
+            </button>
+            <button type="button" class="menu-item preset-item" data-preset="vocal" style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06);">
+              <span>🗣️ Vocal & Dialogue Clarity</span>
+              <span style="font-size: 11px; color: var(--text-muted);">Boosts whispered speech</span>
+            </button>
+            <button type="button" class="menu-item preset-item" data-preset="bass" style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06);">
+              <span>💣 Action Bass Blast</span>
+              <span style="font-size: 11px; color: var(--text-muted);">Sub-bass +8dB for explosions</span>
+            </button>
+            <button type="button" class="menu-item preset-item" data-preset="night" style="padding: 10px 14px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.06);">
+              <span>🌙 Late Night Mode</span>
+              <span style="font-size: 11px; color: var(--text-muted);">Dynamic compression, quiet explosions</span>
+            </button>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+          <button type="button" class="btn btn-primary" id="doneSoundBoosterBtn" style="padding: 8px 24px;">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audio Dubs / Multi-Language Modal -->
+  <div class="modal hidden" id="audioDubsModal" style="z-index: 10005;">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title">🎧 Select Audio Track / Dub</h3>
+        <button class="modal-close-btn" id="closeAudioDubsBtn">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;">Select your preferred audio language track or dub:</p>
+        <div id="audioDubsListContainer"></div>
+        <div style="margin-top: 18px; display: flex; justify-content: flex-end;">
+          <button type="button" class="btn btn-primary" id="doneAudioDubsBtn" style="padding: 8px 24px;">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js?v=20261119e"></script>
 </body>
 </html>
 

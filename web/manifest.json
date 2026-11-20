@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "MovieBox Plus – Watch Worldwide Movies, TV Series & Live Sports",
-  "short_name": "MovieBox Plus",
+  "name": "moviehub.stream – Watch Worldwide Movies, TV Series & Live Sports",
+  "short_name": "moviehub.stream",
   "description": "Stream worldwide movies, TV series, anime, and 24/7 live sports (Cricket, Football, NBA) in 4K Ultra HD with multi-language subtitles, audio dubs, and up to 300% studio sound booster.",
   "start_url": "/?source=pwa",
   "scope": "/",

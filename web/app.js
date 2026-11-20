@@ -1,5 +1,5 @@
 /**
- * NetMirror / MovieBox Web - Client Application
+ * NetMirror / moviehub.stream Web - Client Application
  * Premium Cinema UI/UX & Native In-Browser Video Player
  */
 
@@ -912,39 +912,39 @@
 
     const tabDownloadMeta = {
       mac: {
-        url: '/downloads/MovieBox-Plus-Mac.dmg',
-        filename: 'MovieBox-Plus-Mac.dmg',
+        url: '/downloads/moviehub.stream-Plus-Mac.dmg',
+        filename: 'moviehub.stream-Plus-Mac.dmg',
         btnText: '⬇️ Download Mac DMG',
         bannerTitle: 'Download Native macOS App (Apple Silicon & Intel DMG)',
-        toast: '⬇️ Starting download: MovieBox Plus for Mac (DMG)...'
+        toast: '⬇️ Starting download: moviehub.stream for Mac (DMG)...'
       },
       windows: {
-        url: '/downloads/MovieBox-Plus-Windows.zip',
-        filename: 'MovieBox-Plus-Windows.zip',
+        url: '/downloads/moviehub.stream-Plus-Windows.zip',
+        filename: 'moviehub.stream-Plus-Windows.zip',
         btnText: '⬇️ Download Windows (.zip)',
         bannerTitle: 'Download Native Windows Launcher (.zip)',
-        toast: '⬇️ Starting download: MovieBox Plus for Windows (.zip)...'
+        toast: '⬇️ Starting download: moviehub.stream for Windows (.zip)...'
       },
       android: {
-        url: '/downloads/MovieBox-Plus.apk',
-        filename: 'MovieBox-Plus.apk',
+        url: '/downloads/moviehub.stream-Plus.apk',
+        filename: 'moviehub.stream-Plus.apk',
         btnText: '⬇️ Download Android APK',
         bannerTitle: 'Download Standalone Android APK (Phones, Tablets & TV)',
-        toast: '⬇️ Starting download: MovieBox Plus for Android (APK)...'
+        toast: '⬇️ Starting download: moviehub.stream for Android (APK)...'
       },
       linux: {
-        url: '/downloads/MovieBox-Plus-Linux.tar.gz',
-        filename: 'MovieBox-Plus-Linux.tar.gz',
+        url: '/downloads/moviehub.stream-Plus-Linux.tar.gz',
+        filename: 'moviehub.stream-Plus-Linux.tar.gz',
         btnText: '⬇️ Download Linux Package',
         bannerTitle: 'Download Native Linux Package (.tar.gz)',
-        toast: '⬇️ Starting download: MovieBox Plus for Linux (.tar.gz)...'
+        toast: '⬇️ Starting download: moviehub.stream for Linux (.tar.gz)...'
       },
       extension: {
         url: '/downloads/moviebox-extension.zip',
         filename: 'moviebox-extension.zip',
         btnText: '⬇️ Download Extension (ZIP)',
         bannerTitle: 'Download Chrome Extension (Manifest V3)',
-        toast: '⬇️ Starting download: MovieBox Plus Chrome Extension (ZIP)...'
+        toast: '⬇️ Starting download: moviehub.stream Chrome Extension (ZIP)...'
       },
       ios: {
         url: null,
@@ -1021,7 +1021,7 @@
     window.addEventListener('appinstalled', () => {
       deferredInstallPrompt = null;
       closeInstallModal();
-      showToast('🎉 MovieBox Plus software installed successfully! Enjoy 4K streaming.');
+      showToast('🎉 moviehub.stream software installed successfully! Enjoy 4K streaming.');
     });
 
     // Wire trigger buttons
@@ -1061,7 +1061,7 @@
               deferredInstallPrompt.prompt();
               deferredInstallPrompt.userChoice.then((choiceResult) => {
                 if (choiceResult.outcome === 'accepted') {
-                  showToast('Installing MovieBox Plus...');
+                  showToast('Installing moviehub.stream...');
                   closeInstallModal();
                 }
                 deferredInstallPrompt = null;
@@ -5296,16 +5296,16 @@ const DEFAULT_SHOWCASE_CATALOG = {
     let seoTitle = '';
     if (isWatch) {
       seoTitle = isTv && season > 0
-        ? `Watch ${title} Season ${season} Episode ${episode} Online Free | MovieBox Plus`
-        : `Watch ${title} (${year}) Full Movie Online Free in 4K | MovieBox Plus`;
+        ? `Watch ${title} Season ${season} Episode ${episode} Online Free | moviehub.stream`
+        : `Watch ${title} (${year}) Full Movie Online Free in 4K | moviehub.stream`;
     } else {
-      seoTitle = `${title} (${year}) – Watch Free Online in 4K UHD | MovieBox Plus`;
+      seoTitle = `${title} (${year}) – Watch Free Online in 4K UHD | moviehub.stream`;
     }
 
     document.title = seoTitle;
 
     const overview = details.overview ||
-      `Stream ${title} (${year}) online in 4K Ultra HD on MovieBox Plus with multi-language audio dubs, subtitles, and 300% studio sound booster.`;
+      `Stream ${title} (${year}) online in 4K Ultra HD on moviehub.stream with multi-language audio dubs, subtitles, and 300% studio sound booster.`;
 
     const descMeta = document.querySelector('meta[name="description"]');
     if (descMeta) descMeta.setAttribute('content', overview.slice(0, 160));
@@ -5316,7 +5316,7 @@ const DEFAULT_SHOWCASE_CATALOG = {
     const ogDesc = document.querySelector('meta[property="og:description"]');
     if (ogDesc) ogDesc.setAttribute('content', overview.slice(0, 200));
 
-    const poster = details.poster_url || (details.poster_path ? `https://image.tmdb.org/t/p/w500${details.poster_path}` : 'https://netmirror-plus.vercel.app/og-image.png');
+    const poster = details.poster_url || (details.poster_path ? `https://image.tmdb.org/t/p/w500${details.poster_path}` : 'https://moviehub.stream/og-image.png');
     const ogImg = document.querySelector('meta[property="og:image"]');
     if (ogImg) ogImg.setAttribute('content', poster);
 
@@ -5352,19 +5352,19 @@ const DEFAULT_SHOWCASE_CATALOG = {
   }
 
   function revertSeoMeta() {
-    document.title = 'MovieBox Plus – Watch Worldwide Movies, TV Series & Live Sports Online';
+    document.title = 'moviehub.stream – Watch Worldwide Movies, TV Series & Live Sports Online';
     const descMeta = document.querySelector('meta[name="description"]');
     if (descMeta) {
       descMeta.setAttribute('content', 'Stream worldwide movies, TV series, and 24/7 live sports (Cricket, Football, NBA) in 4K Ultra HD with multi-language subtitles, audio dubs, and up to 300% studio sound booster.');
     }
     const ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle) ogTitle.setAttribute('content', 'MovieBox Plus – Watch Worldwide Movies, Series & Live Sports');
+    if (ogTitle) ogTitle.setAttribute('content', 'moviehub.stream – Watch Worldwide Movies, Series & Live Sports');
     const ogDesc = document.querySelector('meta[property="og:description"]');
     if (ogDesc) ogDesc.setAttribute('content', 'Stream worldwide movies, TV series, and 24/7 live sports (Cricket, Football, NBA) in Ultra HD with multi-language subtitles and up to 300% volume booster.');
     const ogImg = document.querySelector('meta[property="og:image"]');
-    if (ogImg) ogImg.setAttribute('content', 'https://netmirror-plus.vercel.app/og-image.png');
+    if (ogImg) ogImg.setAttribute('content', 'https://moviehub.stream/og-image.png');
     const canonicalTag = document.getElementById('canonicalTag');
-    if (canonicalTag) canonicalTag.setAttribute('href', 'https://netmirror-plus.vercel.app/');
+    if (canonicalTag) canonicalTag.setAttribute('href', 'https://moviehub.stream/');
     const mediaSchemaEl = document.getElementById('dynamicMediaSchema');
     if (mediaSchemaEl) mediaSchemaEl.remove();
   }
@@ -5376,10 +5376,10 @@ const DEFAULT_SHOWCASE_CATALOG = {
       : generateMovieUrl(id, cleanT);
 
     const shareData = {
-      title: `${cleanT} – MovieBox Plus`,
+      title: `${cleanT} – moviehub.stream`,
       text: isWatch && season > 0
-        ? `Watch ${cleanT} Season ${season} Episode ${episode} on MovieBox Plus:`
-        : `Watch ${cleanT} in Full HD on MovieBox Plus:`,
+        ? `Watch ${cleanT} Season ${season} Episode ${episode} on moviehub.stream:`
+        : `Watch ${cleanT} in Full HD on moviehub.stream:`,
       url: shareUrl,
     };
 
@@ -7396,7 +7396,7 @@ const DEFAULT_SHOWCASE_CATALOG = {
     state.gridPage = 1;
     switchView('grid');
     el.gridTitle.textContent = `Results for "${query}"`;
-    el.gridSubtitle.textContent = 'Searching MovieBox catalog...';
+    el.gridSubtitle.textContent = 'Searching moviehub.stream catalog...';
     el.mediaGrid.innerHTML = '<div style="color:var(--text-muted);padding:40px;">Searching...</div>';
 
     try {
@@ -8262,7 +8262,7 @@ const DEFAULT_SHOWCASE_CATALOG = {
       revertSeoMeta();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (target === 'sports') {
-      document.title = 'Live Sports 24/7 – Watch Cricket, Football & NBA Online Free | MovieBox Plus';
+      document.title = 'Live Sports 24/7 – Watch Cricket, Football & NBA Online Free | moviehub.stream';
       const canonicalTag = document.getElementById('canonicalTag');
       if (canonicalTag) canonicalTag.setAttribute('href', `${window.location.origin}/?nav=sports`);
       openSportsView();
@@ -9052,7 +9052,7 @@ const DEFAULT_SHOWCASE_CATALOG = {
 
     // Auto-focus Trap:
     // If an ad click inside an embed tries to open a popup tab or blur window,
-    // refocus immediately to keep the user in MovieBox Plus.
+    // refocus immediately to keep the user in moviehub.stream.
     window.addEventListener('blur', () => {
       if (state.isEmbedMode) {
         setTimeout(() => {
@@ -9436,7 +9436,7 @@ const DEFAULT_SHOWCASE_CATALOG = {
     // Keyboard Shortcuts
     window.addEventListener('keydown', handleGlobalKeydown);
     } catch (err) {
-      console.warn("[MovieBox] Error in setupEventListeners:", err);
+      console.warn("[moviehub.stream] Error in setupEventListeners:", err);
     }
   }
 

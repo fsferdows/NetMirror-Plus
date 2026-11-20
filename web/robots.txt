@@ -1,5 +1,5 @@
 # ==============================================================================
-# MovieBox Plus (NetMirror Plus) – Robots.txt
+# moviehub.stream (NetMirror Plus) – Robots.txt
 # Optimized for Google, Bing, and AI Search Engines (ChatGPT, Perplexity, Claude)
 # ==============================================================================
 
@@ -46,4 +46,4 @@ User-agent: Applebot-Extended
 Allow: /
 
 # Sitemap Index
-Sitemap: https://netmirror-plus.vercel.app/sitemap.xml
+Sitemap: https://moviehub.stream/sitemap.xml

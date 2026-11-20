@@ -1,5 +1,5 @@
-// MovieBox Plus - Production Progressive Web App (PWA) Service Worker
-const CACHE_NAME = 'moviebox-plus-v20261120_v19';
+// moviehub.stream - Production Progressive Web App (PWA) Service Worker
+const CACHE_NAME = 'moviehub-stream-v20261120_v19';
 
 const CORE_ASSETS = [
   '/',

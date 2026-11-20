@@ -1,8 +1,8 @@
-# MovieBox Plus (NetMirror Plus)
+# moviehub.stream (NetMirror Plus)
 > Stream worldwide movies, trending TV series, and 24/7 live sports (Cricket, Football, NBA) online in 4K Ultra HD with multi-language subtitles and up to 300% studio sound booster.
 
 ## Overview
-MovieBox Plus is a high-performance web streaming application and Progressive Web App (PWA) providing instant browser-based playback of worldwide cinema, international TV series, and live sports broadcasts. It integrates TMDB metadata, real-time audio booster technology, and mirror servers with zero intrusive redirects.
+moviehub.stream is a high-performance web streaming application and Progressive Web App (PWA) providing instant browser-based playback of worldwide cinema, international TV series, and live sports broadcasts. It integrates TMDB metadata, real-time audio booster technology, and mirror servers with zero intrusive redirects.
 
 ## Core Features
 - **4K UHD & 1080p Streaming**: High-definition video streaming with adaptive bitrate and multi-server redundancy.
@@ -14,15 +14,15 @@ MovieBox Plus is a high-performance web streaming application and Progressive We
 - **Cross-Platform**: Accessible via any web browser, installable as a PWA, Chrome extension, and native desktop app for macOS, Windows, and Linux.
 
 ## URLs & Key Navigation
-- Homepage: https://netmirror-plus.vercel.app/
-- Live Sports: https://netmirror-plus.vercel.app/?nav=sports
-- Netflix Catalog: https://netmirror-plus.vercel.app/?platform=netflix
-- Prime Video Catalog: https://netmirror-plus.vercel.app/?platform=prime
-- Disney+ Catalog: https://netmirror-plus.vercel.app/?platform=disney
-- Trending Movies: https://netmirror-plus.vercel.app/?cat=trending
-- Top Rated (IMDb Top 250): https://netmirror-plus.vercel.app/?cat=toprated
-- Movie Deep-Links: https://netmirror-plus.vercel.app/?movie={id}&title={title}
-- Watch Deep-Links: https://netmirror-plus.vercel.app/?watch={id}&s={season}&e={episode}&title={title}
+- Homepage: https://moviehub.stream/
+- Live Sports: https://moviehub.stream/?nav=sports
+- Netflix Catalog: https://moviehub.stream/?platform=netflix
+- Prime Video Catalog: https://moviehub.stream/?platform=prime
+- Disney+ Catalog: https://moviehub.stream/?platform=disney
+- Trending Movies: https://moviehub.stream/?cat=trending
+- Top Rated (IMDb Top 250): https://moviehub.stream/?cat=toprated
+- Movie Deep-Links: https://moviehub.stream/?movie={id}&title={title}
+- Watch Deep-Links: https://moviehub.stream/?watch={id}&s={season}&e={episode}&title={title}
 
 ## API Endpoints (For Developers)
 - `/api/tmdb?endpoint={tmdb_endpoint}`: Server-side proxy for TMDB v3 API.

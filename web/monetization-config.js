@@ -30,7 +30,7 @@ window.NETMIRROR_MONETIZATION = {
   },
 
   // 4. VIP PASSCODES (Users can enter these to unlock VIP ad-free status)
-  vipPasscodes: ["FSFERDOWS", "FARDIN KHAN"],
+  vipPasscodes: ["FSFERDOWS", "FARDIN KHAN", "ILOVEUU"],
 
   // 5. BANNER ADVERTISING NETWORKS – GOOGLE ADSENSE (ca-pub-4512671475286537)
   // Google AdSense is the only permitted monetization partner.

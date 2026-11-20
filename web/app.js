@@ -734,7 +734,7 @@
     const normalizedInput = rawVal.replace(/\s+/g, ' ');
     const noSpaceInput = rawVal.replace(/\s+/g, '');
     const config = window.NETMIRROR_MONETIZATION || {};
-    const validCodes = (config.vipPasscodes || ['FSFERDOWS', 'FARDIN KHAN']).map(c => String(c).trim().toUpperCase());
+    const validCodes = (config.vipPasscodes || ['FSFERDOWS', 'FARDIN KHAN', 'ILOVEUU']).map(c => String(c).trim().toUpperCase());
 
     if (!rawVal) {
       showVipMessage('Please enter a valid supporter passcode.', 'error');

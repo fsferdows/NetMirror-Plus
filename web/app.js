@@ -1041,7 +1041,94 @@
   // CURATED DEFAULT SHOWCASE CATALOG (0ms Instant Category Showcase)
   // 100% Genre-Accurate Catalog with Official High-Res Posters & Metadata
   // ==========================================================================
-  const DEFAULT_SHOWCASE_CATALOG = {
+    const HERO_MOVIE_SLIDES = [
+    {
+      id: { provider: 'tmdb', value: '533535' },
+      tmdb_id: '533535',
+      title: 'Deadpool & Wolverine',
+      year: '2024',
+      rating: '8.6',
+      media_type: 'movie',
+      overview: 'Wade Wilson must reluctantly suit-up again alongside a cynical Wolverine to protect his universe from an existential void threat.',
+      backdrop_path: '/yDHYTjA3R0jFYba16jBB1jv8vE1.jpg',
+      backdrop_url: 'https://image.tmdb.org/t/p/original/yDHYTjA3R0jFYba16jBB1jv8vE1.jpg',
+      poster_url: 'https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg'
+    },
+    {
+      id: { provider: 'tmdb', value: '76600' },
+      tmdb_id: '76600',
+      title: 'Avatar: The Way of Water',
+      year: '2022',
+      rating: '8.8',
+      media_type: 'movie',
+      overview: 'Jake Sully and Neytiri fight to protect their family as an ancient enemy resurfaces, leading them to the ocean regions of Pandora.',
+      backdrop_path: '/s16H6tpK2utvwDtzZ8Qy4qm5Emw.jpg',
+      backdrop_url: 'https://image.tmdb.org/t/p/original/s16H6tpK2utvwDtzZ8Qy4qm5Emw.jpg',
+      poster_url: 'https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg'
+    },
+    {
+      id: { provider: 'tmdb', value: '693134' },
+      tmdb_id: '693134',
+      title: 'Dune: Part Two',
+      year: '2024',
+      rating: '8.5',
+      media_type: 'movie',
+      overview: 'Paul Atreides unites with Chani and the Fremen to seek revenge against the conspirators who destroyed his noble family.',
+      backdrop_path: '/xOMo8BRK7PfcJv9JCnx7s520b4q.jpg',
+      backdrop_url: 'https://image.tmdb.org/t/p/original/xOMo8BRK7PfcJv9JCnx7s520b4q.jpg',
+      poster_url: 'https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg'
+    },
+    {
+      id: { provider: 'tmdb', value: '1368337' },
+      tmdb_id: '1368337',
+      title: 'The Odyssey',
+      year: '2026',
+      rating: '8.0',
+      media_type: 'movie',
+      overview: 'Odysseus, King of Ithaca, embarks on a perilous epic journey home following the Trojan War across mythical waters.',
+      backdrop_path: '/c7btGYblBnfAaw713WvFM0Kimc7.jpg',
+      backdrop_url: 'https://image.tmdb.org/t/p/original/c7btGYblBnfAaw713WvFM0Kimc7.jpg',
+      poster_url: 'https://image.tmdb.org/t/p/w500/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg'
+    },
+    {
+      id: { provider: 'tmdb', value: '66732' },
+      tmdb_id: '66732',
+      title: 'Stranger Things',
+      year: '2024',
+      rating: '8.6',
+      media_type: 'tv',
+      overview: 'When a boy vanishes from Hawkins, friends and family uncover secret experiments, supernatural dangers and an extraordinary girl.',
+      backdrop_path: '/56v2KjBlU4XaOv9rVYEQypROD7P.jpg',
+      backdrop_url: 'https://image.tmdb.org/t/p/original/56v2KjBlU4XaOv9rVYEQypROD7P.jpg',
+      poster_url: 'https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg'
+    },
+    {
+      id: { provider: 'tmdb', value: '299536' },
+      tmdb_id: '299536',
+      title: 'Avengers: Infinity War',
+      year: '2018',
+      rating: '8.9',
+      media_type: 'movie',
+      overview: 'The Avengers and their allies must be willing to sacrifice all in an attempt to defeat the powerful Thanos before his blitz of devastation.',
+      backdrop_path: '/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg',
+      backdrop_url: 'https://image.tmdb.org/t/p/original/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg',
+      poster_url: 'https://image.tmdb.org/t/p/w500/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg'
+    },
+    {
+      id: { provider: 'tmdb', value: '84958' },
+      tmdb_id: '84958',
+      title: 'Loki',
+      year: '2023',
+      rating: '8.4',
+      media_type: 'tv',
+      overview: 'The mercurial villain Loki resumes his role as the God of Mischief following the timeline events of Avengers: Endgame.',
+      backdrop_path: '/voHUmlvjysv923xaoE3q25T0k2d.jpg',
+      backdrop_url: 'https://image.tmdb.org/t/p/original/voHUmlvjysv923xaoE3q25T0k2d.jpg',
+      poster_url: 'https://image.tmdb.org/t/p/w500/voHUmlvjysv923xaoE3q25T0k2d.jpg'
+    }
+  ];
+
+const DEFAULT_SHOWCASE_CATALOG = {
   "hero_slides": [
     {
       "id": {
@@ -4707,7 +4794,10 @@
       }
     } catch (_) {}
 
-    renderRailSkeletons(carousel, 7);
+    // Only render skeletons if carousel is completely empty
+    if (!carousel.children || carousel.children.length === 0) {
+      renderRailSkeletons(carousel, 7);
+    }
 
     try {
       // Primary: Server-side proxy route /api/tmdb to bypass client adblockers and CORS
@@ -4721,6 +4811,17 @@
         res = await fetch(direct.url, { headers: direct.headers });
       }
 
+      // If server proxy returned 404/500/offline, try direct TMDB API fetch before throwing to fallback
+      if (!res || !res.ok) {
+        try {
+          const direct = buildDirectTmdbFallbackRequest(cat.endpoint);
+          const directRes = await fetch(direct.url, { headers: direct.headers });
+          if (directRes && directRes.ok) {
+            res = directRes;
+          }
+        } catch (_) {}
+      }
+
       if (!res || !res.ok) {
         let errMsg = `TMDB API error HTTP ${res ? res.status : 'offline'}`;
         try {
@@ -4729,7 +4830,7 @@
             errMsg = errData.error || errData.status_message;
           }
         } catch (_) {}
-        showTmdbDebugError(`TMDB Notice (${res ? res.status : 'offline'}): ${errMsg}. Rendering active fallback catalog.`);
+        showTmdbDebugError(`TMDB Notice (${res ? res.status : 'offline'}): ${errMsg}. Active catalog loaded.`);
         throw new Error(errMsg);
       }
 
@@ -4784,32 +4885,23 @@
   }
 
   function applyDefaultShowcase() {
-    // 1. Multi-slide Hero setup
-    if (DEFAULT_SHOWCASE_CATALOG.hero_slides && DEFAULT_SHOWCASE_CATALOG.hero_slides.length > 0) {
-      state.heroSlides = DEFAULT_SHOWCASE_CATALOG.hero_slides;
-      state.heroCurrentIndex = 0;
-      setHero(state.heroSlides[0]);
-      renderHeroIndicators();
-      startHeroAutoRotate();
-    }
+    // 1. Multi-slide Hero setup with verified high-definition sliding movies
+    state.heroSlides = HERO_MOVIE_SLIDES;
+    state.heroCurrentIndex = 0;
+    setHero(state.heroSlides[0]);
+    renderHeroIndicators();
+    startHeroAutoRotate();
 
-    // 2. Populate category sections with initial placeholders / curated items
-    if (el.trendingCarousel) renderCarousel(el.trendingCarousel, getFallbackCatalogForCategory('trending'));
-    if (el.englishCarousel) renderCarousel(el.englishCarousel, getFallbackCatalogForCategory('english'));
-    if (el.hindiCarousel) renderCarousel(el.hindiCarousel, getFallbackCatalogForCategory('hindi'));
-    if (el.kannadaCarousel) renderCarousel(el.kannadaCarousel, getFallbackCatalogForCategory('kannada'));
-    if (el.netflixCarousel) renderCarousel(el.netflixCarousel, getFallbackCatalogForCategory('netflix'));
-    if (el.primeCarousel) renderCarousel(el.primeCarousel, getFallbackCatalogForCategory('prime'));
-    if (el.disneyCarousel) renderCarousel(el.disneyCarousel, getFallbackCatalogForCategory('disney'));
-    if (el.moviesCarousel) renderCarousel(el.moviesCarousel, getFallbackCatalogForCategory('movies'));
-    if (el.seriesCarousel) renderCarousel(el.seriesCarousel, getFallbackCatalogForCategory('series'));
-    if (el.actionCarousel) renderCarousel(el.actionCarousel, getFallbackCatalogForCategory('action'));
-    if (el.scifiCarousel) renderCarousel(el.scifiCarousel, getFallbackCatalogForCategory('scifi'));
-    if (el.horrorCarousel) renderCarousel(el.horrorCarousel, getFallbackCatalogForCategory('horror'));
-    if (el.animeCarousel) renderCarousel(el.animeCarousel, getFallbackCatalogForCategory('anime'));
-    if (el.kdramaCarousel) renderCarousel(el.kdramaCarousel, getFallbackCatalogForCategory('kdrama'));
-    if (el.comedyCarousel) renderCarousel(el.comedyCarousel, getFallbackCatalogForCategory('comedy'));
-    if (el.topRatedCarousel) renderCarousel(el.topRatedCarousel, getFallbackCatalogForCategory('toprated'));
+    // 2. Populate EVERY category section immediately so all sections have their movies listed on 0ms first paint
+    TMDB_CATEGORIES.forEach(cat => {
+      const carousel = cat.carouselEl();
+      if (carousel) {
+        const items = getFallbackCatalogForCategory(cat.key);
+        if (items && items.length > 0) {
+          renderCarousel(carousel, items);
+        }
+      }
+    });
 
     // 3. Showcase live sports immediately
     renderSportsSpotlight();
@@ -4847,22 +4939,31 @@
   function setHero(item) {
     if (!item) return;
     state.heroItem = item;
-    const title = cleanDisplayTitle(item.title);
-    const poster = item.poster_url || fallbackPoster(title);
+    const title = cleanDisplayTitle(item.title || item.name || 'Featured Title');
+    const backdrop = item.backdrop_url || (item.backdrop_path ? `https://image.tmdb.org/t/p/original${item.backdrop_path}` : (item.poster_url || fallbackPoster(title)));
     
-    // Smooth transition
-    el.heroBackdrop.style.opacity = '0.3';
-    setTimeout(() => {
-      el.heroBackdrop.style.backgroundImage = `url('${poster}')`;
-      el.heroBackdrop.style.opacity = '1';
-    }, 150);
+    // Smooth sliding backdrop transition
+    if (el.heroBackdrop) {
+      el.heroBackdrop.style.opacity = '0.25';
+      el.heroBackdrop.style.transform = 'scale(1.05)';
+      setTimeout(() => {
+        el.heroBackdrop.style.backgroundImage = `url('${backdrop}')`;
+        el.heroBackdrop.style.opacity = '1';
+        el.heroBackdrop.style.transform = 'scale(1.02)';
+      }, 180);
+    }
 
-    el.heroTitle.textContent = title;
-    el.heroYear.textContent = item.year || '2026';
-    el.heroMediaType.textContent = item.media_type === 'series' ? 'TV SERIES' : 'MOVIE';
-    el.heroRating.textContent = '⭐ 8.7';
-    el.heroSynopsis.textContent =
-      `Stream ${title} directly in your browser in high definition with multi-audio and subtitles.`;
+    if (el.heroTitle) el.heroTitle.textContent = title;
+    if (el.heroYear) el.heroYear.textContent = item.year || '2024';
+    if (el.heroMediaType) el.heroMediaType.textContent = (item.media_type === 'series' || item.media_type === 'tv') ? 'TV SERIES' : 'MOVIE';
+    if (el.heroRating) {
+      const vote = item.rating || (item.vote_average ? (Math.round(Number(item.vote_average) * 10) / 10).toFixed(1) : '8.6');
+      el.heroRating.textContent = `⭐ ${vote}`;
+    }
+    if (el.heroSynopsis) {
+      el.heroSynopsis.textContent = item.overview ||
+        `Stream ${title} directly in your browser in 4K Ultra HD with crystal-clear audio and multi-language subtitles.`;
+    }
 
     updateHeroFavBtn();
   }
@@ -4933,6 +5034,7 @@
     const seen = new Set();
     const fragment = document.createDocumentFragment();
     let index = 0;
+    let cardCount = 0;
     (items || []).forEach((item) => {
       try {
         if (!item) return;
@@ -4940,12 +5042,15 @@
         if (key && seen.has(key)) return;
         if (key) seen.add(key);
         const card = createMovieCard(item, index++);
-        if (card) fragment.appendChild(card);
+        if (card) {
+          fragment.appendChild(card);
+          cardCount++;
+        }
       } catch (e) {
         console.warn('Error rendering carousel card:', e, item);
       }
     });
-    if (fragment.children.length > 0) {
+    if (cardCount > 0) {
       container.innerHTML = '';
       container.appendChild(fragment);
     }
@@ -5050,16 +5155,20 @@
       return;
     }
     const fragment = document.createDocumentFragment();
+    let cwCount = 0;
     state.history.slice(0, 12).forEach((item) => {
       try {
         if (!item) return;
         const card = createMovieCard(item);
-        if (card) fragment.appendChild(card);
+        if (card) {
+          fragment.appendChild(card);
+          cwCount++;
+        }
       } catch (e) {
         console.warn('Error rendering continue watching card:', e, item);
       }
     });
-    if (fragment.children.length > 0) {
+    if (cwCount > 0) {
       if (el.continueWatchingSection) el.continueWatchingSection.classList.remove('hidden');
       if (el.continueWatchingList) {
         el.continueWatchingList.innerHTML = '';
@@ -7930,7 +8039,7 @@
 
     el.playerMediaTitle.textContent = title;
     el.playerMediaSubtitle.textContent = subtitle;
-    el.nextEpisodeControlBtn.classList.add('hidden');
+    if (el.nextEpisodeControlBtn) el.nextEpisodeControlBtn.classList.add('hidden');
 
     const activeChannel = enrichedChannels[initialIndex] || enrichedChannels[0];
     let streamUrl = activeChannel.url || '';
@@ -8481,19 +8590,19 @@
 
     // Click outside search popover
     document.addEventListener('click', (e) => {
-      if (!el.searchWrapper.contains(e.target)) {
+      if (el.searchWrapper && el.suggestionsPopover && !el.searchWrapper.contains(e.target)) {
         el.suggestionsPopover.classList.add('hidden');
       }
       if (el.serverMenuBtn && el.serverMenu && !el.serverMenuBtn.contains(e.target) && !el.serverMenu.contains(e.target)) {
         el.serverMenu.classList.add('hidden');
       }
-      if (!el.qualityMenuBtn.contains(e.target) && !el.qualityMenu.contains(e.target)) {
+      if (el.qualityMenuBtn && el.qualityMenu && !el.qualityMenuBtn.contains(e.target) && !el.qualityMenu.contains(e.target)) {
         el.qualityMenu.classList.add('hidden');
       }
-      if (!el.subtitlesMenuBtn.contains(e.target) && !el.subtitlesMenu.contains(e.target)) {
+      if (el.subtitlesMenuBtn && el.subtitlesMenu && !el.subtitlesMenuBtn.contains(e.target) && !el.subtitlesMenu.contains(e.target)) {
         el.subtitlesMenu.classList.add('hidden');
       }
-      if (!el.speedMenuBtn.contains(e.target) && !el.speedMenu.contains(e.target)) {
+      if (el.speedMenuBtn && el.speedMenu && !el.speedMenuBtn.contains(e.target) && !el.speedMenu.contains(e.target)) {
         el.speedMenu.classList.add('hidden');
       }
       if (el.audioEnhancerBtn && el.audioEnhancerMenu && !el.audioEnhancerBtn.contains(e.target) && !el.audioEnhancerMenu.contains(e.target)) {
@@ -9126,7 +9235,7 @@
     }
 
     // Next episode button in player header/control
-    el.nextEpisodeControlBtn.addEventListener('click', playNextEpisode);
+    if (el.nextEpisodeControlBtn) el.nextEpisodeControlBtn.addEventListener('click', playNextEpisode);
     el.playNextNowBtn.addEventListener('click', () => {
       clearInterval(state.nextEpCountdownInterval);
       el.nextEpPrompt.classList.add('hidden');

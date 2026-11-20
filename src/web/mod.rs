@@ -37,6 +37,7 @@ pub fn create_router(service: Arc<MovieBoxService>) -> Router {
         .route("/streams/{id}", get(api::get_streams))
         .route("/subtitles/{id}/{resource_id}", get(api::get_subtitles))
         .route("/subtitles/vtt", get(api::get_vtt_subtitle))
+        .route("/tmdb", get(api::get_tmdb))
         .route(
             "/stream",
             get(proxy::handle_stream_proxy).options(proxy::handle_stream_options),

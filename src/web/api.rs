@@ -2424,3 +2424,53 @@ pub async fn get_sports_stream(
         output_html,
     ))
 }
+
+#[derive(Deserialize)]
+pub struct TmdbQuery {
+    pub endpoint: Option<String>,
+}
+
+pub async fn get_tmdb(
+    Query(params): Query<TmdbQuery>,
+) -> Response {
+    let endpoint = params.endpoint.unwrap_or_else(|| "/trending/all/week".to_string());
+    let sep = if endpoint.contains('?') { "&" } else { "?" };
+    let api_key = std::env::var("TMDB_API_KEY")
+        .or_else(|_| std::env::var("VITE_TMDB_API_KEY"))
+        .unwrap_or_else(|_| "15d2ea6d0dc1d476efbca3eba2b9bbfb".to_string());
+    let url = format!("https://api.themoviedb.org/3{}{sep}api_key={}", endpoint, api_key);
+
+    let client = reqwest::Client::new();
+    match client
+        .get(&url)
+        .header("User-Agent", "MovieBox-NetMirror/2.0")
+        .header("Accept", "application/json")
+        .send()
+        .await
+    {
+        Ok(resp) => {
+            let status = StatusCode::from_u16(resp.status().as_u16()).unwrap_or(StatusCode::OK);
+            let bytes = resp.bytes().await.unwrap_or_default();
+            (
+                status,
+                [
+                    (header::CONTENT_TYPE, "application/json"),
+                    (header::ACCESS_CONTROL_ALLOW_ORIGIN, "*"),
+                    (header::CACHE_CONTROL, "public, max-age=1800"),
+                ],
+                bytes,
+            )
+                .into_response()
+        }
+        Err(e) => (
+            StatusCode::BAD_GATEWAY,
+            [
+                (header::CONTENT_TYPE, "application/json"),
+                (header::ACCESS_CONTROL_ALLOW_ORIGIN, "*"),
+            ],
+            format!("{{\"error\":\"TMDB proxy error: {}\"}}", e),
+        )
+            .into_response(),
+    }
+}
+

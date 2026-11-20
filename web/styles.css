@@ -8428,3 +8428,102 @@ kbd {
     justify-content: center;
   }
 }
+
+
+/* ==========================================================================
+   ORGANIC SEO & AEO KNOWLEDGE HUB / FAQ SECTION
+   ========================================================================== */
+.seo-content-hub {
+  padding: 56px 24px 36px;
+  background: linear-gradient(180deg, transparent 0%, rgba(6, 10, 20, 0.95) 40%, #060a14 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 48px;
+}
+
+.seo-hub-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.seo-hub-header {
+  text-align: center;
+  max-width: 780px;
+  margin: 0 auto 36px;
+}
+
+.seo-hub-pill {
+  display: inline-block;
+  padding: 4px 14px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--red);
+  background: rgba(229, 9, 20, 0.12);
+  border: 1px solid rgba(229, 9, 20, 0.35);
+  border-radius: 9999px;
+  margin-bottom: 12px;
+}
+
+.seo-hub-title {
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.25;
+  margin-bottom: 12px;
+}
+
+.seo-hub-subtitle {
+  font-size: clamp(13px, 1.3vw, 15px);
+  color: #94a3b8;
+  line-height: 1.6;
+}
+
+.seo-faq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.seo-faq-card {
+  background: rgba(14, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 22px 24px;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.seo-faq-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(229, 9, 20, 0.4);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6), 0 0 16px rgba(229, 9, 20, 0.15);
+}
+
+.seo-faq-q {
+  font-size: 15px;
+  font-weight: 700;
+  color: #f8fafc;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.seo-faq-a {
+  font-size: 13.5px;
+  color: #94a3b8;
+  line-height: 1.65;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .seo-content-hub {
+    padding: 36px 14px 24px;
+    margin-top: 32px;
+  }
+  .seo-faq-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .seo-faq-card {
+    padding: 16px 18px;
+  }
+}

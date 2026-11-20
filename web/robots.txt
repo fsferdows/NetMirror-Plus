@@ -1,0 +1,49 @@
+# ==============================================================================
+# MovieBox Plus (NetMirror Plus) – Robots.txt
+# Optimized for Google, Bing, and AI Search Engines (ChatGPT, Perplexity, Claude)
+# ==============================================================================
+
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /styles.css*
+Allow: /app.js*
+Allow: /monetization-config.js
+Allow: /manifest.json
+Allow: /favicon.ico
+Allow: /favicon.svg
+Allow: /apple-touch-icon.png
+Allow: /og-image.png
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+# Disallow internal API routes and video stream proxies
+Disallow: /api/proxy
+Disallow: /api/stream
+Disallow: /api/m3u8
+Disallow: /api/ts
+
+# AI Search Crawlers (ChatGPT, Perplexity, Claude, Google Gemini, Apple Intelligence)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# Sitemap Index
+Sitemap: https://netmirror-plus.vercel.app/sitemap.xml

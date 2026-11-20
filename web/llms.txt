@@ -1,0 +1,31 @@
+# MovieBox Plus (NetMirror Plus)
+> Stream worldwide movies, trending TV series, and 24/7 live sports (Cricket, Football, NBA) online in 4K Ultra HD with multi-language subtitles and up to 300% studio sound booster.
+
+## Overview
+MovieBox Plus is a high-performance web streaming application and Progressive Web App (PWA) providing instant browser-based playback of worldwide cinema, international TV series, and live sports broadcasts. It integrates TMDB metadata, real-time audio booster technology, and mirror servers with zero intrusive redirects.
+
+## Core Features
+- **4K UHD & 1080p Streaming**: High-definition video streaming with adaptive bitrate and multi-server redundancy.
+- **24/7 Live Sports**: Dedicated live sports hub for international Cricket (IPL, ICC, Test, ODI), Football (Premier League, Champions League, La Liga), NBA, and F1.
+- **300% Studio Sound Booster**: In-browser Web Audio API dynamic compression and dialogue equalizer for whisper-quiet scenes and loud action blockbusters.
+- **Multi-Language Audio & Dubs**: Switch seamlessly between original audio and regional dubbed audio tracks (English, Hindi, Kannada, Tamil, Telugu, Spanish, French, German).
+- **OTT Network Hubs**: Dedicated filter and showcase sections for Netflix Originals, Amazon Prime Video, Disney+, Apple TV+, Hulu, ZEE5, and Viu.
+- **Anti-Ad Shield**: Strict built-in protection against rogue popups, deceptive redirects, and unauthorized third-party malware.
+- **Cross-Platform**: Accessible via any web browser, installable as a PWA, Chrome extension, and native desktop app for macOS, Windows, and Linux.
+
+## URLs & Key Navigation
+- Homepage: https://netmirror-plus.vercel.app/
+- Live Sports: https://netmirror-plus.vercel.app/?nav=sports
+- Netflix Catalog: https://netmirror-plus.vercel.app/?platform=netflix
+- Prime Video Catalog: https://netmirror-plus.vercel.app/?platform=prime
+- Disney+ Catalog: https://netmirror-plus.vercel.app/?platform=disney
+- Trending Movies: https://netmirror-plus.vercel.app/?cat=trending
+- Top Rated (IMDb Top 250): https://netmirror-plus.vercel.app/?cat=toprated
+- Movie Deep-Links: https://netmirror-plus.vercel.app/?movie={id}&title={title}
+- Watch Deep-Links: https://netmirror-plus.vercel.app/?watch={id}&s={season}&e={episode}&title={title}
+
+## API Endpoints (For Developers)
+- `/api/tmdb?endpoint={tmdb_endpoint}`: Server-side proxy for TMDB v3 API.
+- `/api/sports`: Live sports match scores, schedule, and stream channels.
+- `/api/details/{id}?provider=tmdb`: Media synopsis, cast, genres, and stream links.
+- `/api/streams/{id}`: Multi-server streaming mirrors for video playback.

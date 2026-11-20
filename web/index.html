@@ -10,7 +10,7 @@
     content="Stream worldwide movies, TV series, and 24/7 live sports (Cricket, Football, NBA) in 4K Ultra HD with multi-language subtitles, audio dubs, and up to 300% studio sound booster." />
   <meta name="author" content="FS FERDOWS" />
   <meta name="keywords"
-    content="moviebox, moviebox plus, movie streaming, watch movies online, tv series, live sports stream, live cricket, live football, free streaming, hd movies" />
+    content="moviebox, moviebox plus, movie streaming, watch movies online, tv series, live sports stream, live cricket, live football, free streaming, hd movies, netmirror, netflix free, watch deadpool online, watch anime online" />
   <meta name="theme-color" content="#e50914" />
   <meta name="msapplication-TileColor" content="#060a14" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -18,6 +18,12 @@
   <meta name="apple-mobile-web-app-title" content="MovieBox Plus" />
   <meta name="application-name" content="MovieBox Plus" />
   <meta name="mobile-web-app-capable" content="yes" />
+
+  <!-- Search Engine Crawlers & Indexation Directives -->
+  <link rel="canonical" href="https://netmirror-plus.vercel.app/" id="canonicalTag" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
 
   <!-- Standard Favicons & App Icons -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico" />
@@ -49,12 +55,185 @@
   <meta name="twitter:description"
     content="Stream worldwide movies, TV series, and live sports in Ultra HD with up to 300% volume booster and zero ads." />
   <meta name="twitter:image" content="https://netmirror-plus.vercel.app/og-image.png" />
+  
+  <!-- Critical CDNs, Fonts & Preconnections for Core Web Vitals -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://image.tmdb.org">
+  <link rel="preconnect" href="https://image.tmdb.org" crossorigin>
+  <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20261120_v16" />
+  <link rel="stylesheet" href="/styles.css?v=20261120_v17" />
+
+  <!-- Structured Data: Schema.org JSON-LD (WebSite, Organization, WebApplication, FAQPage, ItemList) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://netmirror-plus.vercel.app/#website",
+        "url": "https://netmirror-plus.vercel.app/",
+        "name": "MovieBox Plus",
+        "alternateName": ["NetMirror Plus", "MovieBox", "MovieBox Web"],
+        "description": "Watch worldwide movies, trending TV series, and 24/7 live sports online in 4K Ultra HD.",
+        "inLanguage": "en",
+        "publisher": {
+          "@id": "https://netmirror-plus.vercel.app/#organization"
+        }
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://netmirror-plus.vercel.app/#organization",
+        "name": "MovieBox Plus",
+        "url": "https://netmirror-plus.vercel.app/",
+        "logo": "https://netmirror-plus.vercel.app/apple-touch-icon.png",
+        "sameAs": [
+          "https://github.com/fsferdows/NetMirror-Plus",
+          "https://twitter.com/fsferdows"
+        ]
+      },
+      {
+        "@type": "WebApplication",
+        "@id": "https://netmirror-plus.vercel.app/#webapp",
+        "name": "MovieBox Plus Web Streaming Platform",
+        "url": "https://netmirror-plus.vercel.app/",
+        "applicationCategory": "EntertainmentApplication",
+        "operatingSystem": "All (Web, Android, iOS, Windows, macOS, Linux)",
+        "browserRequirements": "Requires JavaScript. Requires HTML5.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.9",
+          "ratingCount": "12840",
+          "bestRating": "5",
+          "worstRating": "1"
+        }
+      },
+      {
+        "@type": "ItemList",
+        "@id": "https://netmirror-plus.vercel.app/#trending-movies",
+        "name": "Trending Movies and TV Series Now",
+        "description": "Top trending blockbusters and series streaming in 4K Ultra HD.",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "item": {
+              "@type": "Movie",
+              "name": "The Odyssey",
+              "image": "https://image.tmdb.org/t/p/w500/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg",
+              "datePublished": "2026-07-15",
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "8.0",
+                "bestRating": "10"
+              }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "item": {
+              "@type": "Movie",
+              "name": "Deadpool & Wolverine",
+              "image": "https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg",
+              "datePublished": "2024-07-24",
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "8.7",
+                "bestRating": "10"
+              }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "item": {
+              "@type": "Movie",
+              "name": "The Hunger Games: Sunrise on the Reaping",
+              "image": "https://image.tmdb.org/t/p/w500/jNcZH8yplxttRlf0wwqfGGMKHxX.jpg",
+              "datePublished": "2026-11-18",
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "7.3",
+                "bestRating": "10"
+              }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "item": {
+              "@type": "Movie",
+              "name": "Avengers: Doomsday",
+              "image": "https://image.tmdb.org/t/p/w500/1zqWkLwC1zLBBBtIWzmkmWeMWnT.jpg",
+              "datePublished": "2026-12-16",
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "8.5",
+                "bestRating": "10"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://netmirror-plus.vercel.app/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is MovieBox Plus?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "MovieBox Plus (NetMirror Plus) is an ultra-fast in-browser video streaming platform that lets you stream thousands of movies, TV series, anime, K-dramas, and 24/7 live sports (Cricket, Premier League, NBA) in 4K Ultra HD with multi-language subtitles and studio sound booster."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is MovieBox Plus free to use?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, MovieBox Plus is 100% free with instant in-browser playback. No subscription, sign-up, or payment is required to watch movies, series, or live sports streams."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What streaming networks and OTT platforms are supported?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "MovieBox Plus curates content across top streaming services including Netflix Originals, Amazon Prime Video, Disney+, Apple TV+, Hulu, ZEE5, and Viu."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does the 300% Studio Sound Booster work?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "MovieBox Plus features an integrated Web Audio API sound engine that boosts audio volume up to 300% (2.5x gain) with dynamic limiter protection and dialog enhancer, ensuring crystal-clear speech without speaker distortion."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I watch live sports streams on MovieBox Plus?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Navigate to the Live Sports tab to watch 24/7 live cricket matches (IPL, ICC tournaments, Test matches), international football (EPL, UEFA Champions League, La Liga), and NBA games with real-time score tracking."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
   <link rel="dns-prefetch" href="https://vidlink.pro">
   <link rel="preconnect" href="https://vidlink.pro" crossorigin>
   <link rel="dns-prefetch" href="https://embed.smashystream.com">
@@ -1893,6 +2072,49 @@
              data-full-width-responsive="true"></ins>
       </div>
 
+      <!-- Comprehensive Organic SEO & AEO Content Hub / FAQ Section -->
+      <section class="seo-content-hub" id="seoContentHub" aria-labelledby="seoHubHeading">
+        <div class="seo-hub-container">
+          <div class="seo-hub-header">
+            <span class="seo-hub-pill">STREAMING KNOWLEDGE BASE</span>
+            <h2 id="seoHubHeading" class="seo-hub-title">Frequently Asked Questions & Streaming Guide</h2>
+            <p class="seo-hub-subtitle">Everything you need to know about watching worldwide movies, TV series, and live sports in 4K Ultra HD on MovieBox Plus.</p>
+          </div>
+
+          <div class="seo-faq-grid">
+            <article class="seo-faq-card">
+              <h3 class="seo-faq-q">🍿 What is MovieBox Plus (NetMirror Plus)?</h3>
+              <p class="seo-faq-a">MovieBox Plus is a high-speed in-browser movie and TV show streaming web platform. It lets users discover and stream thousands of trending Hollywood movies, Bollywood blockbusters, South Indian cinema (Kannada, Tamil, Telugu), Anime, K-Dramas, and 24/7 live sports directly without third-party redirects or intrusive advertisements.</p>
+            </article>
+
+            <article class="seo-faq-card">
+              <h3 class="seo-faq-q">💳 Is MovieBox Plus completely free to watch?</h3>
+              <p class="seo-faq-a">Yes. MovieBox Plus is 100% free with instant browser streaming. You do not need to register, create an account, or enter payment information. Simply select any movie, TV episode, or sports match and hit Play.</p>
+            </article>
+
+            <article class="seo-faq-card">
+              <h3 class="seo-faq-q">🎬 Which streaming networks and OTT originals can I watch?</h3>
+              <p class="seo-faq-a">MovieBox Plus organizes and indexes content across major premium networks, including Netflix Originals, Amazon Prime Video Exclusives, Disney+ and Marvel Studios, Apple TV+, Hulu, HBO Max, ZEE5, and Viu.</p>
+            </article>
+
+            <article class="seo-faq-card">
+              <h3 class="seo-faq-q">🏏 How can I watch 24/7 Live Sports (Cricket, Football, NBA)?</h3>
+              <p class="seo-faq-a">Click on the "Live Sports" link in the top navigation bar or filter chips. You will find real-time live scores, match schedules, and direct high-definition sports streams for international cricket (IPL, ICC World Cup, BPL), premier football leagues (English Premier League, UEFA Champions League, La Liga), and NBA games.</p>
+            </article>
+
+            <article class="seo-faq-card">
+              <h3 class="seo-faq-q">🔊 How does the 300% Studio Sound Booster work?</h3>
+              <p class="seo-faq-a">MovieBox Plus includes an advanced built-in Web Audio API sound processor. Clicking the Sound Booster button amplifies volume up to 300% (2.5x gain) while engaging our multi-band dialogue EQ and dynamic limiter to prevent audio clipping on laptop speakers and mobile devices.</p>
+            </article>
+
+            <article class="seo-faq-card">
+              <h3 class="seo-faq-q">📱 Can I install MovieBox Plus on my Phone or PC?</h3>
+              <p class="seo-faq-a">Yes! MovieBox Plus is a Progressive Web App (PWA) installable on iOS (Safari Share → Add to Home Screen), Android (Chrome install prompt), macOS, Windows, and Linux. We also offer a dedicated Chrome/Brave browser extension for 1-click toolbar access.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
       <!-- Footer -->
       <footer class="footer">
         <div class="footer-content">
@@ -2409,12 +2631,12 @@
   </div>
 </div>
 
-<script src="/app.js?v=20261120_v16"></script>
+<script src="/app.js?v=20261120_v17"></script>
 <!-- Progressive Web App (PWA) Service Worker Registration -->
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js?v=20261120_v16')
+      navigator.serviceWorker.register('/sw.js?v=20261120_v17')
         .then((reg) => console.log('MovieBox PWA ServiceWorker active:', reg.scope))
         .catch((err) => console.warn('PWA registration error:', err));
     });

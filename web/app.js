@@ -5264,6 +5264,92 @@ const DEFAULT_SHOWCASE_CATALOG = {
     const origin = window.location.origin;
     const pathname = window.location.pathname === '/watch' ? '/' : window.location.pathname;
     window.history.replaceState({}, '', `${origin}${pathname}`);
+    revertSeoMeta();
+  }
+
+  // ==========================================================================
+  // PROGRAMMATIC SEO & AI-SEARCH (AEO) METADATA ENGINE
+  // ==========================================================================
+  function updateSeoMeta(details, isWatch = false, season = 0, episode = 0) {
+    if (!details) return;
+    const title = cleanDisplayTitle(details.title || details.name || 'Movie');
+    const year = (details.release_date || details.first_air_date || details.year || '2024').toString().slice(0, 4);
+    const isTv = details.media_type === 'series' || details.media_type === 'tv' || season > 0;
+    
+    let seoTitle = '';
+    if (isWatch) {
+      seoTitle = isTv && season > 0
+        ? `Watch ${title} Season ${season} Episode ${episode} Online Free | MovieBox Plus`
+        : `Watch ${title} (${year}) Full Movie Online Free in 4K | MovieBox Plus`;
+    } else {
+      seoTitle = `${title} (${year}) – Watch Free Online in 4K UHD | MovieBox Plus`;
+    }
+
+    document.title = seoTitle;
+
+    const overview = details.overview ||
+      `Stream ${title} (${year}) online in 4K Ultra HD on MovieBox Plus with multi-language audio dubs, subtitles, and 300% studio sound booster.`;
+
+    const descMeta = document.querySelector('meta[name="description"]');
+    if (descMeta) descMeta.setAttribute('content', overview.slice(0, 160));
+
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.setAttribute('content', seoTitle);
+
+    const ogDesc = document.querySelector('meta[property="og:description"]');
+    if (ogDesc) ogDesc.setAttribute('content', overview.slice(0, 200));
+
+    const poster = details.poster_url || (details.poster_path ? `https://image.tmdb.org/t/p/w500${details.poster_path}` : 'https://netmirror-plus.vercel.app/og-image.png');
+    const ogImg = document.querySelector('meta[property="og:image"]');
+    if (ogImg) ogImg.setAttribute('content', poster);
+
+    const canonicalUrl = isWatch
+      ? generateWatchUrl(getMediaIdValue(details), season, episode, title)
+      : generateMovieUrl(getMediaIdValue(details), title);
+    
+    const canonicalTag = document.getElementById('canonicalTag');
+    if (canonicalTag) canonicalTag.setAttribute('href', canonicalUrl);
+
+    // Dynamic JSON-LD structured data for Google, Bing & AI Answer Engines (ChatGPT, Perplexity)
+    let mediaSchemaEl = document.getElementById('dynamicMediaSchema');
+    if (!mediaSchemaEl) {
+      mediaSchemaEl = document.createElement('script');
+      mediaSchemaEl.id = 'dynamicMediaSchema';
+      mediaSchemaEl.type = 'application/ld+json';
+      document.head.appendChild(mediaSchemaEl);
+    }
+    const vote = Number(details.vote_average || details.rating || 8.0).toFixed(1);
+    mediaSchemaEl.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": isTv ? "TVSeries" : "Movie",
+      "name": title,
+      "image": poster,
+      "description": overview,
+      "datePublished": details.release_date || details.first_air_date || `${year}-01-01`,
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": vote,
+        "bestRating": "10"
+      }
+    });
+  }
+
+  function revertSeoMeta() {
+    document.title = 'MovieBox Plus – Watch Worldwide Movies, TV Series & Live Sports Online';
+    const descMeta = document.querySelector('meta[name="description"]');
+    if (descMeta) {
+      descMeta.setAttribute('content', 'Stream worldwide movies, TV series, and 24/7 live sports (Cricket, Football, NBA) in 4K Ultra HD with multi-language subtitles, audio dubs, and up to 300% studio sound booster.');
+    }
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.setAttribute('content', 'MovieBox Plus – Watch Worldwide Movies, Series & Live Sports');
+    const ogDesc = document.querySelector('meta[property="og:description"]');
+    if (ogDesc) ogDesc.setAttribute('content', 'Stream worldwide movies, TV series, and 24/7 live sports (Cricket, Football, NBA) in Ultra HD with multi-language subtitles and up to 300% volume booster.');
+    const ogImg = document.querySelector('meta[property="og:image"]');
+    if (ogImg) ogImg.setAttribute('content', 'https://netmirror-plus.vercel.app/og-image.png');
+    const canonicalTag = document.getElementById('canonicalTag');
+    if (canonicalTag) canonicalTag.setAttribute('href', 'https://netmirror-plus.vercel.app/');
+    const mediaSchemaEl = document.getElementById('dynamicMediaSchema');
+    if (mediaSchemaEl) mediaSchemaEl.remove();
   }
 
   async function shareMovieLink(id, title, desc = '', poster = '', isWatch = false, season = 0, episode = 0) {
@@ -5431,9 +5517,10 @@ const DEFAULT_SHOWCASE_CATALOG = {
       const displayTitle = cleanDisplayTitle(details.title);
       const poster = details.poster_url || fallbackPoster(displayTitle);
 
-      // Update Browser URL so every movie has its own unique, shareable link
+      // Update Browser URL & Programmatic SEO Metadata so every movie has its own unique, shareable link
       const detailsIdVal = getMediaIdValue(details);
       updateMovieUrl(detailsIdVal, details.title, true);
+      updateSeoMeta(details, false, 0, 0);
 
       // Wire Share Link Button
       if (el.modalShareBtn) {
@@ -6167,8 +6254,9 @@ const DEFAULT_SHOWCASE_CATALOG = {
       }
     }
 
-    // Update Browser URL so every watch stream has its own unique, shareable watch URL
+    // Update Browser URL & Programmatic SEO Metadata so every watch stream has its own unique, shareable watch URL
     updateWatchUrl(mediaIdVal, s, ep, media.title, true);
+    updateSeoMeta(media, true, s, ep);
 
     // Wire Share Stream URL button
     if (el.playerShareBtn) {
@@ -8154,8 +8242,12 @@ const DEFAULT_SHOWCASE_CATALOG = {
 
     if (target === 'home') {
       switchView('rails');
+      revertSeoMeta();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (target === 'sports') {
+      document.title = 'Live Sports 24/7 – Watch Cricket, Football & NBA Online Free | MovieBox Plus';
+      const canonicalTag = document.getElementById('canonicalTag');
+      if (canonicalTag) canonicalTag.setAttribute('href', `${window.location.origin}/?nav=sports`);
       openSportsView();
     } else if (target === 'movies') {
       if (state.currentNav !== 'home') switchView('rails');

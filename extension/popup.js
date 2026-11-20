@@ -1,6 +1,6 @@
-// MovieBox Plus - Chrome Extension Popup Controller
+// moviehub.stream - Chrome Extension Popup Controller
 
-const BASE_URL = 'https://netmirror-plus.vercel.app';
+const BASE_URL = 'https://moviehub.stream';
 const CACHE_STORAGE_KEY = 'mb_browse_cache';
 
 const el = {

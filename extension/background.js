@@ -1,18 +1,18 @@
-// MovieBox Plus - Chrome Extension Background Service Worker (Manifest V3)
+// moviehub.stream - Chrome Extension Background Service Worker (Manifest V3)
 
-const SITE_URL = 'https://netmirror-plus.vercel.app';
+const SITE_URL = 'https://moviehub.stream';
 
 chrome.runtime.onInstalled.addListener(() => {
   // Create context menu for searching highlighted text
   chrome.contextMenus.create({
     id: 'moviebox_search_selection',
-    title: 'Search on MovieBox Plus: "%s"',
+    title: 'Search on moviehub.stream: "%s"',
     contexts: ['selection']
   });
 
   chrome.contextMenus.create({
     id: 'moviebox_open_home',
-    title: 'Open MovieBox Plus (4K Streams)',
+    title: 'Open moviehub.stream (4K Streams)',
     contexts: ['action']
   });
 });

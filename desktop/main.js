@@ -1,7 +1,7 @@
 const { app, BrowserWindow, shell, ipcMain, Menu } = require('electron');
 const path = require('path');
 
-const APP_URL = 'https://netmirror-plus.vercel.app/?source=desktop';
+const APP_URL = 'https://moviehub.stream/?source=desktop';
 
 let mainWindow = null;
 
@@ -12,7 +12,7 @@ function createWindow() {
     minWidth: 960,
     minHeight: 640,
     backgroundColor: '#060a14',
-    title: 'MovieBox Plus',
+    title: 'moviehub.stream',
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
     trafficLightPosition: { x: 16, y: 16 },
     webPreferences: {
@@ -35,7 +35,7 @@ function createWindow() {
   // Block popup ads and unwanted new windows; keep user inside the cinema player
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (
-      url.includes('netmirror-plus.vercel.app') ||
+      url.includes('moviehub.stream') ||
       url.includes('vidlink.pro') ||
       url.includes('smashystream.com')
     ) {

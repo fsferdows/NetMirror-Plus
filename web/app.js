@@ -4908,18 +4908,22 @@ const DEFAULT_SHOWCASE_CATALOG = {
   }
 
   async function init() {
-    initAdShield();
-    initPwaInstall();
-    initTmdbDebugBanner();
-    setupEventListeners();
-    updateAudioEnhancerUI();
-    initMonetization();
-    renderContinueWatching();
+    // 1. Instantly populate default catalog & hero (0ms first paint)
+    try {
+      applyDefaultShowcase();
+    } catch (e) {
+      console.warn('Initial default showcase warning:', e);
+    }
 
-    // 1. Instantly populate default catalog so first paint is 0ms
-    applyDefaultShowcase();
+    try { initAdShield(); } catch (e) { console.warn('initAdShield warning:', e); }
+    try { initPwaInstall(); } catch (e) { console.warn('initPwaInstall warning:', e); }
+    try { initTmdbDebugBanner(); } catch (e) { console.warn('initTmdbDebugBanner warning:', e); }
+    try { setupEventListeners(); } catch (e) { console.error('setupEventListeners error:', e); }
+    try { updateAudioEnhancerUI(); } catch (e) { console.warn('updateAudioEnhancerUI warning:', e); }
+    try { initMonetization(); } catch (e) { console.warn('initMonetization warning:', e); }
+    try { renderContinueWatching(); } catch (e) { console.warn('renderContinueWatching warning:', e); }
 
-    handleDeepLinkOnLoad();
+    try { handleDeepLinkOnLoad(); } catch (e) { console.warn('handleDeepLinkOnLoad warning:', e); }
 
     // 2. Connect all homepage rows to TMDB API v3 & populate real posters, ratings, and titles
     fetchTmdbCategories();
@@ -8271,13 +8275,14 @@ const DEFAULT_SHOWCASE_CATALOG = {
   // EVENT LISTENERS
   // ==========================================================================
   function setupEventListeners() {
+    try {
     // Window Scroll Navbar Style
     window.addEventListener('scroll', () => {
       el.navbar.classList.toggle('scrolled', window.scrollY > 40);
     });
 
     // Logo Click
-    el.logoBtn.addEventListener('click', (e) => {
+    if (el.logoBtn) el.logoBtn.addEventListener('click', (e) => {
       e.preventDefault();
       navigate('home');
     });
@@ -8574,15 +8579,15 @@ const DEFAULT_SHOWCASE_CATALOG = {
     }
 
     // Search Input Events
-    el.searchInput.addEventListener('input', handleSearchInput);
-    el.searchInput.addEventListener('keydown', (e) => {
+    if (el.searchInput) el.searchInput.addEventListener('input', handleSearchInput);
+    if (el.searchInput) el.searchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         el.suggestionsPopover.classList.add('hidden');
         executeSearch(el.searchInput.value);
       }
     });
 
-    el.clearSearchBtn.addEventListener('click', () => {
+    if (el.clearSearchBtn) el.clearSearchBtn.addEventListener('click', () => {
       el.searchInput.value = '';
       el.clearSearchBtn.classList.add('hidden');
       el.suggestionsPopover.classList.add('hidden');
@@ -8611,11 +8616,11 @@ const DEFAULT_SHOWCASE_CATALOG = {
     });
 
     // Hero Quick Search
-    el.heroSearchSubmitBtn.addEventListener('click', () => {
+    if (el.heroSearchSubmitBtn) el.heroSearchSubmitBtn.addEventListener('click', () => {
       const q = el.heroSearchInput.value.trim();
       if (q) executeSearch(q);
     });
-    el.heroSearchInput.addEventListener('keydown', (e) => {
+    if (el.heroSearchInput) el.heroSearchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         const q = el.heroSearchInput.value.trim();
         if (q) executeSearch(q);
@@ -8623,7 +8628,7 @@ const DEFAULT_SHOWCASE_CATALOG = {
     });
 
     // Hero Tag Chips
-    el.quickTags.querySelectorAll('.tag-chip').forEach((chip) => {
+    if (el.quickTags) el.quickTags.querySelectorAll('.tag-chip').forEach((chip) => {
       chip.addEventListener('click', () => {
         const q = chip.dataset.search;
         executeSearch(q);
@@ -8631,19 +8636,19 @@ const DEFAULT_SHOWCASE_CATALOG = {
     });
 
     // Hero Action Buttons
-    el.heroPlayBtn.addEventListener('click', (e) => {
+    if (el.heroPlayBtn) el.heroPlayBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       if (state.heroItem) openPlayerDirect(state.heroItem);
     });
 
-    el.heroDetailsBtn.addEventListener('click', (e) => {
+    if (el.heroDetailsBtn) el.heroDetailsBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       if (state.heroItem) openDetailsModal(getMediaIdValue(state.heroItem), getMediaProvider(state.heroItem), state.heroItem?.title || '');
     });
 
-    el.heroFavBtn.addEventListener('click', () => {
+    if (el.heroFavBtn) el.heroFavBtn.addEventListener('click', () => {
       if (!state.heroItem) return;
       toggleFavorite(state.heroItem);
       updateHeroFavBtn();
@@ -8659,7 +8664,10 @@ const DEFAULT_SHOWCASE_CATALOG = {
           const targetId = btn.dataset.target;
           const target = document.getElementById(targetId);
           if (!target) return;
-          const scrollStep = Math.max(280, Math.floor(target.clientWidth * 0.75));
+          const cardEl = target.querySelector('.movie-card, .skeleton-card, .ott-card, .lang-card');
+          const stepUnit = cardEl ? (cardEl.offsetWidth + 14) : 194;
+          const visibleCount = Math.max(1, Math.floor(target.clientWidth / stepUnit));
+          const scrollStep = Math.max(stepUnit, (visibleCount > 1 ? visibleCount - 1 : 1) * stepUnit);
           const offset = btn.classList.contains('rail-prev') ? -scrollStep : scrollStep;
           target.scrollBy({ left: offset, behavior: 'smooth' });
         });
@@ -8737,11 +8745,11 @@ const DEFAULT_SHOWCASE_CATALOG = {
           }
         }, true);
 
-        // Translate mouse vertical wheel to smooth horizontal sliding
+        // Allow Shift+Wheel for horizontal scrolling without hijacking standard vertical page scroll
         container.addEventListener('wheel', (e) => {
-          if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && container.scrollWidth > container.clientWidth) {
+          if (e.shiftKey && Math.abs(e.deltaY) > 0) {
             e.preventDefault();
-            container.scrollBy({ left: e.deltaY * 1.4, behavior: 'auto' });
+            container.scrollBy({ left: e.deltaY, behavior: 'auto' });
           }
         }, { passive: false });
       });
@@ -8771,6 +8779,9 @@ const DEFAULT_SHOWCASE_CATALOG = {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+        if (typeof btn.scrollIntoView === 'function') {
+          btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
         const targetId = btn.dataset.target;
         if (state.currentNav !== 'home') {
           switchView('rails');
@@ -8783,7 +8794,7 @@ const DEFAULT_SHOWCASE_CATALOG = {
         } else {
           const targetEl = document.getElementById(targetId);
           if (targetEl) {
-            const yOffset = -120; // offset for sticky navbar + category bar
+            const yOffset = window.innerWidth <= 768 ? -96 : -124; // offset for sticky navbar + category bar
             const y = targetEl.getBoundingClientRect().top + window.pageYOffset + yOffset;
             window.scrollTo({ top: y, behavior: 'smooth' });
             const header = targetEl.querySelector('.rail-header');
@@ -8796,60 +8807,74 @@ const DEFAULT_SHOWCASE_CATALOG = {
       });
     });
 
-    el.clearHistoryBtn.addEventListener('click', () => {
-      state.history = [];
-      localStorage.removeItem('netmirror_history');
-      renderContinueWatching();
-      showToast('Watch history cleared');
-    });
+    if (el.clearHistoryBtn) {
+      el.clearHistoryBtn.addEventListener('click', () => {
+        state.history = [];
+        localStorage.removeItem('netmirror_history');
+        renderContinueWatching();
+        showToast('Watch history cleared');
+      });
+    }
 
     // Grid Filters (All, Movies, TV Shows, Dubbed Series)
-    el.gridFilters.querySelectorAll('.filter-chip').forEach((chip) => {
-      chip.addEventListener('click', () => {
-        el.gridFilters.querySelectorAll('.filter-chip').forEach((c) => c.classList.remove('active'));
-        chip.classList.add('active');
-        state.activeFilter = chip.dataset.filter;
-        if (state.activeFilter === 'dubbed') {
-          if (!state.currentQuery && (!state.gridItems || state.gridItems.length < 5)) {
-            openPlatformView('dubbed', 'All Dubbed Series & Multi-Audio', '#8b5cf6');
-            return;
+    if (el.gridFilters) {
+      el.gridFilters.querySelectorAll('.filter-chip').forEach((chip) => {
+        chip.addEventListener('click', () => {
+          el.gridFilters.querySelectorAll('.filter-chip').forEach((c) => c.classList.remove('active'));
+          chip.classList.add('active');
+          state.activeFilter = chip.dataset.filter;
+          if (state.activeFilter === 'dubbed') {
+            if (!state.currentQuery && (!state.gridItems || state.gridItems.length < 5)) {
+              openPlatformView('dubbed', 'All Dubbed Series & Multi-Audio', '#8b5cf6');
+              return;
+            }
           }
-        }
-        renderGridItems(state.gridItems);
+          renderGridItems(state.gridItems);
+        });
       });
-    });
+    }
 
     // Modal Close
-    el.modalCloseBtn.addEventListener('click', closeDetailsModal);
-    el.detailsModal.addEventListener('click', (e) => {
-      if (e.target === el.detailsModal) closeDetailsModal();
-    });
+    if (el.modalCloseBtn) el.modalCloseBtn.addEventListener('click', closeDetailsModal);
+    if (el.detailsModal) {
+      el.detailsModal.addEventListener('click', (e) => {
+        if (e.target === el.detailsModal) closeDetailsModal();
+      });
+    }
 
-    el.modalFavBtn.addEventListener('click', () => {
-      if (!state.currentDetails) return;
-      toggleFavorite(state.currentDetails);
-      const isFav = (state.favorites || []).some((f) => isSameMedia(f, state.currentDetails));
-      el.modalFavBtn.classList.toggle('fav-active', isFav);
-      el.modalFavBtn.textContent = isFav ? '✓ In My List' : 'Add to List';
-    });
+    if (el.modalFavBtn) {
+      el.modalFavBtn.addEventListener('click', () => {
+        if (!state.currentDetails) return;
+        toggleFavorite(state.currentDetails);
+        const isFav = (state.favorites || []).some((f) => isSameMedia(f, state.currentDetails));
+        el.modalFavBtn.classList.toggle('fav-active', isFav);
+        el.modalFavBtn.textContent = isFav ? '✓ In My List' : 'Add to List';
+      });
+    }
 
     // Shortcuts Modal
-    el.shortcutsBtn.addEventListener('click', () => {
-      el.shortcutsModal.classList.remove('hidden');
-    });
-    el.shortcutsCloseBtn.addEventListener('click', () => {
-      el.shortcutsModal.classList.add('hidden');
-    });
-    el.shortcutsModal.addEventListener('click', (e) => {
-      if (e.target === el.shortcutsModal) el.shortcutsModal.classList.add('hidden');
-    });
+    if (el.shortcutsBtn) {
+      el.shortcutsBtn.addEventListener('click', () => {
+        if (el.shortcutsModal) el.shortcutsModal.classList.remove('hidden');
+      });
+    }
+    if (el.shortcutsCloseBtn) {
+      el.shortcutsCloseBtn.addEventListener('click', () => {
+        if (el.shortcutsModal) el.shortcutsModal.classList.add('hidden');
+      });
+    }
+    if (el.shortcutsModal) {
+      el.shortcutsModal.addEventListener('click', (e) => {
+        if (e.target === el.shortcutsModal) el.shortcutsModal.classList.add('hidden');
+      });
+    }
 
     // ========================================================================
     // VIDEO PLAYER CONTROLS & EVENTS
     // ========================================================================
     const video = el.videoElement;
 
-    el.playerBackBtn.addEventListener('click', closePlayer);
+    if (el.playerBackBtn) el.playerBackBtn.addEventListener('click', closePlayer);
     if (el.watchCloseBtn) el.watchCloseBtn.addEventListener('click', closePlayer);
 
     // Anti-Redirect Shield:
@@ -8896,7 +8921,7 @@ const DEFAULT_SHOWCASE_CATALOG = {
     }
 
     // Play / Pause
-    el.playPauseBtn.addEventListener('click', togglePlayPause);
+    if (el.playPauseBtn) el.playPauseBtn.addEventListener('click', togglePlayPause);
     video.addEventListener('click', togglePlayPause);
 
     video.addEventListener('play', () => {
@@ -8951,12 +8976,12 @@ const DEFAULT_SHOWCASE_CATALOG = {
       }
     }
 
-    el.progressBarContainer.addEventListener('mousedown', (e) => {
+    if (el.progressBarContainer) el.progressBarContainer.addEventListener('mousedown', (e) => {
       isDraggingScrubber = true;
       handleScrubberSeek(e);
     });
 
-    el.progressBarContainer.addEventListener('touchstart', (e) => {
+    if (el.progressBarContainer) el.progressBarContainer.addEventListener('touchstart', (e) => {
       isDraggingScrubber = true;
       handleScrubberSeek(e);
     }, { passive: true });
@@ -8990,18 +9015,18 @@ const DEFAULT_SHOWCASE_CATALOG = {
     });
 
     // Rewind / Forward
-    el.rewindBtn.addEventListener('click', () => {
+    if (el.rewindBtn) el.rewindBtn.addEventListener('click', () => {
       video.currentTime = Math.max(0, video.currentTime - 10);
       showToast('-10s');
     });
 
-    el.forwardBtn.addEventListener('click', () => {
+    if (el.forwardBtn) el.forwardBtn.addEventListener('click', () => {
       video.currentTime = Math.min(video.duration, video.currentTime + 10);
       showToast('+10s');
     });
 
     // Volume & Mute with Amplification (0% to 300%)
-    el.volumeSlider.addEventListener('input', (e) => {
+    if (el.volumeSlider) el.volumeSlider.addEventListener('input', (e) => {
       ensureAudioEngine();
       const val = parseFloat(e.target.value);
       if (val <= 1.0) {
@@ -9015,7 +9040,7 @@ const DEFAULT_SHOWCASE_CATALOG = {
       updateVolumeIcons();
     });
 
-    el.volumeBtn.addEventListener('click', () => {
+    if (el.volumeBtn) el.volumeBtn.addEventListener('click', () => {
       ensureAudioEngine();
       video.muted = !video.muted;
       updateVolumeIcons();
@@ -9119,7 +9144,7 @@ const DEFAULT_SHOWCASE_CATALOG = {
       });
     }
 
-    el.qualityMenuBtn.addEventListener('click', () => {
+    if (el.qualityMenuBtn) el.qualityMenuBtn.addEventListener('click', () => {
       el.qualityMenu.classList.toggle('hidden');
       if (el.serverMenu) el.serverMenu.classList.add('hidden');
       el.subtitlesMenu.classList.add('hidden');
@@ -9127,7 +9152,7 @@ const DEFAULT_SHOWCASE_CATALOG = {
       if (el.audioEnhancerMenu) el.audioEnhancerMenu.classList.add('hidden');
     });
 
-    el.subtitlesMenuBtn.addEventListener('click', () => {
+    if (el.subtitlesMenuBtn) el.subtitlesMenuBtn.addEventListener('click', () => {
       el.subtitlesMenu.classList.toggle('hidden');
       if (el.serverMenu) el.serverMenu.classList.add('hidden');
       el.qualityMenu.classList.add('hidden');
@@ -9135,7 +9160,7 @@ const DEFAULT_SHOWCASE_CATALOG = {
       if (el.audioEnhancerMenu) el.audioEnhancerMenu.classList.add('hidden');
     });
 
-    el.speedMenuBtn.addEventListener('click', () => {
+    if (el.speedMenuBtn) el.speedMenuBtn.addEventListener('click', () => {
       el.speedMenu.classList.toggle('hidden');
       if (el.serverMenu) el.serverMenu.classList.add('hidden');
       el.qualityMenu.classList.add('hidden');
@@ -9144,12 +9169,12 @@ const DEFAULT_SHOWCASE_CATALOG = {
     });
 
     // Speed options
-    el.speedMenu.querySelectorAll('.menu-item').forEach((item) => {
+    if (el.speedMenu) el.speedMenu.querySelectorAll('.menu-item').forEach((item) => {
       item.addEventListener('click', () => {
         const speed = parseFloat(item.dataset.speed);
         video.playbackRate = speed;
         el.currentSpeedLabel.textContent = `${speed}x`;
-        el.speedMenu.querySelectorAll('.menu-item').forEach((b) => b.classList.remove('active'));
+        if (el.speedMenu) el.speedMenu.querySelectorAll('.menu-item').forEach((b) => b.classList.remove('active'));
         item.classList.add('active');
         el.speedMenu.classList.add('hidden');
         showToast(`Speed: ${speed}x`);
@@ -9157,7 +9182,7 @@ const DEFAULT_SHOWCASE_CATALOG = {
     });
 
     // Picture-in-Picture
-    el.pipBtn.addEventListener('click', async () => {
+    if (el.pipBtn) el.pipBtn.addEventListener('click', async () => {
       if (document.pictureInPictureElement) {
         await document.exitPictureInPicture();
       } else if (document.pictureInPictureEnabled) {
@@ -9166,7 +9191,7 @@ const DEFAULT_SHOWCASE_CATALOG = {
     });
 
     // Fullscreen / Zoom In
-    el.fullscreenBtn.addEventListener('click', toggleFullscreen);
+    if (el.fullscreenBtn) el.fullscreenBtn.addEventListener('click', toggleFullscreen);
     if (el.watchFullscreenBtn) el.watchFullscreenBtn.addEventListener('click', toggleFullscreen);
     if (el.floatingFullscreenBtn) el.floatingFullscreenBtn.addEventListener('click', toggleFullscreen);
 
@@ -9236,22 +9261,31 @@ const DEFAULT_SHOWCASE_CATALOG = {
 
     // Next episode button in player header/control
     if (el.nextEpisodeControlBtn) el.nextEpisodeControlBtn.addEventListener('click', playNextEpisode);
-    el.playNextNowBtn.addEventListener('click', () => {
-      clearInterval(state.nextEpCountdownInterval);
-      el.nextEpPrompt.classList.add('hidden');
-      playNextEpisode();
-    });
-    el.cancelNextBtn.addEventListener('click', () => {
-      clearInterval(state.nextEpCountdownInterval);
-      el.nextEpPrompt.classList.add('hidden');
-    });
+    if (el.playNextNowBtn) {
+      el.playNextNowBtn.addEventListener('click', () => {
+        clearInterval(state.nextEpCountdownInterval);
+        if (el.nextEpPrompt) el.nextEpPrompt.classList.add('hidden');
+        playNextEpisode();
+      });
+    }
+    if (el.cancelNextBtn) {
+      el.cancelNextBtn.addEventListener('click', () => {
+        clearInterval(state.nextEpCountdownInterval);
+        if (el.nextEpPrompt) el.nextEpPrompt.classList.add('hidden');
+      });
+    }
 
     // Auto-hide controls on mouse idle
-    el.playerContainer.addEventListener('mousemove', resetControlsTimeout);
-    el.playerContainer.addEventListener('click', resetControlsTimeout);
+    if (el.playerContainer) {
+      el.playerContainer.addEventListener('mousemove', resetControlsTimeout);
+      el.playerContainer.addEventListener('click', resetControlsTimeout);
+    }
 
     // Keyboard Shortcuts
     window.addEventListener('keydown', handleGlobalKeydown);
+    } catch (err) {
+      console.warn("[MovieBox] Error in setupEventListeners:", err);
+    }
   }
 
   function togglePlayPause() {

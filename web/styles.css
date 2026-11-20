@@ -941,6 +941,53 @@ body {
   color: var(--red);
 }
 
+/* Fluid Streaming Card Tokens across Devices (Mobile, Tablet, Laptop, Desktop PC, Ultra-wide) */
+:root {
+  --movie-card-w: 180px;
+  --movie-card-gap: 16px;
+  --movie-poster-h: 270px;
+}
+
+@media (min-width: 1441px) {
+  :root {
+    --movie-card-w: 195px;
+    --movie-card-gap: 18px;
+    --movie-poster-h: 292px;
+  }
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --movie-card-w: 160px;
+    --movie-card-gap: 14px;
+    --movie-poster-h: 240px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --movie-card-w: 142px;
+    --movie-card-gap: 12px;
+    --movie-poster-h: 213px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --movie-card-w: 132px;
+    --movie-card-gap: 10px;
+    --movie-poster-h: 198px;
+  }
+}
+
+@media (max-width: 360px) {
+  :root {
+    --movie-card-w: 120px;
+    --movie-card-gap: 8px;
+    --movie-poster-h: 180px;
+  }
+}
+
 .rail-carousel-wrapper {
   position: relative;
   width: 100%;
@@ -948,15 +995,20 @@ body {
 
 .rail-carousel {
   display: flex;
-  gap: 16px;
+  gap: var(--movie-card-gap);
   overflow-x: auto;
+  overflow-y: hidden;
   scroll-behavior: smooth;
-  padding: 8px 12px 20px;
+  padding: 8px 12px 24px;
   scrollbar-width: none;
+  -ms-overflow-style: none;
   cursor: grab;
   user-select: none;
   -webkit-overflow-scrolling: touch;
-  min-height: 335px;
+  touch-action: pan-x pan-y;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  min-height: calc(var(--movie-poster-h) + 65px);
   align-items: stretch;
 }
 
@@ -967,12 +1019,14 @@ body {
 
 .rail-carousel::-webkit-scrollbar {
   display: none;
+  width: 0;
+  height: 0;
 }
 
 .rail-nav-btn {
   position: absolute;
   top: 50%;
-  transform: translateY(calc(-50% - 10px));
+  transform: translateY(calc(-50% - 14px));
   width: 44px;
   height: 76px;
   background: rgba(4, 21, 45, 0.88);
@@ -993,6 +1047,15 @@ body {
   transition: opacity var(--transition-fast), background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
+@media (max-width: 768px) {
+  .rail-nav-btn {
+    width: 32px !important;
+    height: 54px !important;
+    font-size: 20px !important;
+    opacity: 0.65 !important;
+  }
+}
+
 .rail-carousel-wrapper:hover .rail-nav-btn {
   opacity: 1;
 }
@@ -1010,12 +1073,12 @@ body {
   background: var(--red);
   color: #fff;
   border-color: rgba(229, 9, 20, 0.85);
-  transform: translateY(calc(-50% - 10px)) scale(1.08);
+  transform: translateY(calc(-50% - 14px)) scale(1.08);
   box-shadow: 0 0 24px var(--red-glow), 0 8px 24px rgba(0, 0, 0, 0.85);
 }
 
 .rail-nav-btn:active {
-  transform: translateY(calc(-50% - 10px)) scale(0.96);
+  transform: translateY(calc(-50% - 14px)) scale(0.96);
 }
 
 .rail-nav-btn.disabled,
@@ -1027,10 +1090,10 @@ body {
 
 /* Movie & TV Show Card - Clean Dark-Themed Streaming Layout */
 .movie-card {
-  flex: 0 0 180px !important;
-  width: 180px !important;
-  min-width: 180px !important;
-  max-width: 180px !important;
+  flex: 0 0 var(--movie-card-w) !important;
+  width: var(--movie-card-w) !important;
+  min-width: var(--movie-card-w) !important;
+  max-width: var(--movie-card-w) !important;
   flex-shrink: 0 !important;
   position: relative;
   background: transparent;
@@ -1041,6 +1104,7 @@ body {
   flex-direction: column;
   user-select: none;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  scroll-snap-align: start;
 }
 
 .movie-card:hover {
@@ -1050,10 +1114,9 @@ body {
 /* Poster Container (2:3 aspect ratio, rounded corners, subtle hover zoom) */
 .poster-wrap {
   position: relative;
-  width: 180px;
   width: 100%;
-  height: 270px;
-  min-height: 270px;
+  height: var(--movie-poster-h);
+  min-height: var(--movie-poster-h);
   aspect-ratio: 2 / 3;
   flex-shrink: 0;
   border-radius: 12px;
@@ -1102,11 +1165,21 @@ body {
   text-transform: capitalize;
 }
 
+@media (max-width: 768px) {
+  .card-tag-badge,
+  .card-badge-top-right {
+    top: 6px;
+    right: 6px;
+    font-size: 9.5px;
+    padding: 1px 7px;
+  }
+}
+
 /* Bottom-Left Circular Rating Badge (-bottom-4 left-2.5, w-9 h-9 rounded-full bg-white text-slate-900 font-bold text-xs shadow-md) */
 .card-rating-badge,
 .card-rating-circle {
   position: absolute;
-  bottom: -16px; /* -bottom-4 (-1rem) overlapping bottom-left edge of poster */
+  bottom: -15px; /* -bottom-4 (-1rem) overlapping bottom-left edge of poster */
   left: 10px;    /* left-2.5 (0.625rem) */
   width: 36px;   /* w-9 (2.25rem) */
   height: 36px;  /* h-9 (2.25rem) */
@@ -1121,6 +1194,17 @@ body {
   z-index: 4;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
   line-height: 1;
+}
+
+@media (max-width: 768px) {
+  .card-rating-badge,
+  .card-rating-circle {
+    bottom: -11px;
+    left: 8px;
+    width: 29px;
+    height: 29px;
+    font-size: 10px;
+  }
 }
 
 .card-rating-badge.border-emerald-500,
@@ -1219,20 +1303,21 @@ body {
 
 /* Skeleton Loading Shimmer Placeholders */
 .skeleton-card {
-  flex: 0 0 180px !important;
-  width: 180px !important;
-  min-width: 180px !important;
-  max-width: 180px !important;
+  flex: 0 0 var(--movie-card-w) !important;
+  width: var(--movie-card-w) !important;
+  min-width: var(--movie-card-w) !important;
+  max-width: var(--movie-card-w) !important;
   flex-shrink: 0 !important;
   display: flex;
   flex-direction: column;
   user-select: none;
+  scroll-snap-align: start;
 }
 
 .skeleton-poster {
   width: 100%;
-  height: 270px;
-  min-height: 270px;
+  height: var(--movie-poster-h);
+  min-height: var(--movie-poster-h);
   aspect-ratio: 2 / 3;
   flex-shrink: 0;
   border-radius: 12px;
@@ -4826,7 +4911,7 @@ kbd {
     padding-top: 80px;
   }
   .movie-card {
-    flex: 0 0 140px;
+    flex: 0 0 var(--movie-card-w);
   }
   .media-grid {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -6820,9 +6905,12 @@ kbd {
 
   /* Movie & Series Cards in Carousels */
   .movie-card, .skeleton-card {
-    flex: 0 0 128px !important;
+    flex: 0 0 var(--movie-card-w) !important;
+    width: var(--movie-card-w) !important;
+    min-width: var(--movie-card-w) !important;
+    max-width: var(--movie-card-w) !important;
     scroll-snap-align: start !important;
-    border-radius: 8px !important;
+    border-radius: 10px !important;
   }
 
   .card-title {
@@ -7901,7 +7989,10 @@ kbd {
   }
 
   .movie-card, .skeleton-card {
-    flex: 0 0 120px !important;
+    flex: 0 0 var(--movie-card-w) !important;
+    width: var(--movie-card-w) !important;
+    min-width: var(--movie-card-w) !important;
+    max-width: var(--movie-card-w) !important;
   }
 
   .modal-poster-wrap {
@@ -7981,7 +8072,10 @@ kbd {
   }
 
   .movie-card, .skeleton-card {
-    flex: 0 0 108px !important;
+    flex: 0 0 var(--movie-card-w) !important;
+    width: var(--movie-card-w) !important;
+    min-width: var(--movie-card-w) !important;
+    max-width: var(--movie-card-w) !important;
   }
 
   .card-title {

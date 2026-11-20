@@ -1,5 +1,5 @@
 // moviehub.stream - Production Progressive Web App (PWA) Service Worker
-const CACHE_NAME = 'moviehub-stream-v20261120_v30';
+const CACHE_NAME = 'moviehub-stream-v20261120_v31';
 
 const CORE_ASSETS = [
   '/',

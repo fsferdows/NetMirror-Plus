@@ -1898,45 +1898,75 @@ body {
 .user-ad-banner {
   width: 100%;
   max-width: 970px;
+  min-height: 90px;
   margin: 16px auto;
   text-align: center;
-  overflow: hidden;
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.3s ease;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  padding: 10px 14px;
   box-sizing: border-box;
+  overflow: hidden;
+  transition: all 0.3s ease;
 }
 
-@media (max-width: 768px) {
-  .user-ad-banner {
-    margin: 10px auto;
-  }
+.user-ad-banner.ad-banner-square {
+  min-height: 250px;
+  max-width: 320px;
 }
 
-/* Automatically collapse when empty, unfilled by Google AdSense, or blocked */
-.user-ad-banner:empty,
-.user-ad-banner.hidden,
-.user-ad-banner.ad-unfilled,
-.user-ad-banner:has(ins[data-ad-status="unfilled"]) {
-  display: none !important;
-  height: 0 !important;
-  min-height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: none !important;
+.user-ad-banner::before {
+  content: "SPONSORED ADVERTISEMENT • GOOGLE ADSENSE (ca-pub-4512671475286537)";
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  pointer-events: none;
 }
 
-.user-ad-banner ins.adsbygoogle[data-ad-status="unfilled"] {
-  display: none !important;
-  height: 0 !important;
+/* Once Google fills the slot with an active iframe creative, streamline style */
+.user-ad-banner:has(iframe) {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 15, 28, 0.3);
+  padding: 6px;
+}
+
+.user-ad-banner:has(iframe)::before {
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.3);
+  margin-bottom: 4px;
 }
 
 .user-ad-banner ins.adsbygoogle {
   display: block !important;
   width: 100% !important;
+  min-height: 60px;
   margin: 0 auto;
+}
+
+.user-ad-banner.hidden {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .user-ad-banner {
+    margin: 12px auto;
+    padding: 8px 6px;
+    min-height: 80px;
+    border-radius: 8px;
+  }
+  .user-ad-banner.ad-banner-square {
+    min-height: 250px;
+    max-width: 100%;
+  }
 }
 
 /* ==========================================================================

@@ -86,9 +86,15 @@
     languagesDropdownBtn: document.getElementById('languagesDropdownBtn'),
     languagesDropdownMenu: document.getElementById('languagesDropdownMenu'),
     userHeaderAdBanner: document.getElementById('userHeaderAdBanner'),
+    userCatalogFeedAdBanner: document.getElementById('userCatalogFeedAdBanner'),
     userMidRailAdBanner: document.getElementById('userMidRailAdBanner'),
+    userPlatformTopAdBanner: document.getElementById('userPlatformTopAdBanner'),
+    userSportsTopAdBanner: document.getElementById('userSportsTopAdBanner'),
+    userGridTopAdBanner: document.getElementById('userGridTopAdBanner'),
     userDetailsAdBanner: document.getElementById('userDetailsAdBanner'),
+    userPlayerBottomAdBanner: document.getElementById('userPlayerBottomAdBanner'),
     userPlayerEpisodesAdBanner: document.getElementById('userPlayerEpisodesAdBanner'),
+    userDownloadAdBanner: document.getElementById('userDownloadAdBanner'),
     userFooterAdBanner: document.getElementById('userFooterAdBanner'),
     searchInput: document.getElementById('searchInput'),
     searchWrapper: document.getElementById('searchWrapper'),
@@ -552,9 +558,16 @@
     // 4. Render Owner Monetized Banner Ads (Google AdSense ca-pub-4512671475286537)
     if (config.adBanners && config.adBanners.enabled) {
       loadAdSenseUnit(el.userHeaderAdBanner, config.adBanners.headerBannerHtml);
+      loadAdSenseUnit(el.userCatalogFeedAdBanner, config.adBanners.headerBannerHtml);
       loadAdSenseUnit(el.userMidRailAdBanner, config.adBanners.midRailBannerHtml);
-      loadAdSenseUnit(el.userFooterAdBanner, config.adBanners.footerBannerHtml);
+      loadAdSenseUnit(el.userPlatformTopAdBanner, config.adBanners.headerBannerHtml);
+      loadAdSenseUnit(el.userSportsTopAdBanner, config.adBanners.headerBannerHtml);
+      loadAdSenseUnit(el.userGridTopAdBanner, config.adBanners.headerBannerHtml);
+      loadAdSenseUnit(el.userDetailsAdBanner, config.adBanners.detailsBannerHtml);
+      loadAdSenseUnit(el.userPlayerBottomAdBanner, config.adBanners.watchBannerHtml);
       loadAdSenseUnit(el.userPlayerEpisodesAdBanner, config.adBanners.watchBannerHtml);
+      loadAdSenseUnit(el.userDownloadAdBanner, config.adBanners.detailsBannerHtml);
+      loadAdSenseUnit(el.userFooterAdBanner, config.adBanners.footerBannerHtml);
     } else {
       hideAllAdUnits();
     }
@@ -574,31 +587,16 @@
       container.style.display = 'none';
       return;
     }
+
+    container.classList.remove('hidden');
+    container.style.display = 'flex';
+
     const html = customHtml || config.adBanners.headerBannerHtml || '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="auto" data-full-width-responsive="true"></ins>';
 
     let ins = container.querySelector('ins.adsbygoogle');
     if (!ins) {
       container.innerHTML = html;
       ins = container.querySelector('ins.adsbygoogle');
-    }
-
-    // Monitor AdSense status to automatically collapse unfilled units cleanly
-    if (ins) {
-      const checkStatus = () => {
-        const status = ins.getAttribute('data-ad-status');
-        if (status === 'unfilled') {
-          container.classList.add('ad-unfilled');
-          container.style.display = 'none';
-        } else if (status === 'filled') {
-          container.classList.remove('ad-unfilled');
-          container.style.display = 'flex';
-        }
-      };
-      checkStatus();
-      if (typeof MutationObserver !== 'undefined') {
-        const observer = new MutationObserver(checkStatus);
-        observer.observe(ins, { attributes: true, attributeFilter: ['data-ad-status', 'data-adsbygoogle-status'] });
-      }
     }
 
     const triggerPush = () => {
@@ -612,24 +610,32 @@
     };
 
     triggerPush();
-    setTimeout(triggerPush, 400);
-    setTimeout(triggerPush, 1200);
+    setTimeout(triggerPush, 350);
+    setTimeout(triggerPush, 1000);
   }
 
   function triggerAllAdSenseUnits() {
     document.querySelectorAll('.user-ad-banner ins.adsbygoogle:not([data-adsbygoogle-status])').forEach(ins => {
       try {
         (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (_) {}
+      } catch (e) {
+        console.debug('[AdSense] Push notice:', e);
+      }
     });
   }
 
   function hideAllAdUnits() {
     [
       el.userHeaderAdBanner,
+      el.userCatalogFeedAdBanner,
       el.userMidRailAdBanner,
+      el.userPlatformTopAdBanner,
+      el.userSportsTopAdBanner,
+      el.userGridTopAdBanner,
       el.userDetailsAdBanner,
+      el.userPlayerBottomAdBanner,
       el.userPlayerEpisodesAdBanner,
+      el.userDownloadAdBanner,
       el.userFooterAdBanner,
     ].forEach((b) => {
       if (b) {
@@ -5510,6 +5516,7 @@ const DEFAULT_SHOWCASE_CATALOG = {
   async function openDetailsModal(id, provider = 'moviebox', titleHint = '') {
     el.detailsModal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
+    setTimeout(triggerAllAdSenseUnits, 100);
     const modalCard = el.detailsModal.querySelector('.modal-card');
     if (modalCard) modalCard.scrollTop = 0;
 
@@ -6194,6 +6201,7 @@ const DEFAULT_SHOWCASE_CATALOG = {
     const reqId = ++state.playbackRequestSeq;
     el.playerOverlay.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
+    setTimeout(triggerAllAdSenseUnits, 150);
     el.playerSpinner.classList.remove('hidden');
     el.spinnerText.textContent = 'Resolving video streams...';
 
@@ -6569,6 +6577,7 @@ const DEFAULT_SHOWCASE_CATALOG = {
 
   function renderDownloadModal() {
     if (!el.downloadGuideModal) return;
+    setTimeout(triggerAllAdSenseUnits, 100);
     const details = state.currentDetails;
     const s = state.currentSeason || 1;
     const ep = state.currentEpisode || 1;
@@ -7444,6 +7453,7 @@ const DEFAULT_SHOWCASE_CATALOG = {
       if (el.sportsView) el.sportsView.classList.add('hidden');
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(triggerAllAdSenseUnits, 80);
   }
 
   // ==========================================================================

@@ -1,13 +1,14 @@
 // MovieBox Plus - Production Progressive Web App (PWA) Service Worker
-const CACHE_NAME = 'moviebox-plus-v20261120_v18';
+const CACHE_NAME = 'moviebox-plus-v20261120_v19';
 
 const CORE_ASSETS = [
   '/',
   '/index.html',
-  '/styles.css?v=20261120_v18',
-  '/app.js?v=20261120_v18',
+  '/styles.css?v=20261120_v19',
+  '/app.js?v=20261120_v19',
   '/manifest.json',
   '/robots.txt',
+  '/ads.txt',
   '/sitemap.xml',
   '/llms.txt',
   '/favicon.ico',

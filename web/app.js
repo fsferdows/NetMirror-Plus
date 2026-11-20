@@ -587,8 +587,25 @@
       container.innerHTML = html;
       ins = container.querySelector('ins.adsbygoogle');
     }
-    container.classList.remove('hidden');
-    container.style.display = 'flex';
+
+    // Monitor AdSense status to automatically collapse unfilled units cleanly
+    if (ins) {
+      const checkStatus = () => {
+        const status = ins.getAttribute('data-ad-status');
+        if (status === 'unfilled') {
+          container.classList.add('ad-unfilled');
+          container.style.display = 'none';
+        } else if (status === 'filled') {
+          container.classList.remove('ad-unfilled');
+          container.style.display = 'flex';
+        }
+      };
+      checkStatus();
+      if (typeof MutationObserver !== 'undefined') {
+        const observer = new MutationObserver(checkStatus);
+        observer.observe(ins, { attributes: true, attributeFilter: ['data-ad-status', 'data-adsbygoogle-status'] });
+      }
+    }
 
     const triggerPush = () => {
       try {

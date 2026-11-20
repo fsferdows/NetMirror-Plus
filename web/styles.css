@@ -1897,15 +1897,10 @@ body {
 .user-ad-banner {
   width: 100%;
   max-width: 970px;
-  min-height: 90px;
-  margin: 18px auto;
-  padding: 6px;
+  margin: 16px auto;
   text-align: center;
   overflow: hidden;
   position: relative;
-  background: rgba(10, 18, 36, 0.45);
-  border: 1px dashed rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1915,14 +1910,15 @@ body {
 
 @media (max-width: 768px) {
   .user-ad-banner {
-    min-height: 55px;
-    margin: 12px auto;
-    padding: 4px;
-    border-radius: 8px;
+    margin: 10px auto;
   }
 }
 
-.user-ad-banner.hidden {
+/* Automatically collapse when empty, unfilled by Google AdSense, or blocked */
+.user-ad-banner:empty,
+.user-ad-banner.hidden,
+.user-ad-banner.ad-unfilled,
+.user-ad-banner:has(ins[data-ad-status="unfilled"]) {
   display: none !important;
   height: 0 !important;
   min-height: 0 !important;
@@ -1931,17 +1927,15 @@ body {
   border: none !important;
 }
 
+.user-ad-banner ins.adsbygoogle[data-ad-status="unfilled"] {
+  display: none !important;
+  height: 0 !important;
+}
+
 .user-ad-banner ins.adsbygoogle {
   display: block !important;
   width: 100% !important;
-  min-height: 90px !important;
   margin: 0 auto;
-}
-
-@media (max-width: 768px) {
-  .user-ad-banner ins.adsbygoogle {
-    min-height: 50px !important;
-  }
 }
 
 /* ==========================================================================

@@ -70,7 +70,7 @@
     audioBoost: parseFloat((typeof localStorage !== 'undefined' && localStorage.getItem('moviebox_audio_boost')) || '1.5'),
     audioLimiter: (typeof localStorage !== 'undefined' && localStorage.getItem('moviebox_audio_limiter')) !== 'false',
     audioVoiceEq: (typeof localStorage !== 'undefined' && localStorage.getItem('moviebox_audio_voice_eq')) !== 'false',
-    isVip: (typeof localStorage !== 'undefined' && localStorage.getItem('netmirror_is_vip')) === 'true',
+    isVip: true, // All VIP facilities (4K UHD, 300% sound booster, AdShield protection, live sports) permanently unlocked for all users
     isPlaying: false,
     controlsTimeout: null,
     nextEpCountdownInterval: null,
@@ -550,7 +550,7 @@
     if (el.solAddrInput) el.solAddrInput.value = wallets.sol || 'So1... (Configure in monetization-config.js)';
 
     // 4. Render Owner Monetized Banner Ads (Google AdSense ca-pub-4512671475286537)
-    if (config.adBanners && config.adBanners.enabled && !state.isVip) {
+    if (config.adBanners && config.adBanners.enabled) {
       loadAdSenseUnit(el.userHeaderAdBanner, config.adBanners.headerBannerHtml);
       loadAdSenseUnit(el.userMidRailAdBanner, config.adBanners.midRailBannerHtml);
       loadAdSenseUnit(el.userFooterAdBanner, config.adBanners.footerBannerHtml);
@@ -568,12 +568,6 @@
 
   function loadAdSenseUnit(container, customHtml) {
     if (!container) return;
-    if (state.isVip) {
-      container.innerHTML = '';
-      container.classList.add('hidden');
-      container.style.display = 'none';
-      return;
-    }
     const config = window.NETMIRROR_MONETIZATION || {};
     if (!config.adBanners || !config.adBanners.enabled) {
       container.classList.add('hidden');
@@ -623,7 +617,6 @@
   }
 
   function triggerAllAdSenseUnits() {
-    if (state.isVip) return;
     document.querySelectorAll('.user-ad-banner ins.adsbygoogle:not([data-adsbygoogle-status])').forEach(ins => {
       try {
         (window.adsbygoogle = window.adsbygoogle || []).push({});
@@ -648,21 +641,18 @@
   }
 
   function updateVipStatusUI() {
-    if (state.isVip) {
-      if (el.vipModalBtn) {
-        el.vipModalBtn.innerHTML = `
-          <svg viewBox="0 0 24 24" class="vip-crown-icon" style="fill:#22c55e"><path d="M2 4l3 12h14l3-12-6 7-4-11-4 11-6-7zm3 16h14v2H5v-2z"/></svg>
-          <span class="vip-btn-text" style="color:#86efac">VIP Active</span>
-        `;
-        el.vipModalBtn.style.borderColor = '#22c55e';
-      }
-      if (el.detailsSponsorBanner) {
-        el.detailsSponsorBanner.style.display = 'none';
-      }
-      if (el.playerSponsorPill) {
-        el.playerSponsorPill.style.display = 'none';
-      }
-      hideAllAdUnits();
+    if (el.vipModalBtn) {
+      el.vipModalBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" class="vip-crown-icon" style="fill:#eab308"><path d="M2 4l3 12h14l3-12-6 7-4-11-4 11-6-7zm3 16h14v2H5v-2z"/></svg>
+        <span class="vip-btn-text" style="color:#fde047">VIP Active</span>
+      `;
+      el.vipModalBtn.style.borderColor = 'rgba(234, 179, 8, 0.6)';
+      el.vipModalBtn.title = 'VIP Pass Active • All Facilities Unlocked';
+    }
+    if (el.vipStatusMsg) {
+      el.vipStatusMsg.classList.remove('hidden');
+      el.vipStatusMsg.className = 'vip-status-message success';
+      el.vipStatusMsg.innerHTML = '👑 <strong>VIP Privileges Active:</strong> Ultra 4K Direct Speed, 300% Studio Sound Booster, AdShield Protection &amp; All Live Sports Broadcasts Unlocked.';
     }
   }
 
@@ -6360,7 +6350,11 @@ const DEFAULT_SHOWCASE_CATALOG = {
         if (el.playerControls) {
           el.playerControls.classList.remove('hidden');
         }
-        const defaultStream = state.currentStreams[0];
+        const sortedStreams = [...state.currentStreams].sort((a, b) => {
+          const getRes = q => (q && q.toLowerCase().includes('4k') ? 4000 : parseInt(q) || 0);
+          return getRes(b.quality) - getRes(a.quality);
+        });
+        const defaultStream = sortedStreams[0] || state.currentStreams[0];
         state.currentQuality = defaultStream.quality;
         el.currentQualityLabel.textContent = defaultStream.quality;
         if (el.currentServerLabel) {

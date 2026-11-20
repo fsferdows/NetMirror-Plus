@@ -8643,6 +8643,22 @@ const DEFAULT_SHOWCASE_CATALOG = {
       });
     }
 
+    if (el.sportsSpotlightCarousel) {
+      el.sportsSpotlightCarousel.addEventListener('click', (e) => {
+        const card = e.target.closest('.sports-spotlight-card');
+        if (!card) return;
+        const channelName = card.dataset.channel;
+        const sportName = card.dataset.sport || 'Live Sports';
+        if (channelName) {
+          const found = (state.sportsChannels || []).find((c) => c.name.toLowerCase() === channelName.toLowerCase()) || {
+            name: channelName,
+            url: `/api/sports-stream?name=${encodeURIComponent(channelName)}`
+          };
+          openSportsPlayer(found.name, `🔴 24/7 Live Broadcast • ${sportName}`, [found], 0);
+        }
+      });
+    }
+
     if (el.sportsRefreshBtn) {
       el.sportsRefreshBtn.addEventListener('click', () => {
         fetchSportsData(true);

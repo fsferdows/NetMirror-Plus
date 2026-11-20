@@ -10,7 +10,7 @@
     content="Stream worldwide movies, TV series, and 24/7 live sports (Cricket, Football, NBA) in 4K Ultra HD with multi-language subtitles, audio dubs, and up to 300% studio sound booster." />
   <meta name="author" content="FS FERDOWS" />
   <meta name="keywords"
-    content="moviebox, moviebox plus, movie streaming, watch movies online, tv series, live sports stream, live cricket, live football, free streaming, hd movies, netmirror, netflix free, watch deadpool online, watch anime online" />
+    content="moviehub.stream, moviehub, movie streaming, watch movies online, tv series, live sports stream, live cricket, live football, free streaming, hd movies, netmirror, netflix free, watch deadpool online, watch anime online" />
   <meta name="theme-color" content="#e50914" />
   <meta name="msapplication-TileColor" content="#060a14" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -65,7 +65,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20261120_v19" />
+  <link rel="stylesheet" href="/styles.css?v=20261120_v20" />
 
   <!-- Structured Data: Schema.org JSON-LD (WebSite, Organization, WebApplication, FAQPage, ItemList) -->
   <script type="application/ld+json">
@@ -266,8 +266,7 @@
       <div class="nav-left">
         <a href="#" class="logo" id="logoBtn">
           <span class="logo-badge">M</span>
-          <span class="logo-text">MOVIEHUB</span>
-          <span class="logo-tag">.STREAM</span>
+          <span class="logo-text">moviehub<span class="logo-highlight">.stream</span></span>
         </a>
         <nav class="nav-links" id="navLinks">
           <a href="#" class="nav-link active" data-nav="home">Home</a>
@@ -3397,8 +3396,7 @@
           <div class="footer-brand">
             <a href="#" class="logo" style="margin-bottom: 12px; display: inline-flex;">
               <span class="logo-badge">M</span>
-              <span class="logo-text">MOVIEHUB</span>
-              <span class="logo-tag">.STREAM</span>
+              <span class="logo-text">moviehub<span class="logo-highlight">.stream</span></span>
             </a>
             <p class="footer-desc">Next-generation cinema & live sports streaming platform. Stream 4,500+ worldwide
               movies,
@@ -3906,7 +3904,7 @@
   </div>
 </div>
 
-<script src="/app.js?v=20261120_v19"></script>
+<script src="/app.js?v=20261120_v20"></script>
 <!-- Progressive Web App (PWA) Service Worker Registration & Localhost Cache Bypass -->
 <script>
   if ('serviceWorker' in navigator) {
@@ -3926,7 +3924,7 @@
       }
     } else {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=20261120_v19')
+        navigator.serviceWorker.register('/sw.js?v=20261120_v20')
           .then((reg) => {
             reg.update();
             console.log('moviehub.stream PWA ServiceWorker active:', reg.scope);

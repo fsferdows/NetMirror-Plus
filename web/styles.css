@@ -145,20 +145,21 @@ body {
 }
 
 .logo-text {
-  font-size: 22px;
+  font-size: 21px;
   font-weight: 800;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   color: #fff;
+  display: inline-flex;
+  align-items: center;
+}
+
+.logo-highlight {
+  color: var(--red);
+  font-weight: 900;
 }
 
 .logo-tag {
-  font-size: 10px;
-  font-weight: 800;
-  background: linear-gradient(90deg, #f89e00, #da2f68);
-  color: #fff;
-  padding: 2px 6px;
-  border-radius: 4px;
-  letter-spacing: 0.5px;
+  display: none;
 }
 
 .nav-links {
@@ -6587,11 +6588,7 @@ kbd {
   }
 
   .logo-tag {
-    display: inline-block !important;
-    font-size: 8.5px !important;
-    padding: 1px 4px !important;
-    letter-spacing: 0.3px !important;
-    border-radius: 3px !important;
+    display: none !important;
   }
 
   .nav-right {

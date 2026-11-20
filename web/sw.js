@@ -1,11 +1,11 @@
 // MovieBox Plus - Production Progressive Web App (PWA) Service Worker
-const CACHE_NAME = 'moviebox-plus-v20261120_v17';
+const CACHE_NAME = 'moviebox-plus-v20261120_v18';
 
 const CORE_ASSETS = [
   '/',
   '/index.html',
-  '/styles.css?v=20261120_v17',
-  '/app.js?v=20261120_v17',
+  '/styles.css?v=20261120_v18',
+  '/app.js?v=20261120_v18',
   '/manifest.json',
   '/robots.txt',
   '/sitemap.xml',
@@ -52,6 +52,11 @@ self.addEventListener('fetch', (event) => {
   // Ignore non-GET requests
   if (req.method !== 'GET') return;
 
+  // Never cache or intercept requests on local development hostnames
+  if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+    return;
+  }
+
   // Ignore video streams, third-party embeds, and ads
   if (
     url.hostname.includes('vidlink.pro') ||
@@ -66,6 +71,22 @@ self.addEventListener('fetch', (event) => {
     url.pathname.endsWith('.mp4') ||
     url.pathname.endsWith('.m3u8')
   ) {
+    return;
+  }
+
+  // Network-First for Navigation (HTML) so users always receive latest releases immediately
+  if (req.mode === 'navigate' || (req.headers.get('accept') && req.headers.get('accept').includes('text/html'))) {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          if (res.ok) {
+            const clone = res.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
+          }
+          return res;
+        })
+        .catch(() => caches.match(req).then((cached) => cached || caches.match('/index.html')))
+    );
     return;
   }
 

@@ -47,3 +47,4 @@ Allow: /
 
 # Sitemap Index
 Sitemap: https://moviehub.stream/sitemap.xml
+Sitemap: https://www.moviehub.stream/sitemap.xml

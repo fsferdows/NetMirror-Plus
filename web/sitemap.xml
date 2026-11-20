@@ -220,4 +220,24 @@
       <image:title>Dexter: Resurrection (2025) Poster</image:title>
     </image:image>
   </url>
+
+  <!-- Legal, Compliance & Policy Pages -->
+  <url>
+    <loc>https://moviehub.stream/privacy.html</loc>
+    <lastmod>2026-11-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://moviehub.stream/terms.html</loc>
+    <lastmod>2026-11-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://moviehub.stream/dmca.html</loc>
+    <lastmod>2026-11-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
 </urlset>

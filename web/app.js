@@ -730,21 +730,29 @@
   }
 
   function handleVipActivation() {
-    const inputVal = (el.vipPasscodeInput.value || '').trim().toUpperCase();
+    const rawVal = (el.vipPasscodeInput.value || '').trim().toUpperCase();
+    const normalizedInput = rawVal.replace(/\s+/g, ' ');
+    const noSpaceInput = rawVal.replace(/\s+/g, '');
     const config = window.NETMIRROR_MONETIZATION || {};
-    const validCodes = (config.vipPasscodes || ['VIP2026', 'NETMIRRORVIP', 'PREMIUM4K', 'FSFERDOWS']).map(c => String(c).toUpperCase());
+    const validCodes = (config.vipPasscodes || ['FSFERDOWS', 'FARDIN KHAN']).map(c => String(c).trim().toUpperCase());
 
-    if (!inputVal) {
+    if (!rawVal) {
       showVipMessage('Please enter a valid supporter passcode.', 'error');
       return;
     }
 
-    if (validCodes.includes(inputVal)) {
+    const isMatch = validCodes.some(c => {
+      const normCode = c.replace(/\s+/g, ' ');
+      const noSpaceCode = c.replace(/\s+/g, '');
+      return normalizedInput === normCode || noSpaceInput === noSpaceCode;
+    });
+
+    if (isMatch) {
       state.isVip = true;
       localStorage.setItem('netmirror_is_vip', 'true');
       updateVipStatusUI();
       showVipMessage('🎉 VIP Supporter Pass Activated! Ultra 4K Priority & Ad-Free Cinema unlocked.', 'success');
-      showToast('👑 VIP Pass Activated! Enjoy Premium NetMirror.');
+      showToast('👑 VIP Pass Activated! Enjoy Premium moviehub.stream.');
       setTimeout(() => {
         if (el.vipModal) {
           el.vipModal.classList.add('hidden');

@@ -8494,6 +8494,22 @@ const DEFAULT_SHOWCASE_CATALOG = {
     if (mobileSheetBackdrop) mobileSheetBackdrop.addEventListener('click', closeMobilePlatformsSheet);
     if (mobileSheetCloseBtn) mobileSheetCloseBtn.addEventListener('click', closeMobilePlatformsSheet);
 
+    document.querySelectorAll('.mobile-plat-btn[data-nav]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const nav = btn.dataset.nav;
+        closeMobilePlatformsSheet();
+        navigate(nav);
+      });
+    });
+
+    const mobileVipPassBtn = document.getElementById('mobileVipPassBtn');
+    if (mobileVipPassBtn) {
+      mobileVipPassBtn.addEventListener('click', () => {
+        closeMobilePlatformsSheet();
+        if (el.vipModalBtn) el.vipModalBtn.click();
+      });
+    }
+
     document.querySelectorAll('.mobile-plat-btn[data-ott]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const ott = btn.dataset.ott;
@@ -8755,18 +8771,31 @@ const DEFAULT_SHOWCASE_CATALOG = {
     }
 
     // Search Input Events
-    if (el.searchInput) el.searchInput.addEventListener('input', handleSearchInput);
-    if (el.searchInput) el.searchInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        el.suggestionsPopover.classList.add('hidden');
-        executeSearch(el.searchInput.value);
-      }
-    });
+    if (el.searchInput) {
+      el.searchInput.addEventListener('input', handleSearchInput);
+      el.searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          el.suggestionsPopover.classList.add('hidden');
+          executeSearch(el.searchInput.value);
+        }
+      });
+      el.searchInput.addEventListener('focus', () => {
+        if (el.navbar) el.navbar.classList.add('search-active');
+      });
+      el.searchInput.addEventListener('blur', () => {
+        setTimeout(() => {
+          if (!el.searchInput.value && el.navbar) {
+            el.navbar.classList.remove('search-active');
+          }
+        }, 180);
+      });
+    }
 
     if (el.clearSearchBtn) el.clearSearchBtn.addEventListener('click', () => {
       el.searchInput.value = '';
       el.clearSearchBtn.classList.add('hidden');
       el.suggestionsPopover.classList.add('hidden');
+      if (el.navbar) el.navbar.classList.remove('search-active');
     });
 
     // Click outside search popover

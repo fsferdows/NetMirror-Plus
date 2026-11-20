@@ -65,7 +65,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20261120_v23" />
+  <link rel="stylesheet" href="/styles.css?v=20261120_v24" />
 
   <!-- Structured Data: Schema.org JSON-LD (WebSite, Organization, WebApplication, FAQPage, ItemList) -->
   <script type="application/ld+json">
@@ -3615,9 +3615,24 @@
           <div class="mobile-sheet-header">
             <div class="sheet-indicator"></div>
             <div class="sheet-title-row">
-              <h3>Browse By Platform</h3>
+              <h3>Navigation & Platforms</h3>
               <button class="sheet-close-btn" id="mobileSheetCloseBtn" type="button">✕</button>
             </div>
+          </div>
+          <!-- Mobile Quick Nav Items -->
+          <div class="sheet-title-row" style="margin-bottom: 10px;">
+            <h3>Quick Links</h3>
+          </div>
+          <div class="mobile-platforms-grid" style="margin-bottom: 18px;">
+            <button class="mobile-plat-btn" data-nav="trending" style="--c:#e50914">🔥 Trending</button>
+            <button class="mobile-plat-btn" data-nav="sports" style="--c:#38bdf8">⚽ Live Sports</button>
+            <button class="mobile-plat-btn" data-nav="mylist" style="--c:#8b5cf6">⭐ My List</button>
+            <button class="mobile-plat-btn" data-nav="history" style="--c:#10b981">🕒 History</button>
+            <button class="mobile-plat-btn" id="mobileVipPassBtn" style="--c:#eab308">👑 VIP Pass</button>
+          </div>
+
+          <div class="sheet-title-row" style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px; margin-bottom: 10px;">
+            <h3>Browse By Platform</h3>
           </div>
           <div class="mobile-platforms-grid">
             <button class="mobile-plat-btn" data-ott="netflix" style="--c:#e50914">Netflix</button>
@@ -3994,7 +4009,7 @@
   </div>
 </div>
 
-<script src="/app.js?v=20261120_v23"></script>
+<script src="/app.js?v=20261120_v24"></script>
 <!-- Progressive Web App (PWA) Service Worker Registration & Localhost Cache Bypass -->
 <script>
   if ('serviceWorker' in navigator) {

@@ -52,7 +52,11 @@ window.NETMIRROR_MONETIZATION = {
     detailsBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="rectangle" data-full-width-responsive="true"></ins>',
     // Google AdSense Footer Unit
     footerBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="auto" data-full-width-responsive="true"></ins>'
-  }
+  },
+
+  // 6. THE MOVIE DATABASE (TMDB) API KEY / BEARER TOKEN
+  // Enter your TMDB API Key v3 or Read Access Bearer Token here, or provide via VITE_TMDB_API_KEY / NEXT_PUBLIC_TMDB_API_KEY
+  tmdbApiKey: (typeof window !== "undefined" && (window.VITE_TMDB_API_KEY || window.NEXT_PUBLIC_TMDB_API_KEY)) || ""
 };
 
 

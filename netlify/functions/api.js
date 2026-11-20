@@ -2373,6 +2373,42 @@ exports.handler = async (event) => {
     };
   }
 
+  if (cleanPath === "/tmdb" || cleanPath.startsWith("/tmdb/")) {
+    const tmdbEndpoint = params.endpoint || cleanPath.replace(/^\/tmdb/, "") || "/trending/all/week";
+    const apiKey = process.env.VITE_TMDB_API_KEY || process.env.NEXT_PUBLIC_TMDB_API_KEY || process.env.TMDB_API_KEY || "15d2ea6d0dc1d476efbca3eba2b9bbfb";
+    const isBearer = Boolean(apiKey && (apiKey.startsWith("ey") || apiKey.length > 40));
+    const sep = tmdbEndpoint.includes("?") ? "&" : "?";
+    const fullUrl = isBearer
+      ? `https://api.themoviedb.org/3${tmdbEndpoint}`
+      : `https://api.themoviedb.org/3${tmdbEndpoint}${sep}api_key=${encodeURIComponent(apiKey)}`;
+    const headers = { "Accept": "application/json", "User-Agent": USER_AGENT };
+    if (isBearer) {
+      headers["Authorization"] = `Bearer ${apiKey}`;
+    }
+    try {
+      const resp = await fetch(fullUrl, { headers });
+      const data = await resp.json();
+      return {
+        statusCode: resp.status || 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          "Cache-Control": "public, max-age=1800, s-maxage=1800, stale-while-revalidate=86400"
+        },
+        body: JSON.stringify(data)
+      };
+    } catch (err) {
+      return {
+        statusCode: 502,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+        body: JSON.stringify({ error: "TMDB API proxy error: " + err.message })
+      };
+    }
+  }
+
   if (cleanPath === "/platforms") {
     return handlePlatforms();
   }

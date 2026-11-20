@@ -54,7 +54,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20261120_v11" />
+  <link rel="stylesheet" href="/styles.css?v=20261120_v12" />
   <link rel="dns-prefetch" href="https://vidlink.pro">
   <link rel="preconnect" href="https://vidlink.pro" crossorigin>
   <link rel="dns-prefetch" href="https://embed.smashystream.com">
@@ -520,6 +520,12 @@
         <div class="home-category-scroll" id="homeCategoryScroll">
           <button type="button" class="cat-pill active" data-target="all">🌟 All Categories</button>
           <button type="button" class="cat-pill" data-target="trendingRailSection">🔥 Trending</button>
+          <button type="button" class="cat-pill" data-target="englishRailSection">🇺🇸 English</button>
+          <button type="button" class="cat-pill" data-target="hindiRailSection">🇮🇳 Hindi</button>
+          <button type="button" class="cat-pill" data-target="kannadaRailSection">🟡 Kannada</button>
+          <button type="button" class="cat-pill" data-target="netflixRailSection">🔴 Netflix</button>
+          <button type="button" class="cat-pill" data-target="primeRailSection">🔵 Prime</button>
+          <button type="button" class="cat-pill" data-target="disneyRailSection">🔷 Disney+</button>
           <button type="button" class="cat-pill" data-target="moviesRailSection">🎬 Movies</button>
           <button type="button" class="cat-pill" data-target="seriesRailSection">📺 TV Series</button>
           <button type="button" class="cat-pill" data-target="actionRailSection">💥 Action</button>
@@ -529,9 +535,6 @@
           <button type="button" class="cat-pill" data-target="kdramaRailSection">🇰🇷 K-Drama</button>
           <button type="button" class="cat-pill" data-target="comedyRailSection">😂 Comedy</button>
           <button type="button" class="cat-pill" data-target="topRatedRailSection">🏆 Top Rated</button>
-          <button type="button" class="cat-pill" data-target="netflixRailSection">🔴 Netflix</button>
-          <button type="button" class="cat-pill" data-target="primeRailSection">🔵 Prime</button>
-          <button type="button" class="cat-pill" data-target="disneyRailSection">🔷 Disney+</button>
           <button type="button" class="cat-pill" data-target="sportsSpotlightSection">⚽ Sports</button>
         </div>
       </div>
@@ -543,9 +546,8 @@
             <h2 class="rail-title"><span class="live-dot-pulse"></span> Live Sports Broadcasts</h2>
             <p class="rail-subtitle">Live matches & tournaments streaming right now in HD</p>
           </div>
-          <button class="rail-view-all-btn platform-link-btn" id="homeViewAllSportsBtn"
-            style="background:rgba(229,9,20,0.18);border-color:rgba(229,9,20,0.4);">
-            <span class="live-dot-pulse"></span> Watch All Live Sports & Channels ›
+          <button class="rail-view-all-btn platform-link-btn" id="homeViewAllSportsBtn">
+            <span class="live-dot-pulse"></span> View All
           </button>
         </div>
         <div class="rail-carousel-wrapper">
@@ -562,12 +564,60 @@
             <h2 class="rail-title"><span class="rail-indicator"></span> Trending Now</h2>
             <p class="rail-subtitle">Hottest releases trending across all networks</p>
           </div>
-          <button class="rail-view-all-btn" data-tab="2">View All ›</button>
+          <button class="rail-view-all-btn" data-category="trending" data-title="Trending Now">View All</button>
         </div>
         <div class="rail-carousel-wrapper">
           <button class="rail-nav-btn rail-prev" data-target="trendingCarousel">‹</button>
           <div class="rail-carousel" id="trendingCarousel"></div>
           <button class="rail-nav-btn rail-next" data-target="trendingCarousel">›</button>
+        </div>
+      </section>
+
+      <!-- Latest English Rail -->
+      <section class="rail-section" id="englishRailSection">
+        <div class="rail-header">
+          <div>
+            <h2 class="rail-title"><span class="rail-indicator"></span> Latest English</h2>
+            <p class="rail-subtitle">Top trending Hollywood and English blockbusters</p>
+          </div>
+          <button class="rail-view-all-btn" data-category="english" data-title="Latest English Movies">View All</button>
+        </div>
+        <div class="rail-carousel-wrapper">
+          <button class="rail-nav-btn rail-prev" data-target="englishCarousel">‹</button>
+          <div class="rail-carousel" id="englishCarousel"></div>
+          <button class="rail-nav-btn rail-next" data-target="englishCarousel">›</button>
+        </div>
+      </section>
+
+      <!-- Latest Hindi Rail -->
+      <section class="rail-section" id="hindiRailSection">
+        <div class="rail-header">
+          <div>
+            <h2 class="rail-title"><span class="rail-indicator"></span> Latest Hindi</h2>
+            <p class="rail-subtitle">Popular Bollywood releases, Hindi originals & cinema</p>
+          </div>
+          <button class="rail-view-all-btn" data-category="hindi" data-title="Latest Hindi Movies">View All</button>
+        </div>
+        <div class="rail-carousel-wrapper">
+          <button class="rail-nav-btn rail-prev" data-target="hindiCarousel">‹</button>
+          <div class="rail-carousel" id="hindiCarousel"></div>
+          <button class="rail-nav-btn rail-next" data-target="hindiCarousel">›</button>
+        </div>
+      </section>
+
+      <!-- Latest Kannada Rail -->
+      <section class="rail-section" id="kannadaRailSection">
+        <div class="rail-header">
+          <div>
+            <h2 class="rail-title"><span class="rail-indicator"></span> Latest Kannada</h2>
+            <p class="rail-subtitle">Sandalwood blockbusters, Kannada action hits & new releases</p>
+          </div>
+          <button class="rail-view-all-btn" data-category="kannada" data-title="Latest Kannada Movies">View All</button>
+        </div>
+        <div class="rail-carousel-wrapper">
+          <button class="rail-nav-btn rail-prev" data-target="kannadaCarousel">‹</button>
+          <div class="rail-carousel" id="kannadaCarousel"></div>
+          <button class="rail-nav-btn rail-next" data-target="kannadaCarousel">›</button>
         </div>
       </section>
 
@@ -578,7 +628,7 @@
             <h2 class="rail-title"><span class="rail-indicator"></span> Netflix Originals & Exclusives</h2>
             <p class="rail-subtitle">Popular Netflix movies and series streaming now</p>
           </div>
-          <button class="rail-view-all-btn platform-link-btn" data-ott="netflix" data-title="Netflix Originals">View All Netflix (2,270+) ›</button>
+          <button class="rail-view-all-btn platform-link-btn" data-category="netflix" data-ott="netflix" data-title="Netflix Originals">View All</button>
         </div>
         <div class="rail-carousel-wrapper">
           <button class="rail-nav-btn rail-prev" data-target="netflixCarousel">‹</button>
@@ -594,8 +644,7 @@
             <h2 class="rail-title"><span class="rail-indicator"></span> Prime Video Exclusives</h2>
             <p class="rail-subtitle">Amazon Prime Video top rated originals</p>
           </div>
-          <button class="rail-view-all-btn platform-link-btn" data-ott="primeVideo"
-            data-title="Prime Video Exclusives">View All Prime (900+) ›</button>
+          <button class="rail-view-all-btn platform-link-btn" data-category="prime" data-ott="primeVideo" data-title="Prime Video Exclusives">View All</button>
         </div>
         <div class="rail-carousel-wrapper">
           <button class="rail-nav-btn rail-prev" data-target="primeCarousel">‹</button>
@@ -611,13 +660,14 @@
             <h2 class="rail-title"><span class="rail-indicator"></span> Disney+ & Marvel Showcase</h2>
             <p class="rail-subtitle">Disney+ Hotstar, Star Wars, Pixar & Marvel titles</p>
           </div>
-          <button class="rail-view-all-btn platform-link-btn" data-ott="disney" data-title="Disney+ Hotstar">View All Disney+ (210+) ›</button>
+          <button class="rail-view-all-btn platform-link-btn" data-category="disney" data-ott="disney" data-title="Disney+ Hotstar">View All</button>
         </div>
         <div class="rail-carousel-wrapper">
           <button class="rail-nav-btn rail-prev" data-target="disneyCarousel">‹</button>
           <div class="rail-carousel" id="disneyCarousel"></div>
           <button class="rail-nav-btn rail-next" data-target="disneyCarousel">›</button>
         </div>
+      </section>
       </section>
 
       <!-- Popular Movies Rail -->
@@ -627,7 +677,7 @@
             <h2 class="rail-title"><span class="rail-indicator"></span> Popular Movies</h2>
             <p class="rail-subtitle">Top rated movies in cinema and on demand</p>
           </div>
-          <button class="rail-view-all-btn" data-tab="1">View All ›</button>
+          <button class="rail-view-all-btn" data-category="movies" data-title="Popular Movies">View All</button>
         </div>
         <div class="rail-carousel-wrapper">
           <button class="rail-nav-btn rail-prev" data-target="moviesCarousel">‹</button>
@@ -643,7 +693,7 @@
             <h2 class="rail-title"><span class="rail-indicator"></span> Bingeworthy TV Series</h2>
             <p class="rail-subtitle">Multi-season drama, sci-fi, comedy and anime</p>
           </div>
-          <button class="rail-view-all-btn" data-tab="3">View All ›</button>
+          <button class="rail-view-all-btn" data-category="series" data-title="Bingeworthy TV Series">View All</button>
         </div>
         <div class="rail-carousel-wrapper">
           <button class="rail-nav-btn rail-prev" data-target="seriesCarousel">‹</button>
@@ -659,7 +709,7 @@
             <h2 class="rail-title"><span class="rail-indicator"></span> Action & Adventure Blockbusters</h2>
             <p class="rail-subtitle">High-octane action, superhero epics, martial arts & adrenaline cinema</p>
           </div>
-          <button class="rail-view-all-btn category-grid-btn" data-category="action" data-title="Action & Adventure Movies">View All Action ›</button>
+          <button class="rail-view-all-btn category-grid-btn" data-category="action" data-title="Action & Adventure Movies">View All</button>
         </div>
         <div class="rail-carousel-wrapper">
           <button class="rail-nav-btn rail-prev" data-target="actionCarousel">‹</button>
@@ -675,7 +725,7 @@
             <h2 class="rail-title"><span class="rail-indicator"></span> Sci-Fi, Cyberpunk & Fantasy Epics</h2>
             <p class="rail-subtitle">Interstellar voyages, mind-bending futures, space exploration & fantasy realms</p>
           </div>
-          <button class="rail-view-all-btn category-grid-btn" data-category="scifi" data-title="Sci-Fi & Fantasy Movies">View All Sci-Fi ›</button>
+          <button class="rail-view-all-btn category-grid-btn" data-category="scifi" data-title="Sci-Fi & Fantasy Movies">View All</button>
         </div>
         <div class="rail-carousel-wrapper">
           <button class="rail-nav-btn rail-prev" data-target="scifiCarousel">‹</button>
@@ -691,7 +741,7 @@
             <h2 class="rail-title"><span class="rail-indicator"></span> Horror & Supernatural Thrillers</h2>
             <p class="rail-subtitle">Psychological suspense, supernatural chills, crime investigations & dark thrillers</p>
           </div>
-          <button class="rail-view-all-btn category-grid-btn" data-category="horror" data-title="Horror & Thriller Movies">View All Horror ›</button>
+          <button class="rail-view-all-btn category-grid-btn" data-category="horror" data-title="Horror & Thriller Movies">View All</button>
         </div>
         <div class="rail-carousel-wrapper">
           <button class="rail-nav-btn rail-prev" data-target="horrorCarousel">‹</button>
@@ -707,7 +757,7 @@
             <h2 class="rail-title"><span class="rail-indicator"></span> Anime Series & Animation</h2>
             <p class="rail-subtitle">Top-rated Japanese anime, shonen adventures, Studio Ghibli & English dubs</p>
           </div>
-          <button class="rail-view-all-btn category-grid-btn" data-category="anime" data-title="Anime & Animation">View All Anime ›</button>
+          <button class="rail-view-all-btn category-grid-btn" data-category="anime" data-title="Anime & Animation">View All</button>
         </div>
         <div class="rail-carousel-wrapper">
           <button class="rail-nav-btn rail-prev" data-target="animeCarousel">‹</button>
@@ -723,7 +773,7 @@
             <h2 class="rail-title"><span class="rail-indicator"></span> Korean K-Drama Sensation</h2>
             <p class="rail-subtitle">Addictive Korean drama series, romantic thrillers & Seoul cinematic masterpieces</p>
           </div>
-          <button class="rail-view-all-btn category-grid-btn" data-category="kdrama" data-title="Korean K-Drama & Cinema">View All K-Drama ›</button>
+          <button class="rail-view-all-btn category-grid-btn" data-category="kdrama" data-title="Korean K-Drama & Cinema">View All</button>
         </div>
         <div class="rail-carousel-wrapper">
           <button class="rail-nav-btn rail-prev" data-target="kdramaCarousel">‹</button>
@@ -739,7 +789,7 @@
             <h2 class="rail-title"><span class="rail-indicator"></span> Comedy & Feel-Good Hits</h2>
             <p class="rail-subtitle">Hilarious comedy blockbusters, witty sitcoms, romantic comedies & family fun</p>
           </div>
-          <button class="rail-view-all-btn category-grid-btn" data-category="comedy" data-title="Comedy & Feel-Good Movies">View All Comedy ›</button>
+          <button class="rail-view-all-btn category-grid-btn" data-category="comedy" data-title="Comedy & Feel-Good Movies">View All</button>
         </div>
         <div class="rail-carousel-wrapper">
           <button class="rail-nav-btn rail-prev" data-target="comedyCarousel">‹</button>
@@ -755,13 +805,14 @@
             <h2 class="rail-title"><span class="rail-indicator"></span> Top Rated IMDb Hall of Fame</h2>
             <p class="rail-subtitle">All-time masterpiece movies and series holding 8.5+ ratings worldwide</p>
           </div>
-          <button class="rail-view-all-btn category-grid-btn" data-category="toprated" data-title="Top Rated IMDb Hall of Fame">View All Top Rated ›</button>
+          <button class="rail-view-all-btn category-grid-btn" data-category="toprated" data-title="Top Rated IMDb Hall of Fame">View All</button>
         </div>
         <div class="rail-carousel-wrapper">
           <button class="rail-nav-btn rail-prev" data-target="topRatedCarousel">‹</button>
           <div class="rail-carousel" id="topRatedCarousel"></div>
           <button class="rail-nav-btn rail-next" data-target="topRatedCarousel">›</button>
         </div>
+      </section>
       </section>
     </div>
 
@@ -2219,12 +2270,12 @@
   </div>
 </div>
 
-<script src="/app.js?v=20261120_v11"></script>
+<script src="/app.js?v=20261120_v12"></script>
 <!-- Progressive Web App (PWA) Service Worker Registration -->
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js?v=20261120_v11')
+      navigator.serviceWorker.register('/sw.js?v=20261120_v12')
         .then((reg) => console.log('MovieBox PWA ServiceWorker active:', reg.scope))
         .catch((err) => console.warn('PWA registration error:', err));
     });

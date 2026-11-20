@@ -145,6 +145,12 @@
     // Carousels & Rails
     homeCategoryBar: document.getElementById('homeCategoryBar'),
     trendingRailSection: document.getElementById('trendingRailSection'),
+    englishRailSection: document.getElementById('englishRailSection'),
+    hindiRailSection: document.getElementById('hindiRailSection'),
+    kannadaRailSection: document.getElementById('kannadaRailSection'),
+    netflixRailSection: document.getElementById('netflixRailSection'),
+    primeRailSection: document.getElementById('primeRailSection'),
+    disneyRailSection: document.getElementById('disneyRailSection'),
     moviesRailSection: document.getElementById('moviesRailSection'),
     seriesRailSection: document.getElementById('seriesRailSection'),
     actionRailSection: document.getElementById('actionRailSection'),
@@ -158,6 +164,9 @@
     continueWatchingList: document.getElementById('continueWatchingList'),
     clearHistoryBtn: document.getElementById('clearHistoryBtn'),
     trendingCarousel: document.getElementById('trendingCarousel'),
+    englishCarousel: document.getElementById('englishCarousel'),
+    hindiCarousel: document.getElementById('hindiCarousel'),
+    kannadaCarousel: document.getElementById('kannadaCarousel'),
     netflixCarousel: document.getElementById('netflixCarousel'),
     primeCarousel: document.getElementById('primeCarousel'),
     disneyCarousel: document.getElementById('disneyCarousel'),
@@ -3113,6 +3122,343 @@
     { name: 'ESPN Live Sports USA HD', url: 'https://fl01.topembed.pw/live/espn_us/playlist.m3u8', sport: 'Sports' }
   ];
 
+  // ==========================================================================
+  // TMDB API V3 INTEGRATION & CATEGORY ROWS ENGINE
+  // ==========================================================================
+  const TMDB_CONFIG = {
+    baseUrl: 'https://api.themoviedb.org/3',
+    imageBase: 'https://image.tmdb.org/t/p/w500',
+    defaultKey: '15d2ea6d0dc1d476efbca3eba2b9bbfb',
+    getKey: () => {
+      // 1. Check window environment variables (Vite / Next.js / Custom)
+      if (typeof window !== 'undefined') {
+        if (window.VITE_TMDB_API_KEY) return window.VITE_TMDB_API_KEY;
+        if (window.NEXT_PUBLIC_TMDB_API_KEY) return window.NEXT_PUBLIC_TMDB_API_KEY;
+        if (window.TMDB_API_KEY) return window.TMDB_API_KEY;
+        if (window.ENV?.VITE_TMDB_API_KEY) return window.ENV.VITE_TMDB_API_KEY;
+        if (window.ENV?.NEXT_PUBLIC_TMDB_API_KEY) return window.ENV.NEXT_PUBLIC_TMDB_API_KEY;
+        if (window.NETMIRROR_MONETIZATION?.tmdbApiKey) return window.NETMIRROR_MONETIZATION.tmdbApiKey;
+      }
+      // 2. Check process.env if available (bundlers)
+      if (typeof process !== 'undefined' && process.env) {
+        if (process.env.VITE_TMDB_API_KEY) return process.env.VITE_TMDB_API_KEY;
+        if (process.env.NEXT_PUBLIC_TMDB_API_KEY) return process.env.NEXT_PUBLIC_TMDB_API_KEY;
+        if (process.env.TMDB_API_KEY) return process.env.TMDB_API_KEY;
+      }
+      return TMDB_CONFIG.defaultKey;
+    }
+  };
+
+  const TMDB_CATEGORIES = [
+    {
+      key: 'trending',
+      carouselEl: () => el.trendingCarousel,
+      sectionEl: () => el.trendingRailSection,
+      title: 'Trending Now',
+      endpoint: '/trending/all/week',
+      defaultTag: 'Trending'
+    },
+    {
+      key: 'english',
+      carouselEl: () => el.englishCarousel,
+      sectionEl: () => el.englishRailSection,
+      title: 'Latest English',
+      endpoint: '/discover/movie?with_original_language=en&sort_by=popularity.desc',
+      defaultTag: 'English'
+    },
+    {
+      key: 'hindi',
+      carouselEl: () => el.hindiCarousel,
+      sectionEl: () => el.hindiRailSection,
+      title: 'Latest Hindi',
+      endpoint: '/discover/movie?with_original_language=hi&sort_by=popularity.desc',
+      defaultTag: 'Hindi'
+    },
+    {
+      key: 'kannada',
+      carouselEl: () => el.kannadaCarousel,
+      sectionEl: () => el.kannadaRailSection,
+      title: 'Latest Kannada',
+      endpoint: '/discover/movie?with_original_language=kn&sort_by=popularity.desc',
+      defaultTag: 'Kannada'
+    },
+    {
+      key: 'netflix',
+      carouselEl: () => el.netflixCarousel,
+      sectionEl: () => el.netflixRailSection,
+      title: 'Netflix Originals & Exclusives',
+      endpoint: '/discover/tv?with_networks=213&sort_by=popularity.desc',
+      defaultTag: 'Netflix'
+    },
+    {
+      key: 'prime',
+      carouselEl: () => el.primeCarousel,
+      sectionEl: () => el.primeRailSection,
+      title: 'Prime Video Exclusives',
+      endpoint: '/discover/tv?with_networks=1024&sort_by=popularity.desc',
+      defaultTag: 'Prime'
+    },
+    {
+      key: 'disney',
+      carouselEl: () => el.disneyCarousel,
+      sectionEl: () => el.disneyRailSection,
+      title: 'Disney+ & Marvel Showcase',
+      endpoint: '/discover/tv?with_networks=2739&sort_by=popularity.desc',
+      defaultTag: 'Disney+'
+    },
+    {
+      key: 'movies',
+      carouselEl: () => el.moviesCarousel,
+      sectionEl: () => el.moviesRailSection,
+      title: 'Popular Movies',
+      endpoint: '/discover/movie?sort_by=popularity.desc',
+      defaultTag: 'Movie'
+    },
+    {
+      key: 'series',
+      carouselEl: () => el.seriesCarousel,
+      sectionEl: () => el.seriesRailSection,
+      title: 'Bingeworthy TV Series',
+      endpoint: '/discover/tv?sort_by=popularity.desc',
+      defaultTag: 'S1'
+    },
+    {
+      key: 'action',
+      carouselEl: () => el.actionCarousel,
+      sectionEl: () => el.actionRailSection,
+      title: 'Action & Adventure Blockbusters',
+      endpoint: '/discover/movie?with_genres=28&sort_by=popularity.desc',
+      defaultTag: 'Action'
+    },
+    {
+      key: 'scifi',
+      carouselEl: () => el.scifiCarousel,
+      sectionEl: () => el.scifiRailSection,
+      title: 'Sci-Fi, Cyberpunk & Fantasy Epics',
+      endpoint: '/discover/movie?with_genres=878&sort_by=popularity.desc',
+      defaultTag: 'Sci-Fi'
+    },
+    {
+      key: 'horror',
+      carouselEl: () => el.horrorCarousel,
+      sectionEl: () => el.horrorRailSection,
+      title: 'Horror & Supernatural Thrillers',
+      endpoint: '/discover/movie?with_genres=27&sort_by=popularity.desc',
+      defaultTag: 'Horror'
+    },
+    {
+      key: 'anime',
+      carouselEl: () => el.animeCarousel,
+      sectionEl: () => el.animeRailSection,
+      title: 'Anime Series & Animation',
+      endpoint: '/discover/tv?with_genres=16&with_original_language=ja&sort_by=popularity.desc',
+      defaultTag: 'Anime'
+    },
+    {
+      key: 'kdrama',
+      carouselEl: () => el.kdramaCarousel,
+      sectionEl: () => el.kdramaRailSection,
+      title: 'Korean K-Drama Sensation',
+      endpoint: '/discover/tv?with_original_language=ko&sort_by=popularity.desc',
+      defaultTag: 'K-Drama'
+    },
+    {
+      key: 'comedy',
+      carouselEl: () => el.comedyCarousel,
+      sectionEl: () => el.comedyRailSection,
+      title: 'Comedy & Feel-Good Hits',
+      endpoint: '/discover/movie?with_genres=35&sort_by=popularity.desc',
+      defaultTag: 'Comedy'
+    },
+    {
+      key: 'toprated',
+      carouselEl: () => el.topRatedCarousel,
+      sectionEl: () => el.topRatedRailSection,
+      title: 'Top Rated IMDb Hall of Fame',
+      endpoint: '/movie/top_rated',
+      defaultTag: 'Top 250'
+    }
+  ];
+
+  function buildTmdbRequest(endpoint) {
+    const tokenOrKey = TMDB_CONFIG.getKey();
+    const isBearer = Boolean(tokenOrKey && (tokenOrKey.startsWith('ey') || tokenOrKey.length > 40));
+    const headers = { 'Accept': 'application/json' };
+    if (isBearer) {
+      headers['Authorization'] = `Bearer ${tokenOrKey}`;
+    }
+    const sep = endpoint.includes('?') ? '&' : '?';
+    const url = isBearer
+      ? `${TMDB_CONFIG.baseUrl}${endpoint}`
+      : `${TMDB_CONFIG.baseUrl}${endpoint}${sep}api_key=${encodeURIComponent(tokenOrKey)}`;
+    return { url, headers };
+  }
+
+  function mapTmdbItem(item, defaultTag = '') {
+    if (!item || !item.poster_path) return null;
+    const isTv = Boolean(item.name || item.first_air_date || item.media_type === 'tv');
+    const title = (item.title || item.name || 'Untitled').trim();
+    const year = (item.release_date || item.first_air_date || '').slice(0, 4) || '2024';
+    const posterUrl = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
+    const voteAvg = typeof item.vote_average === 'number' && item.vote_average > 0 ? item.vote_average : 7.8;
+
+    let tag = defaultTag;
+    if (!tag) {
+      const lang = (item.original_language || '').toLowerCase();
+      const langMap = {
+        en: 'English',
+        hi: 'Hindi',
+        kn: 'Kannada',
+        ko: 'K-Drama',
+        ja: 'Anime',
+        es: 'Spanish',
+        fr: 'French',
+        de: 'German',
+        ta: 'Tamil',
+        te: 'Telugu',
+        ml: 'Malayalam'
+      };
+      if (langMap[lang]) {
+        tag = langMap[lang];
+      } else if (isTv) {
+        tag = 'S1';
+      } else {
+        tag = 'Movie';
+      }
+    }
+
+    return {
+      id: { provider: 'tmdb', value: String(item.id) },
+      tmdb_id: String(item.id),
+      title,
+      name: title,
+      poster_url: posterUrl,
+      poster_path: item.poster_path,
+      media_type: isTv ? 'series' : 'movie',
+      year,
+      vote_average: voteAvg,
+      rating: voteAvg.toFixed(1),
+      tag,
+      original_language: item.original_language,
+      backdrop_path: item.backdrop_path,
+      overview: item.overview || ''
+    };
+  }
+
+  function renderRailSkeletons(carousel, count = 7) {
+    if (!carousel) return;
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < count; i++) {
+      const card = document.createElement('div');
+      card.className = 'skeleton-card';
+      card.innerHTML = `
+        <div class="skeleton-poster aspect-[2/3] rounded-xl"></div>
+        <div class="skeleton-info pt-5">
+          <div class="skeleton-line skeleton-title"></div>
+          <div class="skeleton-line skeleton-year"></div>
+        </div>
+      `;
+      frag.appendChild(card);
+    }
+    carousel.innerHTML = '';
+    carousel.appendChild(frag);
+  }
+
+  function renderRailFallback(carousel, cat) {
+    if (!carousel) return;
+    carousel.innerHTML = `
+      <div class="rail-fallback-msg">
+        <span class="rail-fallback-icon">📡</span>
+        <div class="rail-fallback-content">
+          <span class="rail-fallback-text">Unable to load ${cat.title} right now.</span>
+          <button type="button" class="rail-retry-btn" data-category="${cat.key}">Retry</button>
+        </div>
+      </div>
+    `;
+    const retryBtn = carousel.querySelector('.rail-retry-btn');
+    if (retryBtn) {
+      retryBtn.addEventListener('click', () => {
+        fetchSingleTmdbCategory(cat);
+      });
+    }
+  }
+
+  async function fetchSingleTmdbCategory(cat) {
+    const carousel = cat.carouselEl();
+    if (!carousel) return;
+
+    // Check memory or session cache first for fast 0ms restores
+    const cacheKey = `tmdb_cache_${cat.key}`;
+    try {
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          renderCarousel(carousel, parsed);
+          return parsed;
+        }
+      }
+    } catch (_) {}
+
+    renderRailSkeletons(carousel, 7);
+
+    try {
+      const { url, headers } = buildTmdbRequest(cat.endpoint);
+      let res = await fetch(url, { headers });
+      
+      // If direct TMDB fetch is blocked by CORS/adblocker, try fallback server proxy
+      if (!res.ok) {
+        res = await fetch(`/api/tmdb?endpoint=${encodeURIComponent(cat.endpoint)}`);
+      }
+      if (!res.ok) throw new Error(`TMDB HTTP ${res.status}`);
+
+      const data = await res.json();
+      const results = (data.results || []).filter(item => Boolean(item && item.poster_path));
+
+      if (!results.length) {
+        throw new Error('No items with poster_path');
+      }
+
+      const mapped = results.map(item => mapTmdbItem(item, cat.defaultTag)).filter(Boolean);
+
+      try {
+        sessionStorage.setItem(cacheKey, JSON.stringify(mapped));
+      } catch (_) {}
+
+      renderCarousel(carousel, mapped);
+
+      // If this is trending row, also update hero slides with high-res backdrops
+      if (cat.key === 'trending' && mapped.length > 0) {
+        const heroItems = mapped.slice(0, 5).map(m => {
+          const backdrop = m.backdrop_path ? `https://image.tmdb.org/t/p/original${m.backdrop_path}` : m.poster_url;
+          return { ...m, poster_url: backdrop };
+        });
+        state.heroSlides = heroItems;
+        setHero(heroItems[0]);
+        renderHeroIndicators();
+        startHeroAutoRotate();
+      }
+
+      return mapped;
+    } catch (err) {
+      console.warn(`TMDB fetch failed for ${cat.key}:`, err);
+      // If curated showcase items exist, backfill seamlessly
+      const fallbackList = DEFAULT_SHOWCASE_CATALOG[cat.key];
+      if (fallbackList && fallbackList.length > 0) {
+        renderCarousel(carousel, fallbackList);
+      } else {
+        renderRailFallback(carousel, cat);
+      }
+      return null;
+    }
+  }
+
+  async function fetchTmdbCategories() {
+    // Fire all category fetches concurrently
+    const promises = TMDB_CATEGORIES.map(cat => fetchSingleTmdbCategory(cat));
+    await Promise.allSettled(promises);
+  }
+
   function applyDefaultShowcase() {
     // 1. Multi-slide Hero setup
     if (DEFAULT_SHOWCASE_CATALOG.hero_slides && DEFAULT_SHOWCASE_CATALOG.hero_slides.length > 0) {
@@ -3123,7 +3469,7 @@
       startHeroAutoRotate();
     }
 
-    // 2. Populate every category section with rich cards immediately
+    // 2. Populate category sections with initial placeholders / curated items
     if (el.trendingCarousel) renderCarousel(el.trendingCarousel, DEFAULT_SHOWCASE_CATALOG.trending);
     if (el.netflixCarousel) renderCarousel(el.netflixCarousel, DEFAULT_SHOWCASE_CATALOG.netflix);
     if (el.primeCarousel) renderCarousel(el.primeCarousel, DEFAULT_SHOWCASE_CATALOG.prime);
@@ -3150,13 +3496,13 @@
     initMonetization();
     renderContinueWatching();
 
-    // Immediately showcase full categories across all sections in 0ms!
+    // 1. Instantly populate default catalog so first paint is 0ms
     applyDefaultShowcase();
 
     handleDeepLinkOnLoad();
 
-    // Start browse fetching immediately (renders fresh edge-cached data)
-    fetchBrowseData();
+    // 2. Connect all homepage rows to TMDB API v3 & populate real posters, ratings, and titles
+    fetchTmdbCategories();
 
     // Defer sports schedule fetching until main thread is idle to conserve mobile bandwidth
     if ('requestIdleCallback' in window) {
@@ -3167,138 +3513,6 @@
       setTimeout(() => {
         fetchSportsData().catch(() => {});
       }, 1500);
-    }
-  }
-
-  function applyBrowseData(data) {
-    if (!data) return;
-    state.browseData = data;
-
-    // Multi-slide Hero Setup
-    const heroSlides = (data.hero_slides && data.hero_slides.length > 0) ? data.hero_slides.slice(0, 5) : DEFAULT_SHOWCASE_CATALOG.hero_slides;
-    if (heroSlides && heroSlides.length) {
-      state.heroSlides = heroSlides;
-      state.heroCurrentIndex = 0;
-      setHero(state.heroSlides[0]);
-      renderHeroIndicators();
-      startHeroAutoRotate();
-    } else if (data.hero) {
-      setHero(data.hero);
-    }
-
-    // Deduplicate within category and backfill from curated catalog if sparse so no section is ever empty
-    function buildCategoryRail(incomingList, categoryKey, max = 16) {
-      const seen = new Set();
-      const out = [];
-      const combined = [...(incomingList || []), ...(DEFAULT_SHOWCASE_CATALOG[categoryKey] || [])];
-      for (const item of combined) {
-        if (!item) continue;
-        const k = getCanonicalKey(item) || getMediaIdValue(item);
-        if (k && seen.has(k)) continue;
-        if (k) seen.add(k);
-        out.push(item);
-        if (out.length >= max) break;
-      }
-      return out;
-    }
-
-    const trending = buildCategoryRail(data.trending, 'trending', 16);
-    const netflix = buildCategoryRail(data.netflix, 'netflix', 16);
-    const prime = buildCategoryRail(data.prime, 'prime', 16);
-    const disney = buildCategoryRail(data.disney, 'disney', 16);
-    const movies = buildCategoryRail(data.movies, 'movies', 16);
-    const series = buildCategoryRail(data.series, 'series', 16);
-    const action = buildCategoryRail(data.action, 'action', 16);
-    const scifi = buildCategoryRail(data.scifi, 'scifi', 16);
-    const horror = buildCategoryRail(data.horror, 'horror', 16);
-    const anime = buildCategoryRail(data.anime, 'anime', 16);
-    const kdrama = buildCategoryRail(data.kdrama, 'kdrama', 16);
-    const comedy = buildCategoryRail(data.comedy, 'comedy', 16);
-    const toprated = buildCategoryRail(data.toprated, 'toprated', 16);
-
-    if (trending.length && el.trendingCarousel) renderCarousel(el.trendingCarousel, trending);
-    if (netflix.length && el.netflixCarousel) renderCarousel(el.netflixCarousel, netflix);
-    if (prime.length && el.primeCarousel) renderCarousel(el.primeCarousel, prime);
-    if (disney.length && el.disneyCarousel) renderCarousel(el.disneyCarousel, disney);
-    if (movies.length && el.moviesCarousel) renderCarousel(el.moviesCarousel, movies);
-    if (series.length && el.seriesCarousel) renderCarousel(el.seriesCarousel, series);
-    if (action.length && el.actionCarousel) renderCarousel(el.actionCarousel, action);
-    if (scifi.length && el.scifiCarousel) renderCarousel(el.scifiCarousel, scifi);
-    if (horror.length && el.horrorCarousel) renderCarousel(el.horrorCarousel, horror);
-    if (anime.length && el.animeCarousel) renderCarousel(el.animeCarousel, anime);
-    if (kdrama.length && el.kdramaCarousel) renderCarousel(el.kdramaCarousel, kdrama);
-    if (comedy.length && el.comedyCarousel) renderCarousel(el.comedyCarousel, comedy);
-    if (toprated.length && el.topRatedCarousel) renderCarousel(el.topRatedCarousel, toprated);
-  }
-
-  function renderBrowseSkeletons() {
-    const carousels = [
-      el.trendingCarousel,
-      el.netflixCarousel,
-      el.primeCarousel,
-      el.disneyCarousel,
-      el.moviesCarousel,
-      el.seriesCarousel,
-      el.actionCarousel,
-      el.scifiCarousel,
-      el.horrorCarousel,
-      el.animeCarousel,
-      el.kdramaCarousel,
-      el.comedyCarousel,
-      el.topRatedCarousel
-    ];
-    carousels.forEach((carousel) => {
-      if (!carousel || carousel.children.length > 0) return;
-      const frag = document.createDocumentFragment();
-      for (let i = 0; i < 6; i++) {
-        const skel = document.createElement('div');
-        skel.className = 'skeleton-card';
-        frag.appendChild(skel);
-      }
-      carousel.appendChild(frag);
-    });
-  }
-
-  async function fetchBrowseData() {
-    const CACHE_KEY = 'netmirror_browse_cache_v1';
-    let hasRenderedFromCache = false;
-
-    // 1. Instant Stale-While-Revalidate from client local storage (<15ms first paint)
-    try {
-      const cachedStr = localStorage.getItem(CACHE_KEY);
-      if (cachedStr) {
-        const cached = JSON.parse(cachedStr);
-        if (cached && cached.data) {
-          applyBrowseData(cached.data);
-          hasRenderedFromCache = true;
-        }
-      }
-    } catch (_) {}
-
-    // 2. If no cache yet, show sleek animated skeleton placeholder cards
-    if (!hasRenderedFromCache) {
-      renderBrowseSkeletons();
-    }
-
-    // 3. Fetch fresh edge-cached data without cache-busting timestamp
-    try {
-      const res = await fetch('/api/browse');
-      if (!res.ok) throw new Error('Failed to load browse data');
-      const data = await res.json();
-
-      applyBrowseData(data);
-
-      try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify({
-          timestamp: Date.now(),
-          data
-        }));
-      } catch (_) {}
-    } catch (err) {
-      console.error(err);
-      if (!hasRenderedFromCache) {
-        showToast('Error connecting to MovieBox service. Retrying...');
-      }
     }
   }
 
@@ -3413,11 +3627,41 @@
     const card = document.createElement('div');
     card.className = 'movie-card';
 
-    const displayTitle = cleanDisplayTitle(item?.title || 'Unknown Title');
-    const poster = item?.poster_url || fallbackPoster(displayTitle);
-    const mediaTypeLabel = item?.media_type === 'series' ? 'SERIES' : 'MOVIE';
-    const year = item?.year || '2024';
-    const ratingVal = item?.rating ? Number(item.rating).toFixed(1) : (8.5 + ((index % 4) * 0.1)).toFixed(1);
+    const displayTitle = cleanDisplayTitle(item?.title || item?.name || 'Unknown Title');
+    const poster = item?.poster_url
+      || (item?.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : fallbackPoster(displayTitle));
+
+    // Top-Right Badge: Small rounded pill showing language or season tag (e.g. English, Hindi, Kannada, S1)
+    let tag = item?.tag || '';
+    if (!tag) {
+      if (item?.original_language) {
+        const langMap = {
+          en: 'English',
+          hi: 'Hindi',
+          kn: 'Kannada',
+          ko: 'K-Drama',
+          ja: 'Anime',
+          es: 'Spanish',
+          fr: 'French',
+          de: 'German',
+          ta: 'Tamil',
+          te: 'Telugu',
+          ml: 'Malayalam'
+        };
+        tag = langMap[item.original_language.toLowerCase()] || item.original_language.toUpperCase();
+      } else if (item?.media_type === 'series') {
+        tag = 'S1';
+      } else {
+        tag = 'Movie';
+      }
+    }
+
+    const year = (item?.release_date || item?.first_air_date || item?.year || '2024').toString().slice(0, 4);
+    const voteAvg = item?.vote_average != null ? Number(item.vote_average) : (item?.rating ? Number(item.rating) : (7.5 + ((index % 5) * 0.3)));
+    const ratingFormatted = (Math.round(voteAvg * 10) / 10).toFixed(1);
+    const isHighRating = voteAvg >= 7.0;
+    const ringClass = isHighRating ? 'border-emerald-500' : 'border-amber-500';
+    const ringColor = isHighRating ? '#10b981' : '#f59e0b';
 
     // Check if item is in continue watching history safely
     let historyItem = null;
@@ -3430,23 +3674,31 @@
       : 0;
 
     card.innerHTML = `
-      <div class="poster-wrap">
-        <img class="poster-img" src="${poster}" alt="${displayTitle}" loading="lazy" onerror="this.src='${fallbackPoster(displayTitle)}'" />
-        <span class="card-badge-type">${mediaTypeLabel}</span>
-        <span class="card-badge-rating">★ ${ratingVal}</span>
-        <div class="card-play-overlay">
-          <div class="card-play-icon">
-            <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+      <div class="poster-wrap aspect-[2/3] relative rounded-xl">
+        <div class="poster-inner rounded-xl overflow-hidden relative w-full h-full">
+          <img class="poster-img" src="${poster}" alt="${displayTitle}" loading="lazy" onerror="this.src='${fallbackPoster(displayTitle)}'" />
+          
+          <!-- Top-Right Badge: Small rounded pill inside top-right corner of poster -->
+          <span class="card-tag-badge bg-rose-600 text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full">${tag}</span>
+          
+          <div class="card-play-overlay">
+            <div class="card-play-icon">
+              <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            </div>
           </div>
+          ${progressPercent > 0 ? `<div class="card-progress-bar"><div class="card-progress-fill" style="width: ${progressPercent}%;"></div></div>` : ''}
         </div>
-        ${progressPercent > 0 ? `<div class="card-progress-bar"><div class="card-progress-fill" style="width: ${progressPercent}%;"></div></div>` : ''}
+
+        <!-- Bottom-Left Circular Rating Badge overlapping bottom-left edge (-bottom-4 left-2.5) -->
+        <div class="card-rating-badge -bottom-4 left-2.5 w-9 h-9 rounded-full bg-white text-slate-900 font-bold text-xs shadow-md ${ringClass}" style="border: 2.5px solid ${ringColor};" title="TMDB Rating: ${ratingFormatted}">
+          ${ratingFormatted}
+        </div>
       </div>
-      <div class="card-info">
-        <span class="card-title" title="${displayTitle}">${displayTitle}</span>
-        <div class="card-meta">
-          <span>${year}</span>
-          <span>${mediaTypeLabel}</span>
-        </div>
+      
+      <!-- Metadata Below Poster: pt-5 to clear overlapping rating circle -->
+      <div class="card-info pt-5">
+        <div class="card-title text-sm font-semibold text-white truncate" title="${displayTitle}">${displayTitle}</div>
+        <div class="card-year text-xs text-slate-400 mt-0.5">${year}</div>
       </div>
     `;
 
@@ -3457,7 +3709,7 @@
         e.stopPropagation();
         openPlayerDirect(item);
       } else {
-        openDetailsModal(getMediaIdValue(item), getMediaProvider(item), item?.title || '');
+        openDetailsModal(getMediaIdValue(item), getMediaProvider(item), displayTitle, item);
       }
     });
 
@@ -6418,14 +6670,51 @@
 
     if (target === 'home') {
       switchView('rails');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (target === 'sports') {
       openSportsView();
     } else if (target === 'movies') {
-      loadCategoryGrid('Popular Movies', '1');
+      if (state.currentNav !== 'home') switchView('rails');
+      const targetEl = el.moviesRailSection || document.getElementById('moviesRailSection');
+      if (targetEl) {
+        const y = targetEl.getBoundingClientRect().top + window.pageYOffset - 120;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+        const h = targetEl.querySelector('.rail-header');
+        if (h) {
+          h.classList.add('rail-highlight-pulse');
+          setTimeout(() => h.classList.remove('rail-highlight-pulse'), 1300);
+        }
+      } else {
+        loadCategoryGrid('Popular Movies', 'movies');
+      }
     } else if (target === 'series') {
-      loadCategoryGrid('TV Series', '3');
+      if (state.currentNav !== 'home') switchView('rails');
+      const targetEl = el.seriesRailSection || document.getElementById('seriesRailSection');
+      if (targetEl) {
+        const y = targetEl.getBoundingClientRect().top + window.pageYOffset - 120;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+        const h = targetEl.querySelector('.rail-header');
+        if (h) {
+          h.classList.add('rail-highlight-pulse');
+          setTimeout(() => h.classList.remove('rail-highlight-pulse'), 1300);
+        }
+      } else {
+        loadCategoryGrid('TV Series', 'series');
+      }
     } else if (target === 'trending') {
-      loadCategoryGrid('Trending Titles', '2');
+      if (state.currentNav !== 'home') switchView('rails');
+      const targetEl = el.trendingRailSection || document.getElementById('trendingRailSection');
+      if (targetEl) {
+        const y = targetEl.getBoundingClientRect().top + window.pageYOffset - 120;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+        const h = targetEl.querySelector('.rail-header');
+        if (h) {
+          h.classList.add('rail-highlight-pulse');
+          setTimeout(() => h.classList.remove('rail-highlight-pulse'), 1300);
+        }
+      } else {
+        loadCategoryGrid('Trending Now', 'trending');
+      }
     } else if (target === 'mylist') {
       renderFavoritesView();
     } else if (target === 'history') {
@@ -6436,9 +6725,34 @@
   async function loadCategoryGrid(title, tabId) {
     switchView('grid');
     el.gridTitle.textContent = title;
-    el.gridSubtitle.textContent = 'Loading titles...';
+    el.gridSubtitle.textContent = 'Loading titles from TMDB...';
 
-    // Instant support for curated genre & category keys
+    // 1. Direct match with TMDB category endpoint
+    const cat = TMDB_CATEGORIES.find(c => c.key === tabId || c.title.toLowerCase() === (title || '').toLowerCase());
+    if (cat) {
+      try {
+        const { url, headers } = buildTmdbRequest(cat.endpoint);
+        let res = await fetch(url, { headers });
+        if (!res.ok) {
+          res = await fetch(`/api/tmdb?endpoint=${encodeURIComponent(cat.endpoint)}`);
+        }
+        if (res.ok) {
+          const data = await res.json();
+          const items = (data.results || []).filter(item => Boolean(item && item.poster_path)).map(item => mapTmdbItem(item, cat.defaultTag)).filter(Boolean);
+          if (items.length) {
+            state.gridItems = items;
+            renderGridItems(items);
+            el.gridSubtitle.textContent = `Showing ${items.length} titles in ${title}`;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('Grid TMDB fetch failed, falling back:', e);
+      }
+    }
+
+    // 2. Curated showcase catalog fallback
     if (DEFAULT_SHOWCASE_CATALOG[tabId]) {
       const items = DEFAULT_SHOWCASE_CATALOG[tabId];
       state.gridItems = items;
@@ -7018,6 +7332,11 @@
         document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         const targetId = btn.dataset.target;
+        if (state.currentNav !== 'home') {
+          switchView('rails');
+          state.currentNav = 'home';
+          el.navLinks.forEach(link => link.classList.toggle('active', link.dataset.nav === 'home'));
+        }
         if (targetId === 'all') {
           const targetY = el.heroSection ? el.heroSection.offsetHeight : 0;
           window.scrollTo({ top: targetY, behavior: 'smooth' });

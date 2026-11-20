@@ -902,7 +902,32 @@ body {
   color: #fff;
 }
 
-.rail-view-all-btn, .rail-clear-btn {
+.rail-view-all-btn {
+  background: #f59e0b !important;
+  color: #04152d !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  padding: 6px 18px !important;
+  border-radius: 9999px !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  white-space: nowrap !important;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.28) !important;
+  transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast) !important;
+}
+
+.rail-view-all-btn:hover {
+  background: #d97706 !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.45) !important;
+}
+
+.rail-clear-btn {
   background: none;
   border: none;
   color: var(--text-secondary);
@@ -910,9 +935,6 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: color var(--transition-fast);
-}
-.rail-view-all-btn:hover {
-  color: var(--red);
 }
 .rail-clear-btn:hover {
   color: var(--red);
@@ -1000,74 +1022,121 @@ body {
   cursor: default;
 }
 
-/* Movie Card */
+/* Movie & TV Show Card - Clean Dark-Themed Streaming Layout */
 .movie-card {
-  flex: 0 0 185px;
-  background: var(--bg-card);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  cursor: pointer;
+  flex: 0 0 182px;
+  width: 182px;
   position: relative;
-  border: 1px solid var(--border-subtle);
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
+  background: transparent;
+  border-radius: 12px;
+  overflow: visible; /* Allows -bottom-4 overlapping circular rating badge */
+  cursor: pointer;
   display: flex;
   flex-direction: column;
+  user-select: none;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .movie-card:hover {
-  transform: translateY(-6px) scale(1.03);
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.8), 0 0 16px var(--red-glow);
-  border-color: rgba(229, 9, 20, 0.7);
-  z-index: 2;
+  transform: translateY(-4px);
 }
 
-/* Skeleton Loading Shimmer Placeholders */
-.skeleton-card {
-  flex: 0 0 185px;
-  aspect-ratio: 2 / 3;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 75%);
-  background-size: 200% 100%;
-  animation: skeletonShimmer 1.4s infinite;
-  border-radius: var(--radius-md);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-@keyframes skeletonShimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
+/* Poster Container (2:3 aspect ratio, rounded corners, subtle hover zoom) */
 .poster-wrap {
   position: relative;
   width: 100%;
   aspect-ratio: 2 / 3;
+  border-radius: 12px;
+  overflow: visible;
+}
+
+.poster-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
   overflow: hidden;
-  background: #141b2b;
+  background: #071326;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
 }
 
 .poster-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform var(--transition-slow);
+  display: block;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .movie-card:hover .poster-img {
-  transform: scale(1.06);
+  transform: scale(1.05); /* Subtle hover zoom (hover:scale-105) */
 }
 
+/* Top-Right Badge: Small rounded pill (bg-rose-600 text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full) */
+.card-tag-badge,
+.card-badge-top-right {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: #e11d48; /* bg-rose-600 */
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  line-height: 1.4;
+  letter-spacing: 0.2px;
+  text-transform: capitalize;
+}
+
+/* Bottom-Left Circular Rating Badge (-bottom-4 left-2.5, w-9 h-9 rounded-full bg-white text-slate-900 font-bold text-xs shadow-md) */
+.card-rating-badge,
+.card-rating-circle {
+  position: absolute;
+  bottom: -16px; /* -bottom-4 (-1rem) overlapping bottom-left edge of poster */
+  left: 10px;    /* left-2.5 (0.625rem) */
+  width: 36px;   /* w-9 (2.25rem) */
+  height: 36px;  /* h-9 (2.25rem) */
+  border-radius: 9999px;
+  background-color: #ffffff;
+  color: #0f172a;
+  font-weight: 800;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  line-height: 1;
+}
+
+.card-rating-badge.border-emerald-500,
+.card-rating-circle.border-emerald-500 {
+  border: 2.5px solid #10b981 !important; /* Emerald green for scores >= 7.0 */
+}
+
+.card-rating-badge.border-amber-500,
+.card-rating-circle.border-amber-500 {
+  border: 2.5px solid #f59e0b !important; /* Amber/yellow for scores < 7.0 */
+}
+
+/* Hover Play Overlay */
 .card-play-overlay {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(4, 7, 20, 0.5);
+  background: rgba(4, 7, 20, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
   transition: opacity var(--transition-fast);
+  z-index: 2;
 }
 
 .movie-card:hover .card-play-overlay {
@@ -1075,16 +1144,16 @@ body {
 }
 
 .card-play-icon {
-  width: 46px;
-  height: 46px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: var(--red);
+  background: #e50914;
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 20px var(--red);
-  transform: scale(0.8);
+  box-shadow: 0 0 20px rgba(229, 9, 20, 0.7);
+  transform: scale(0.85);
   transition: transform var(--transition-fast);
 }
 
@@ -1099,60 +1168,151 @@ body {
   margin-left: 2px;
 }
 
-.card-badge-type {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  font-size: 10px;
-  font-weight: 800;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: rgba(4, 7, 20, 0.85);
-  color: #fff;
-  backdrop-filter: blur(8px);
-}
-
-.card-badge-rating {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: rgba(4, 7, 20, 0.85);
-  color: var(--gold);
-  backdrop-filter: blur(8px);
-}
-
+/* Metadata Below Poster (Leave pt-5 to clear overlapping rating circle) */
 .card-info {
-  padding: 12px 10px;
+  padding-top: 20px; /* pt-5 (1.25rem) to clear overlapping circle badge */
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-bottom: 2px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  flex: 1;
-  justify-content: space-between;
 }
 
+/* Bold white single-line truncated text (text-sm font-semibold text-white truncate) */
 .card-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  color: #fff;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  color: #ffffff;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
   line-height: 1.35;
-  min-height: 2.7em;
+}
+
+/* 4-digit release year directly underneath in muted gray (text-xs text-slate-400 mt-0.5) */
+.card-year {
+  font-size: 12px;
+  color: #94a3b8; /* text-slate-400 */
+  margin-top: 2px; /* mt-0.5 */
+  font-weight: 500;
 }
 
 .card-meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
-  color: var(--text-muted);
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+/* Skeleton Loading Shimmer Placeholders */
+.skeleton-card {
+  flex: 0 0 182px;
+  width: 182px;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+}
+
+.skeleton-poster {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #071326 25%, #0f2442 50%, #071326 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s infinite;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.skeleton-info {
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skeleton-line {
+  border-radius: 4px;
+  background: linear-gradient(90deg, #091830 25%, #132a4e 50%, #091830 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s infinite;
+}
+
+.skeleton-title {
+  width: 80%;
+  height: 14px;
+}
+
+.skeleton-year {
+  width: 45%;
+  height: 11px;
+}
+
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Clean Fallback Message if API Request Fails */
+.rail-fallback-msg {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 12px;
+  color: #94a3b8;
+  font-size: 13px;
+  margin: 6px 0;
+  width: 100%;
+  backdrop-filter: blur(10px);
+}
+
+.rail-fallback-icon {
+  font-size: 22px;
+}
+
+.rail-fallback-content {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.rail-retry-btn {
+  background: #f59e0b;
+  color: #04152d;
+  border: none;
+  border-radius: 9999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 14px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.rail-retry-btn:hover {
+  background: #d97706;
+  color: #ffffff;
+}
+
+/* Highlight Pulse when scrolling to a category */
+@keyframes railPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+.rail-highlight-pulse {
+  animation: railPulse 0.6s ease-in-out;
+}
+
+.rail-highlight-pulse .rail-title {
+  color: #f59e0b !important;
+  text-shadow: 0 0 16px rgba(245, 158, 11, 0.5);
 }
 
 /* Progress bar on Continue Watching cards */

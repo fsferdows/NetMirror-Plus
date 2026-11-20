@@ -574,7 +574,7 @@
       container.style.display = 'none';
       return;
     }
-    const html = customHtml || config.adBanners.headerBannerHtml || '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>';
+    const html = customHtml || config.adBanners.headerBannerHtml || '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="auto" data-full-width-responsive="true"></ins>';
 
     let ins = container.querySelector('ins.adsbygoogle');
     if (!ins) {

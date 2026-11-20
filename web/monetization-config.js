@@ -42,15 +42,15 @@ window.NETMIRROR_MONETIZATION = {
   adBanners: {
     enabled: true,
     // Google AdSense Responsive Display Unit for Header (Top of Homepage)
-    headerBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>',
+    headerBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="auto" data-full-width-responsive="true"></ins>',
     // Google AdSense Responsive Display Unit for Mid-Rail (In-Between Category Rails)
-    midRailBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>',
+    midRailBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="auto" data-full-width-responsive="true"></ins>',
     // Google AdSense Responsive Display Unit for Movie/Show Details Modal
-    detailsBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-slot="auto" data-ad-format="rectangle" data-full-width-responsive="true"></ins>',
+    detailsBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="rectangle" data-full-width-responsive="true"></ins>',
     // Google AdSense Responsive Unit for Cinema Watch Cockpit View
-    watchBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>',
+    watchBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="auto" data-full-width-responsive="true"></ins>',
     // Google AdSense Footer Unit (Bottom of Homepage)
-    footerBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>'
+    footerBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="auto" data-full-width-responsive="true"></ins>'
   },
 
   // 6. THE MOVIE DATABASE (TMDB) API KEY / BEARER TOKEN

@@ -1,11 +1,16 @@
 // Vercel Serverless Function entry point for MovieBox / NetMirror Plus API
 const { handler: netlifyHandler } = require("../netlify/functions/api");
+const tmdbHandler = require("./tmdb");
 
 module.exports = async (req, res) => {
   try {
     const host = req.headers["x-forwarded-host"] || req.headers.host || "localhost";
     const proto = req.headers["x-forwarded-proto"] || "https";
     const fullUrl = new URL(req.url, `${proto}://${host}`);
+
+    if (fullUrl.pathname === "/api/tmdb" || fullUrl.pathname.startsWith("/api/tmdb/") || fullUrl.pathname === "/tmdb" || fullUrl.pathname.startsWith("/tmdb/")) {
+      return tmdbHandler(req, res);
+    }
 
     // Parse query params into simple key-value dictionary
     const queryStringParameters = {};

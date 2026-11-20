@@ -54,7 +54,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20261120_v12" />
+  <link rel="stylesheet" href="/styles.css?v=20261120_v13" />
   <link rel="dns-prefetch" href="https://vidlink.pro">
   <link rel="preconnect" href="https://vidlink.pro" crossorigin>
   <link rel="dns-prefetch" href="https://embed.smashystream.com">
@@ -219,6 +219,16 @@
       </div>
     </div>
   </header>
+
+  <!-- TMDB API Diagnostics Error Banner (visible only if TMDB endpoint errors or requires attention) -->
+  <aside id="tmdbDebugBanner" class="tmdb-debug-banner" style="display: none;" role="alert" aria-live="assertive">
+    <div class="tmdb-debug-content">
+      <span class="tmdb-debug-icon">⚠️</span>
+      <span class="tmdb-debug-title">TMDB Diagnostic Notice:</span>
+      <span id="tmdbDebugMessage" class="tmdb-debug-msg">Using offline high-fidelity fallback catalog.</span>
+      <button type="button" id="tmdbDebugDismiss" class="tmdb-debug-dismiss" aria-label="Dismiss">&times;</button>
+    </div>
+  </aside>
 
   <!-- Hero Feature Showcase -->
   <section class="hero-section" id="heroSection">
@@ -2270,12 +2280,12 @@
   </div>
 </div>
 
-<script src="/app.js?v=20261120_v12"></script>
+<script src="/app.js?v=20261120_v13"></script>
 <!-- Progressive Web App (PWA) Service Worker Registration -->
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js?v=20261120_v12')
+      navigator.serviceWorker.register('/sw.js?v=20261120_v13')
         .then((reg) => console.log('MovieBox PWA ServiceWorker active:', reg.scope))
         .catch((err) => console.warn('PWA registration error:', err));
     });

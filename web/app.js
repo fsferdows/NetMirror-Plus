@@ -3123,6 +3123,1307 @@
   ];
 
   // ==========================================================================
+  // HIGH-FIDELITY BUILT-IN FALLBACK CATALOG (30+ REAL TMDB TITLES)
+  // Ensures Homepage Rows Are NEVER Blank Under Any Network / API Constraint
+  // ==========================================================================
+  const FALLBACK_TMDB_CATALOG = {
+  "trending": [
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1368337"
+      },
+      "tmdb_id": "1368337",
+      "title": "The Odyssey",
+      "year": "2026",
+      "rating": 8.0,
+      "poster_url": "https://image.tmdb.org/t/p/w500/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg",
+      "tag": "Trending",
+      "media_type": "movie"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "76600"
+      },
+      "tmdb_id": "76600",
+      "title": "Avatar: The Way of Water",
+      "year": "2022",
+      "rating": 7.6,
+      "poster_url": "https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg",
+      "tag": "Trending",
+      "media_type": "movie"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "299536"
+      },
+      "tmdb_id": "299536",
+      "title": "Avengers: Infinity War",
+      "year": "2018",
+      "rating": 8.3,
+      "poster_url": "https://image.tmdb.org/t/p/w500/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg",
+      "tag": "Trending",
+      "media_type": "movie"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "533535"
+      },
+      "tmdb_id": "533535",
+      "title": "Deadpool & Wolverine",
+      "year": "2024",
+      "rating": 7.7,
+      "poster_url": "https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg",
+      "tag": "Trending",
+      "media_type": "movie"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1300968"
+      },
+      "tmdb_id": "1300968",
+      "title": "The Hunger Games: Sunrise on the Reaping",
+      "year": "2026",
+      "rating": 7.4,
+      "poster_url": "https://image.tmdb.org/t/p/w500/jNcZH8yplxttRlf0wwqfGGMKHxX.jpg",
+      "backdrop_path": "/aqFZcr2dxSZ2UwWSo1WC6C0rwDf.jpg",
+      "media_type": "movie",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1003596"
+      },
+      "tmdb_id": "1003596",
+      "title": "Avengers: Doomsday",
+      "year": "2026",
+      "rating": 7.5,
+      "poster_url": "https://image.tmdb.org/t/p/w500/1zqWkLwC1zLBBBtIWzmkmWeMWnT.jpg",
+      "backdrop_path": "/9N21RJNwDuYJP5M0Of3mN4xG3IA.jpg",
+      "media_type": "movie",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "84773"
+      },
+      "tmdb_id": "84773",
+      "title": "The Lord of the Rings: The Rings of Power",
+      "year": "2022",
+      "rating": 7.2,
+      "poster_url": "https://image.tmdb.org/t/p/w500/bMXWXKM9ydUmMTNvDnYo9QtCBRt.jpg",
+      "backdrop_path": "/i1phX1JpaqSnHBBGta6LBFYVCZq.jpg",
+      "media_type": "tv",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "291507"
+      },
+      "tmdb_id": "291507",
+      "title": "The Body",
+      "year": "2026",
+      "rating": 7.9,
+      "poster_url": "https://image.tmdb.org/t/p/w500/zleCYDRbW5mKwgZwVK4SNIrKXWx.jpg",
+      "backdrop_path": "/hYJqUoXRZnodGxgVZTM8uwr5kbC.jpg",
+      "media_type": "tv",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1185344"
+      },
+      "tmdb_id": "1185344",
+      "title": "The Beast",
+      "year": "2026",
+      "rating": 5.2,
+      "poster_url": "https://image.tmdb.org/t/p/w500/ocg5JfJP19fodcv5uQUApkmZMdI.jpg",
+      "backdrop_path": "/r5RYEmZzm1Z6imS7XfiKPnMlyc7.jpg",
+      "media_type": "movie",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "213375"
+      },
+      "tmdb_id": "213375",
+      "title": "VisionQuest",
+      "year": "2026",
+      "rating": 8.3,
+      "poster_url": "https://image.tmdb.org/t/p/w500/WGyAyBPncfuu8MZhLY9RtfZPM0.jpg",
+      "backdrop_path": "/uoXXbN2PrOxH6UKyP7kYwmGpAAP.jpg",
+      "media_type": "tv",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "254630"
+      },
+      "tmdb_id": "254630",
+      "title": "12 12 12",
+      "year": "2026",
+      "rating": 6.1,
+      "poster_url": "https://image.tmdb.org/t/p/w500/8q6BvFQuKM1Rud4E9NQDaMGy9EL.jpg",
+      "backdrop_path": "/tjy25xpiFeo2gahl7N0hoxbRtG7.jpg",
+      "media_type": "tv",
+      "original_language": "en"
+    }
+  ],
+  "english": [
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "693134"
+      },
+      "tmdb_id": "693134",
+      "title": "Dune: Part Two",
+      "year": "2024",
+      "rating": 8.2,
+      "poster_url": "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
+      "tag": "English",
+      "media_type": "movie"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "917496"
+      },
+      "tmdb_id": "917496",
+      "title": "Beetlejuice Beetlejuice",
+      "year": "2024",
+      "rating": 7.1,
+      "poster_url": "https://image.tmdb.org/t/p/w500/kKgQzkUCUmgnqzAzJJflYRoAeQX.jpg",
+      "tag": "English",
+      "media_type": "movie"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "558449"
+      },
+      "tmdb_id": "558449",
+      "title": "Gladiator II",
+      "year": "2024",
+      "rating": 7.4,
+      "poster_url": "https://image.tmdb.org/t/p/w500/2cxhvwyEwRlysAmRH4iodkvo0z5.jpg",
+      "tag": "English",
+      "media_type": "movie"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "653346"
+      },
+      "tmdb_id": "653346",
+      "title": "Kingdom of the Planet of the Apes",
+      "year": "2024",
+      "rating": 7.1,
+      "poster_url": "https://image.tmdb.org/t/p/w500/gKkl37BQuKTanygYQG1pyYgLVgf.jpg",
+      "tag": "English",
+      "media_type": "movie"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1368337"
+      },
+      "tmdb_id": "1368337",
+      "title": "The Odyssey",
+      "year": "2026",
+      "rating": 8.0,
+      "poster_url": "https://image.tmdb.org/t/p/w500/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg",
+      "backdrop_path": "/c7btGYblBnfAaw713WvFM0Kimc7.jpg",
+      "media_type": "movie",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1263337"
+      },
+      "tmdb_id": "1263337",
+      "title": "Heart of the Beast",
+      "year": "2026",
+      "rating": 7.8,
+      "poster_url": "https://image.tmdb.org/t/p/w500/6sYemVUn79UPKz1ZsSG6kPU4RVy.jpg",
+      "backdrop_path": "/yE766yhgg98tKwTKd8CyNvAtmn6.jpg",
+      "media_type": "movie",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1400837"
+      },
+      "tmdb_id": "1400837",
+      "title": "Other Mommy",
+      "year": "2026",
+      "rating": 6.5,
+      "poster_url": "https://image.tmdb.org/t/p/w500/fGRNCssTRrhYZxNzykGGCoMsAVq.jpg",
+      "backdrop_path": "/smZ8BT4Vzw4iCEppTLCnN8jNYtn.jpg",
+      "media_type": "movie",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1423191"
+      },
+      "tmdb_id": "1423191",
+      "title": "Resident Evil",
+      "year": "2026",
+      "rating": 7.5,
+      "poster_url": "https://image.tmdb.org/t/p/w500/gAgWJhUSQWCgtKR8170nMkYlBda.jpg",
+      "backdrop_path": "/3icyRAqgakNcQn6aDVz9libFmBA.jpg",
+      "media_type": "movie",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "969681"
+      },
+      "tmdb_id": "969681",
+      "title": "Spider-Man: Brand New Day",
+      "year": "2026",
+      "rating": 8.5,
+      "poster_url": "https://image.tmdb.org/t/p/w500/bjiS5ipwxb9JFy3XRRN4OAilSeX.jpg",
+      "backdrop_path": "/r08LxMJCbf1SiJIWeyH9aJmdqwC.jpg",
+      "media_type": "movie",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1300968"
+      },
+      "tmdb_id": "1300968",
+      "title": "The Hunger Games: Sunrise on the Reaping",
+      "year": "2026",
+      "rating": 7.4,
+      "poster_url": "https://image.tmdb.org/t/p/w500/jNcZH8yplxttRlf0wwqfGGMKHxX.jpg",
+      "backdrop_path": "/aqFZcr2dxSZ2UwWSo1WC6C0rwDf.jpg",
+      "media_type": "movie",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "687163"
+      },
+      "tmdb_id": "687163",
+      "title": "Project Hail Mary",
+      "year": "2026",
+      "rating": 8.6,
+      "poster_url": "https://image.tmdb.org/t/p/w500/iOb2fjXLbpJgyQXe46n1WtGCnaa.jpg",
+      "backdrop_path": "/2I1OFQJ0L9T0dpU6FobKFWV2PxX.jpg",
+      "media_type": "movie",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1813355"
+      },
+      "tmdb_id": "1813355",
+      "title": "A Story of Derry",
+      "year": "2026",
+      "rating": 6.6,
+      "poster_url": "https://image.tmdb.org/t/p/w500/4PtzGcegF5Po1NmDAW9IklyvAUh.jpg",
+      "backdrop_path": "/z26LxXDMmAIzKr06FPDudCJyvsM.jpg",
+      "media_type": "movie",
+      "original_language": "en"
+    }
+  ],
+  "hindi": [
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1084736"
+      },
+      "tmdb_id": "1084736",
+      "title": "Stree 2",
+      "year": "2024",
+      "rating": 7.3,
+      "poster_url": "https://image.tmdb.org/t/p/w500/m2zxbOiTsvN9aK37cKk18V1d6K3.jpg",
+      "tag": "Hindi",
+      "media_type": "movie"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "872585"
+      },
+      "tmdb_id": "872585",
+      "title": "Oppenheimer (Hindi)",
+      "year": "2023",
+      "rating": 8.1,
+      "poster_url": "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
+      "tag": "Hindi",
+      "media_type": "movie"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "786892"
+      },
+      "tmdb_id": "786892",
+      "title": "Fighter",
+      "year": "2024",
+      "rating": 7.0,
+      "poster_url": "https://image.tmdb.org/t/p/w500/zDZowwb9STn4o4r0a0aK0qF5q8U.jpg",
+      "tag": "Hindi",
+      "media_type": "movie"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "823464"
+      },
+      "tmdb_id": "823464",
+      "title": "Kalki 2898 AD",
+      "year": "2024",
+      "rating": 7.2,
+      "poster_url": "https://image.tmdb.org/t/p/w500/fa7mK5qJc61aF9M1Qp3v5X9Lg9p.jpg",
+      "tag": "Hindi",
+      "media_type": "movie"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "656908"
+      },
+      "tmdb_id": "656908",
+      "title": "Ramayana: Rise of a Legend",
+      "year": "2026",
+      "rating": 7.5,
+      "poster_url": "https://image.tmdb.org/t/p/w500/vBQ7wks68OhJKlb3RnXSl2yXBXK.jpg",
+      "backdrop_path": "/yHVZncPRZr63mezRX20IyKLrSkv.jpg",
+      "media_type": "movie",
+      "original_language": "hi"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1453407"
+      },
+      "tmdb_id": "1453407",
+      "title": "Gajab Raat",
+      "year": "2026",
+      "rating": 6.1,
+      "poster_url": "https://image.tmdb.org/t/p/w500/e4N7M52cBbyi24xLga8yI6yt1u1.jpg",
+      "backdrop_path": "/8I4YFWgi9IZW4VUi398A0BqLnm.jpg",
+      "media_type": "movie",
+      "original_language": "hi"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1389172"
+      },
+      "tmdb_id": "1389172",
+      "title": "Reporting Live",
+      "year": "2026",
+      "rating": 7.1,
+      "poster_url": "https://image.tmdb.org/t/p/w500/xVabS4lTi6IMscr2FOucxydE6ZD.jpg",
+      "backdrop_path": "/faJB8DXU0LXwq5ebMLj5drz8S4N.jpg",
+      "media_type": "movie",
+      "original_language": "hi"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1215889"
+      },
+      "tmdb_id": "1215889",
+      "title": "Daayra",
+      "year": "2026",
+      "rating": 6.4,
+      "poster_url": "https://image.tmdb.org/t/p/w500/eAsR8oCZGCOqaxDVt0c0WrRFjrn.jpg",
+      "backdrop_path": "/rbwmf04kpX1o3zbbOS6Y7woF2Ku.jpg",
+      "media_type": "movie",
+      "original_language": "hi"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1493572"
+      },
+      "tmdb_id": "1493572",
+      "title": "Parivarik ManuRanjan",
+      "year": "2026",
+      "rating": 5.3,
+      "poster_url": "https://image.tmdb.org/t/p/w500/2gKGkD0pN2Ss9LrHA6tv5hEjHOs.jpg",
+      "backdrop_path": "/9j9DtcTGSSZJVrimys2emN5kVh3.jpg",
+      "media_type": "movie",
+      "original_language": "hi"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "19404"
+      },
+      "tmdb_id": "19404",
+      "title": "Dilwale Dulhania Le Jayenge",
+      "year": "1995",
+      "rating": 8.5,
+      "poster_url": "https://image.tmdb.org/t/p/w500/lfRkUr7DYdHldAqi3PwdQGBRBPM.jpg",
+      "backdrop_path": "/7VDLEHli74eLsYLNcq9djn1Gw76.jpg",
+      "media_type": "movie",
+      "original_language": "hi"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1291608"
+      },
+      "tmdb_id": "1291608",
+      "title": "Dhurandhar",
+      "year": "2025",
+      "rating": 7.3,
+      "poster_url": "https://image.tmdb.org/t/p/w500/8FHOtUpNIk5ZPEay2N2EY5lrxkv.jpg",
+      "backdrop_path": "/snYOXem8pUGOffnLbbGq4aB1pg4.jpg",
+      "media_type": "movie",
+      "original_language": "hi"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1582770"
+      },
+      "tmdb_id": "1582770",
+      "title": "Dhurandhar: The Revenge",
+      "year": "2026",
+      "rating": 7.2,
+      "poster_url": "https://image.tmdb.org/t/p/w500/ov8vrRLZGoXHpYjSY9Vpv1tHJX7.jpg",
+      "backdrop_path": "/br4Ra4dRpvR0R7a1zPPkOwGkcky.jpg",
+      "media_type": "movie",
+      "original_language": "hi"
+    }
+  ],
+  "kannada": [
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "785084"
+      },
+      "tmdb_id": "785084",
+      "title": "KGF: Chapter 2",
+      "year": "2022",
+      "rating": 7.8,
+      "poster_url": "https://image.tmdb.org/t/p/w500/kh9j1pD6B77a28Z2c6z8Fq67bA8.jpg",
+      "tag": "Kannada",
+      "media_type": "movie"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1004021"
+      },
+      "tmdb_id": "1004021",
+      "title": "Kantara",
+      "year": "2022",
+      "rating": 8.0,
+      "poster_url": "https://image.tmdb.org/t/p/w500/5k7mZgC3fD7f8bZ3zL9jB5vD7kY.jpg",
+      "tag": "Kannada",
+      "media_type": "movie"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "853521"
+      },
+      "tmdb_id": "853521",
+      "title": "777 Charlie",
+      "year": "2022",
+      "rating": 8.2,
+      "poster_url": "https://image.tmdb.org/t/p/w500/2L3A3mY5zB8uK7vF6p3xK7aP8o9.jpg",
+      "tag": "Kannada",
+      "media_type": "movie"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "939243"
+      },
+      "tmdb_id": "939243",
+      "title": "Toxic",
+      "year": "2026",
+      "rating": 7.6,
+      "poster_url": "https://image.tmdb.org/t/p/w500/5RTd3YCLWbEhbe9OXRuNX3pbT5U.jpg",
+      "tag": "Kannada",
+      "media_type": "movie"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1735270"
+      },
+      "tmdb_id": "1735270",
+      "title": "Premada Oorali",
+      "year": "2026",
+      "rating": 4.6,
+      "poster_url": "https://image.tmdb.org/t/p/w500/wJsUmiwuZ9eKnOiYLAVk8THFk7i.jpg",
+      "backdrop_path": "/r22LSVD46wOY3rkavnM4gWc3sz2.jpg",
+      "media_type": "movie",
+      "original_language": "kn"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1083637"
+      },
+      "tmdb_id": "1083637",
+      "title": "Kantara - A Legend: Chapter 1",
+      "year": "2025",
+      "rating": 7.3,
+      "poster_url": "https://image.tmdb.org/t/p/w500/hCxdcaRK6jmwnwjitYRejVCU1P0.jpg",
+      "backdrop_path": "/w57nxiBIODAYHLRs1xmrCY9zEFe.jpg",
+      "media_type": "movie",
+      "original_language": "kn"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "564147"
+      },
+      "tmdb_id": "564147",
+      "title": "K.G.F: Chapter 1",
+      "year": "2018",
+      "rating": 7.5,
+      "poster_url": "https://image.tmdb.org/t/p/w500/ltHlJwvxKv7d0ooCiKSAvfwV9tX.jpg",
+      "backdrop_path": "/4i1ofsSpfTuswHXcgPtXbZrSnoe.jpg",
+      "media_type": "movie",
+      "original_language": "kn"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "587412"
+      },
+      "tmdb_id": "587412",
+      "title": "K.G.F: Chapter 2",
+      "year": "2022",
+      "rating": 7.5,
+      "poster_url": "https://image.tmdb.org/t/p/w500/khNVygolU0TxLIDWff5tQlAhZ23.jpg",
+      "backdrop_path": "/nsV5Mfi9FAV4w8eDsdr7uqVswOk.jpg",
+      "media_type": "movie",
+      "original_language": "kn"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "962640"
+      },
+      "tmdb_id": "962640",
+      "title": "K.G.F: Chapter 3",
+      "year": "2024",
+      "rating": 7.5,
+      "poster_url": "https://image.tmdb.org/t/p/w500/ex2zyM6LVd31h9TlAi9RaR7QARK.jpg",
+      "backdrop_path": null,
+      "media_type": "movie",
+      "original_language": "kn"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1103473"
+      },
+      "tmdb_id": "1103473",
+      "title": "KD \u2013 The Devil",
+      "year": "2026",
+      "rating": 5.3,
+      "poster_url": "https://image.tmdb.org/t/p/w500/nEuEMJrnLBneE9tJlmzbhCFLu95.jpg",
+      "backdrop_path": "/cNvaYDnGSfmOFi2yGnOmRIM5pce.jpg",
+      "media_type": "movie",
+      "original_language": "kn"
+    }
+  ],
+  "netflix": [
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "66732"
+      },
+      "tmdb_id": "66732",
+      "title": "Stranger Things",
+      "year": "2016",
+      "rating": 8.6,
+      "poster_url": "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg",
+      "tag": "Netflix",
+      "media_type": "tv"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "119051"
+      },
+      "tmdb_id": "119051",
+      "title": "Wednesday",
+      "year": "2022",
+      "rating": 8.5,
+      "poster_url": "https://image.tmdb.org/t/p/w500/9PFonBhy4cQy7Jz20NpMygczOkv.jpg",
+      "tag": "Netflix",
+      "media_type": "tv"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "93405"
+      },
+      "tmdb_id": "93405",
+      "title": "Squid Game",
+      "year": "2021",
+      "rating": 7.8,
+      "poster_url": "https://image.tmdb.org/t/p/w500/dDlG1T8v4oO7xP9bJ9zN2YgQ1kZ.jpg",
+      "tag": "Netflix",
+      "media_type": "tv"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "111110"
+      },
+      "tmdb_id": "111110",
+      "title": "One Piece (Live Action)",
+      "year": "2023",
+      "rating": 8.2,
+      "poster_url": "https://image.tmdb.org/t/p/w500/fcXdJUSDiDiFnbUQ9Ki4vMm99u4.jpg",
+      "tag": "Netflix",
+      "media_type": "tv"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "63333"
+      },
+      "tmdb_id": "63333",
+      "title": "The Last Kingdom",
+      "year": "2015",
+      "rating": 8.3,
+      "poster_url": "https://image.tmdb.org/t/p/w500/8eJf0hxgIhE6QSxbtuNCekTddy1.jpg",
+      "backdrop_path": "/QbtctI8EzlhsyFDMUMyG3fli8B.jpg",
+      "media_type": "tv",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "4656"
+      },
+      "tmdb_id": "4656",
+      "title": "Raw",
+      "year": "1993",
+      "rating": 6.7,
+      "poster_url": "https://image.tmdb.org/t/p/w500/fstEe6RsyNyPUnMwNcL20iNl0nE.jpg",
+      "backdrop_path": "/ykWWT8FAChBffNxcDzoJMCK9LBb.jpg",
+      "media_type": "tv",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "65494"
+      },
+      "tmdb_id": "65494",
+      "title": "The Crown",
+      "year": "2016",
+      "rating": 8.2,
+      "poster_url": "https://image.tmdb.org/t/p/w500/1M876KPjulVwppEpldhdc8V4o68.jpg",
+      "backdrop_path": "/8VXhcrl5z2I1zEU9X3pkkNrZlD.jpg",
+      "media_type": "tv",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "291507"
+      },
+      "tmdb_id": "291507",
+      "title": "The Body",
+      "year": "2026",
+      "rating": 7.9,
+      "poster_url": "https://image.tmdb.org/t/p/w500/zleCYDRbW5mKwgZwVK4SNIrKXWx.jpg",
+      "backdrop_path": "/hYJqUoXRZnodGxgVZTM8uwr5kbC.jpg",
+      "media_type": "tv",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "15226"
+      },
+      "tmdb_id": "15226",
+      "title": "C.I.D.",
+      "year": "1998",
+      "rating": 5.5,
+      "poster_url": "https://image.tmdb.org/t/p/w500/3UymnlLfLMKxG8OcFhSnAlnhQfZ.jpg",
+      "backdrop_path": "/1gZrOa2E9DOohEvSLLBJqus2zGu.jpg",
+      "media_type": "tv",
+      "original_language": "hi"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "67744"
+      },
+      "tmdb_id": "67744",
+      "title": "MINDHUNTER",
+      "year": "2017",
+      "rating": 8.1,
+      "poster_url": "https://image.tmdb.org/t/p/w500/fbKE87mojpIETWepSbD5Qt741fp.jpg",
+      "backdrop_path": "/lpDVJuIro21gtMj9iXMFKHuroZN.jpg",
+      "media_type": "tv",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "65701"
+      },
+      "tmdb_id": "65701",
+      "title": "Good Mythical Morning",
+      "year": "2012",
+      "rating": 6.9,
+      "poster_url": "https://image.tmdb.org/t/p/w500/jMpBQr2aNOFAI6wsC47zsOG6qOh.jpg",
+      "backdrop_path": "/hvFCS0dMeC3ffiF4uYTKzUAkvYL.jpg",
+      "media_type": "tv",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1424"
+      },
+      "tmdb_id": "1424",
+      "title": "Orange Is the New Black",
+      "year": "2013",
+      "rating": 7.6,
+      "poster_url": "https://image.tmdb.org/t/p/w500/ekaa7YjGPTkFLcPhwWXTnARuCEU.jpg",
+      "backdrop_path": "/zJiWhsEYCy5BkFCBONoMnUunyZQ.jpg",
+      "media_type": "tv",
+      "original_language": "en"
+    }
+  ],
+  "prime": [
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "76479"
+      },
+      "tmdb_id": "76479",
+      "title": "The Boys",
+      "year": "2019",
+      "rating": 8.4,
+      "poster_url": "https://image.tmdb.org/t/p/w500/2zmTngn1tYC1AvfnNDBpQI4r1fB.jpg",
+      "tag": "Prime",
+      "media_type": "tv"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "108978"
+      },
+      "tmdb_id": "108978",
+      "title": "Reacher",
+      "year": "2022",
+      "rating": 8.1,
+      "poster_url": "https://image.tmdb.org/t/p/w500/j7uBDwCKnSp1T7c0A2L7n9V3k1a.jpg",
+      "tag": "Prime",
+      "media_type": "tv"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "106379"
+      },
+      "tmdb_id": "106379",
+      "title": "Fallout",
+      "year": "2024",
+      "rating": 8.3,
+      "poster_url": "https://image.tmdb.org/t/p/w500/AnsZu4h8p3F2Q1l2LzG2vK1Q6m7.jpg",
+      "tag": "Prime",
+      "media_type": "tv"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "84773"
+      },
+      "tmdb_id": "84773",
+      "title": "The Lord of the Rings: The Rings of Power",
+      "year": "2022",
+      "rating": 7.2,
+      "poster_url": "https://image.tmdb.org/t/p/w500/bMXWXKM9ydUmMTNvDnYo9QtCBRt.jpg",
+      "tag": "Prime",
+      "media_type": "tv"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "253376"
+      },
+      "tmdb_id": "253376",
+      "title": "The Girlfriend",
+      "year": "2025",
+      "rating": 7.1,
+      "poster_url": "https://image.tmdb.org/t/p/w500/ktrp3tdZ5IQpFux4nLy8z70bt3n.jpg",
+      "backdrop_path": "/lnVWmFvLv2pTZGsuAJytiqKu541.jpg",
+      "media_type": "tv",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "194766"
+      },
+      "tmdb_id": "194766",
+      "title": "The Summer I Turned Pretty",
+      "year": "2022",
+      "rating": 8.1,
+      "poster_url": "https://image.tmdb.org/t/p/w500/xBIz53wYWsKfFpN0TaizVAjKJ0z.jpg",
+      "backdrop_path": "/jCQV3rHNbgHKo3N4G6CARbVEjPV.jpg",
+      "media_type": "tv",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "85077"
+      },
+      "tmdb_id": "85077",
+      "title": "The Chosen",
+      "year": "2019",
+      "rating": 8.9,
+      "poster_url": "https://image.tmdb.org/t/p/w500/nr0r7YTn1l84KLG1iCSO5ofHTvO.jpg",
+      "backdrop_path": "/2YQFwn9aF7huTFHxn9lFTAn14F.jpg",
+      "media_type": "tv",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "303044"
+      },
+      "tmdb_id": "303044",
+      "title": "Campus Drivers",
+      "year": "2026",
+      "rating": 7.8,
+      "poster_url": "https://image.tmdb.org/t/p/w500/kTgV6VLp70QOBpCZqvEuTWAA4Ng.jpg",
+      "backdrop_path": "/oaWJm4brEMSWBmQIB73DFxsU683.jpg",
+      "media_type": "tv",
+      "original_language": "fr"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "44217"
+      },
+      "tmdb_id": "44217",
+      "title": "Vikings",
+      "year": "2013",
+      "rating": 8.1,
+      "poster_url": "https://image.tmdb.org/t/p/w500/bQLrHIRNEkE3PdIWQrZHynQZazu.jpg",
+      "backdrop_path": "/13kblIK8DnxMurcRDkeyy2sGR7v.jpg",
+      "media_type": "tv",
+      "original_language": "en"
+    }
+  ],
+  "disney": [
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "84958"
+      },
+      "tmdb_id": "84958",
+      "title": "Loki",
+      "year": "2021",
+      "rating": 8.2,
+      "poster_url": "https://image.tmdb.org/t/p/w500/voHUmlvjysv923xaoE3q25T0k2d.jpg",
+      "tag": "Disney+",
+      "media_type": "tv"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "82856"
+      },
+      "tmdb_id": "82856",
+      "title": "The Mandalorian",
+      "year": "2019",
+      "rating": 8.4,
+      "poster_url": "https://image.tmdb.org/t/p/w500/eU1i6eHXlzMOlEq0ku1R07Y8vun.jpg",
+      "tag": "Disney+",
+      "media_type": "tv"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "88396"
+      },
+      "tmdb_id": "88396",
+      "title": "The Falcon and the Winter Soldier",
+      "year": "2021",
+      "rating": 7.6,
+      "poster_url": "https://image.tmdb.org/t/p/w500/6kbAMLteGO8yyewYau6bJ683sw7.jpg",
+      "tag": "Disney+",
+      "media_type": "tv"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "114472"
+      },
+      "tmdb_id": "114472",
+      "title": "Secret Invasion",
+      "year": "2023",
+      "rating": 7.1,
+      "poster_url": "https://image.tmdb.org/t/p/w500/f5JggRLJS205k01Z5q8a4g2qQ9Z.jpg",
+      "tag": "Disney+",
+      "media_type": "tv"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "279246"
+      },
+      "tmdb_id": "279246",
+      "title": "The Remarried Empress",
+      "year": "2026",
+      "rating": 8.8,
+      "poster_url": "https://image.tmdb.org/t/p/w500/zn3IXZzGavH3qle3o3g1r32eXDy.jpg",
+      "backdrop_path": "/fNcpHmuZLKoyhNMBEzdqzX8iIvg.jpg",
+      "media_type": "tv",
+      "original_language": "ko"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "213375"
+      },
+      "tmdb_id": "213375",
+      "title": "VisionQuest",
+      "year": "2026",
+      "rating": 8.2,
+      "poster_url": "https://image.tmdb.org/t/p/w500/WGyAyBPncfuu8MZhLY9RtfZPM0.jpg",
+      "backdrop_path": "/uoXXbN2PrOxH6UKyP7kYwmGpAAP.jpg",
+      "media_type": "tv",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "1508"
+      },
+      "tmdb_id": "1508",
+      "title": "Dancing with the Stars",
+      "year": "2005",
+      "rating": 6.2,
+      "poster_url": "https://image.tmdb.org/t/p/w500/iisHVZ6we56PE4BcV1csB46SbiG.jpg",
+      "backdrop_path": "/r4ceAy8m4w9gheLWEgEgQnbYK85.jpg",
+      "media_type": "tv",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "208921"
+      },
+      "tmdb_id": "208921",
+      "title": "Rivals",
+      "year": "2024",
+      "rating": 7.4,
+      "poster_url": "https://image.tmdb.org/t/p/w500/3p9t1KDo5iXAn1zsSPn8sdtakWs.jpg",
+      "backdrop_path": "/vPw5Gpg0YEEk1VsE8QlmyTxIJuU.jpg",
+      "media_type": "tv",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "4194"
+      },
+      "tmdb_id": "4194",
+      "title": "Star Wars: The Clone Wars",
+      "year": "2008",
+      "rating": 8.5,
+      "poster_url": "https://image.tmdb.org/t/p/w500/e1nWfnnCVqxS2LeTO3dwGyAsG2V.jpg",
+      "backdrop_path": "/m6eRgkR1KC6Mr6gKx6gKCzSn6vD.jpg",
+      "media_type": "tv",
+      "original_language": "en"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "103540"
+      },
+      "tmdb_id": "103540",
+      "title": "Percy Jackson and the Olympians",
+      "year": "2023",
+      "rating": 7.3,
+      "poster_url": "https://image.tmdb.org/t/p/w500/zofPiEpwCRYaezOncTlQwXebHFU.jpg",
+      "backdrop_path": "/dLIKNqBi9L1cVbwuniXkaNOsIXg.jpg",
+      "media_type": "tv",
+      "original_language": "en"
+    }
+  ],
+  "kdrama": [
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "33238"
+      },
+      "tmdb_id": "33238",
+      "title": "Running Man",
+      "year": "2010",
+      "rating": 8.2,
+      "poster_url": "https://image.tmdb.org/t/p/w500/2Wmmu1MkqxJ48J7aySET9EKEjXz.jpg",
+      "backdrop_path": "/wsHj4oHQJoe7DMYaqNFwVoyLiAh.jpg",
+      "media_type": "tv",
+      "original_language": "ko"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "279246"
+      },
+      "tmdb_id": "279246",
+      "title": "The Remarried Empress",
+      "year": "2026",
+      "rating": 8.8,
+      "poster_url": "https://image.tmdb.org/t/p/w500/zn3IXZzGavH3qle3o3g1r32eXDy.jpg",
+      "backdrop_path": "/fNcpHmuZLKoyhNMBEzdqzX8iIvg.jpg",
+      "media_type": "tv",
+      "original_language": "ko"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "5092"
+      },
+      "tmdb_id": "5092",
+      "title": "Infinite Challenge",
+      "year": "2005",
+      "rating": 7.5,
+      "poster_url": "https://image.tmdb.org/t/p/w500/3ZIPTvMnzI5ThmdGeEYQFxJV5Sg.jpg",
+      "backdrop_path": "/s2qJb1FLwp1Mse9lY08JqgMp0kw.jpg",
+      "media_type": "tv",
+      "original_language": "ko"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "65270"
+      },
+      "tmdb_id": "65270",
+      "title": "Radio Star",
+      "year": "2007",
+      "rating": 5.3,
+      "poster_url": "https://image.tmdb.org/t/p/w500/uRUZDsvUfIP3JUEgOC8ReBlQQUU.jpg",
+      "backdrop_path": "/kCd0rmnNwCd3sgupO9DqSi9aHa0.jpg",
+      "media_type": "tv",
+      "original_language": "ko"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "303745"
+      },
+      "tmdb_id": "303745",
+      "title": "Love in Disguise",
+      "year": "2026",
+      "rating": 9.0,
+      "poster_url": "https://image.tmdb.org/t/p/w500/c9DEtqCDZBPL9i06WmbDrcndrBy.jpg",
+      "backdrop_path": "/ob7m6JqZ7jSOocR3VL73VxRC6Is.jpg",
+      "media_type": "tv",
+      "original_language": "ko"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "39429"
+      },
+      "tmdb_id": "39429",
+      "title": "You Hee-yeol's Sketchbook",
+      "year": "2009",
+      "rating": 6.1,
+      "poster_url": "https://image.tmdb.org/t/p/w500/5zsoaVX483aJG90rJhlAup1VAXI.jpg",
+      "backdrop_path": "/gWTJDV0iRWkkiwlL5uXHQvRPbkk.jpg",
+      "media_type": "tv",
+      "original_language": "ko"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "70672"
+      },
+      "tmdb_id": "70672",
+      "title": "Men on a Mission",
+      "year": "2015",
+      "rating": 7.3,
+      "poster_url": "https://image.tmdb.org/t/p/w500/2jIi55JtYKJTL1km8qHMuUilOWo.jpg",
+      "backdrop_path": "/a8a8z4aJr40zYgRMfmSESppX2eO.jpg",
+      "media_type": "tv",
+      "original_language": "ko"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "65282"
+      },
+      "tmdb_id": "65282",
+      "title": "Home Alone",
+      "year": "2013",
+      "rating": 7.2,
+      "poster_url": "https://image.tmdb.org/t/p/w500/1hqGagr94soBq70Lq7tPHvNmmxy.jpg",
+      "backdrop_path": "/sztoil0XfQ0cSHy4PXmYW6uAdfQ.jpg",
+      "media_type": "tv",
+      "original_language": "ko"
+    }
+  ],
+  "anime": [
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "60572"
+      },
+      "tmdb_id": "60572",
+      "title": "Pok\u00e9mon",
+      "year": "1997",
+      "rating": 8.0,
+      "poster_url": "https://image.tmdb.org/t/p/w500/lP4zwr0F7hWTbAFltfoFTc2AxRG.jpg",
+      "backdrop_path": "/yYpQV25I7XB6S0POJOScPjxYWV5.jpg",
+      "media_type": "tv",
+      "original_language": "ja"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "37854"
+      },
+      "tmdb_id": "37854",
+      "title": "One Piece",
+      "year": "1999",
+      "rating": 8.8,
+      "poster_url": "https://image.tmdb.org/t/p/w500/dB4EDhre2dsC2kxYDavyKWqLQwi.jpg",
+      "backdrop_path": "/2rmK7mnchw9Xr3XdiTFSxTTLXqv.jpg",
+      "media_type": "tv",
+      "original_language": "ja"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "65733"
+      },
+      "tmdb_id": "65733",
+      "title": "Doraemon",
+      "year": "2005",
+      "rating": 8.1,
+      "poster_url": "https://image.tmdb.org/t/p/w500/9ZN1P32SHviL3SV51qLivxycvcx.jpg",
+      "backdrop_path": "/c2oiRa7V3bQzof4wVGzLXtWJ5QU.jpg",
+      "media_type": "tv",
+      "original_language": "ja"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "57775"
+      },
+      "tmdb_id": "57775",
+      "title": "Chibi Maruko-chan",
+      "year": "1990",
+      "rating": 7.6,
+      "poster_url": "https://image.tmdb.org/t/p/w500/bfn54AAMuh47IFqeoco0jgeVH1a.jpg",
+      "backdrop_path": "/vuajwjep1FxphPhMEWKv4bfrCnf.jpg",
+      "media_type": "tv",
+      "original_language": "ja"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "30983"
+      },
+      "tmdb_id": "30983",
+      "title": "Detective Conan",
+      "year": "1996",
+      "rating": 8.0,
+      "poster_url": "https://image.tmdb.org/t/p/w500/iHfA63x7rFaWbP2C832uCe2r0zy.jpg",
+      "backdrop_path": "/z67lpMtm8YGykJO4p89meuNMvj8.jpg",
+      "media_type": "tv",
+      "original_language": "ja"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "30984"
+      },
+      "tmdb_id": "30984",
+      "title": "Bleach",
+      "year": "2004",
+      "rating": 8.3,
+      "poster_url": "https://image.tmdb.org/t/p/w500/2EewmxXe72ogD0EaWM8gqa0ccIw.jpg",
+      "backdrop_path": "/o0NsbcIvsllg6CJX0FBFY8wWbsn.jpg",
+      "media_type": "tv",
+      "original_language": "ja"
+    },
+    {
+      "id": {
+        "provider": "tmdb",
+        "value": "34860"
+      },
+      "tmdb_id": "34860",
+      "title": "Ninja Boy Rantaro",
+      "year": "1993",
+      "rating": 6.9,
+      "poster_url": "https://image.tmdb.org/t/p/w500/fzNiSp0HhCthOTYu9IYWlPPa7fU.jpg",
+      "backdrop_path": "/4fVwc77cov2q9i0szzYhlkAaqza.jpg",
+      "media_type": "tv",
+      "original_language": "ja"
+    }
+  ]
+};
+
+  function getFallbackCatalogForCategory(key) {
+    if (FALLBACK_TMDB_CATALOG[key] && FALLBACK_TMDB_CATALOG[key].length > 0) {
+      return FALLBACK_TMDB_CATALOG[key];
+    }
+    if (DEFAULT_SHOWCASE_CATALOG[key] && DEFAULT_SHOWCASE_CATALOG[key].length > 0) {
+      return DEFAULT_SHOWCASE_CATALOG[key];
+    }
+    return FALLBACK_TMDB_CATALOG.trending || [];
+  }
+
+  function showTmdbDebugError(msg) {
+    console.warn('[TMDB Diagnostics]', msg);
+    const banner = document.getElementById('tmdbDebugBanner');
+    const msgEl = document.getElementById('tmdbDebugMessage');
+    if (banner && msgEl) {
+      msgEl.textContent = msg;
+      banner.style.display = 'block';
+    }
+  }
+
+  function initTmdbDebugBanner() {
+    const dismissBtn = document.getElementById('tmdbDebugDismiss');
+    if (dismissBtn) {
+      dismissBtn.addEventListener('click', () => {
+        const banner = document.getElementById('tmdbDebugBanner');
+        if (banner) banner.style.display = 'none';
+      });
+    }
+  }
+
+  // ==========================================================================
   // TMDB API V3 INTEGRATION & CATEGORY ROWS ENGINE
   // ==========================================================================
   const TMDB_CONFIG = {
@@ -3281,6 +4582,12 @@
   ];
 
   function buildTmdbRequest(endpoint) {
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+    const url = `/api/tmdb?endpoint=${encodeURIComponent(cleanEndpoint)}`;
+    return { url, headers: { 'Accept': 'application/json' } };
+  }
+
+  function buildDirectTmdbFallbackRequest(endpoint) {
     const tokenOrKey = TMDB_CONFIG.getKey();
     const isBearer = Boolean(tokenOrKey && (tokenOrKey.startsWith('ey') || tokenOrKey.length > 40));
     const headers = { 'Accept': 'application/json' };
@@ -3403,24 +4710,41 @@
     renderRailSkeletons(carousel, 7);
 
     try {
+      // Primary: Server-side proxy route /api/tmdb to bypass client adblockers and CORS
       const { url, headers } = buildTmdbRequest(cat.endpoint);
-      let res = await fetch(url, { headers });
-      
-      // If direct TMDB fetch is blocked by CORS/adblocker, try fallback server proxy
-      if (!res.ok) {
-        res = await fetch(`/api/tmdb?endpoint=${encodeURIComponent(cat.endpoint)}`);
+      let res;
+      try {
+        res = await fetch(url, { headers });
+      } catch (proxyNetErr) {
+        // Fallback to direct client-side fetch if proxy unreachable
+        const direct = buildDirectTmdbFallbackRequest(cat.endpoint);
+        res = await fetch(direct.url, { headers: direct.headers });
       }
-      if (!res.ok) throw new Error(`TMDB HTTP ${res.status}`);
+
+      if (!res || !res.ok) {
+        let errMsg = `TMDB API error HTTP ${res ? res.status : 'offline'}`;
+        try {
+          const errData = await res.json();
+          if (errData?.error || errData?.status_message) {
+            errMsg = errData.error || errData.status_message;
+          }
+        } catch (_) {}
+        showTmdbDebugError(`TMDB Notice (${res ? res.status : 'offline'}): ${errMsg}. Rendering active fallback catalog.`);
+        throw new Error(errMsg);
+      }
 
       const data = await res.json();
-      const results = (data.results || []).filter(item => Boolean(item && item.poster_path));
+      if (data?.error) {
+        showTmdbDebugError(`TMDB Notice: ${data.error}. Rendering active fallback catalog.`);
+        throw new Error(data.error);
+      }
 
+      const results = (data.results || []).filter(item => Boolean(item && item.poster_path));
       if (!results.length) {
         throw new Error('No items with poster_path');
       }
 
       const mapped = results.map(item => mapTmdbItem(item, cat.defaultTag)).filter(Boolean);
-
       try {
         sessionStorage.setItem(cacheKey, JSON.stringify(mapped));
       } catch (_) {}
@@ -3442,8 +4766,8 @@
       return mapped;
     } catch (err) {
       console.warn(`TMDB fetch failed for ${cat.key}:`, err);
-      // If curated showcase items exist, backfill seamlessly
-      const fallbackList = DEFAULT_SHOWCASE_CATALOG[cat.key];
+      // Fallback to rich built-in mock dataset so homepage is NEVER blank
+      const fallbackList = getFallbackCatalogForCategory(cat.key);
       if (fallbackList && fallbackList.length > 0) {
         renderCarousel(carousel, fallbackList);
       } else {
@@ -3470,19 +4794,22 @@
     }
 
     // 2. Populate category sections with initial placeholders / curated items
-    if (el.trendingCarousel) renderCarousel(el.trendingCarousel, DEFAULT_SHOWCASE_CATALOG.trending);
-    if (el.netflixCarousel) renderCarousel(el.netflixCarousel, DEFAULT_SHOWCASE_CATALOG.netflix);
-    if (el.primeCarousel) renderCarousel(el.primeCarousel, DEFAULT_SHOWCASE_CATALOG.prime);
-    if (el.disneyCarousel) renderCarousel(el.disneyCarousel, DEFAULT_SHOWCASE_CATALOG.disney);
-    if (el.moviesCarousel) renderCarousel(el.moviesCarousel, DEFAULT_SHOWCASE_CATALOG.movies);
-    if (el.seriesCarousel) renderCarousel(el.seriesCarousel, DEFAULT_SHOWCASE_CATALOG.series);
-    if (el.actionCarousel) renderCarousel(el.actionCarousel, DEFAULT_SHOWCASE_CATALOG.action);
-    if (el.scifiCarousel) renderCarousel(el.scifiCarousel, DEFAULT_SHOWCASE_CATALOG.scifi);
-    if (el.horrorCarousel) renderCarousel(el.horrorCarousel, DEFAULT_SHOWCASE_CATALOG.horror);
-    if (el.animeCarousel) renderCarousel(el.animeCarousel, DEFAULT_SHOWCASE_CATALOG.anime);
-    if (el.kdramaCarousel) renderCarousel(el.kdramaCarousel, DEFAULT_SHOWCASE_CATALOG.kdrama);
-    if (el.comedyCarousel) renderCarousel(el.comedyCarousel, DEFAULT_SHOWCASE_CATALOG.comedy);
-    if (el.topRatedCarousel) renderCarousel(el.topRatedCarousel, DEFAULT_SHOWCASE_CATALOG.toprated);
+    if (el.trendingCarousel) renderCarousel(el.trendingCarousel, getFallbackCatalogForCategory('trending'));
+    if (el.englishCarousel) renderCarousel(el.englishCarousel, getFallbackCatalogForCategory('english'));
+    if (el.hindiCarousel) renderCarousel(el.hindiCarousel, getFallbackCatalogForCategory('hindi'));
+    if (el.kannadaCarousel) renderCarousel(el.kannadaCarousel, getFallbackCatalogForCategory('kannada'));
+    if (el.netflixCarousel) renderCarousel(el.netflixCarousel, getFallbackCatalogForCategory('netflix'));
+    if (el.primeCarousel) renderCarousel(el.primeCarousel, getFallbackCatalogForCategory('prime'));
+    if (el.disneyCarousel) renderCarousel(el.disneyCarousel, getFallbackCatalogForCategory('disney'));
+    if (el.moviesCarousel) renderCarousel(el.moviesCarousel, getFallbackCatalogForCategory('movies'));
+    if (el.seriesCarousel) renderCarousel(el.seriesCarousel, getFallbackCatalogForCategory('series'));
+    if (el.actionCarousel) renderCarousel(el.actionCarousel, getFallbackCatalogForCategory('action'));
+    if (el.scifiCarousel) renderCarousel(el.scifiCarousel, getFallbackCatalogForCategory('scifi'));
+    if (el.horrorCarousel) renderCarousel(el.horrorCarousel, getFallbackCatalogForCategory('horror'));
+    if (el.animeCarousel) renderCarousel(el.animeCarousel, getFallbackCatalogForCategory('anime'));
+    if (el.kdramaCarousel) renderCarousel(el.kdramaCarousel, getFallbackCatalogForCategory('kdrama'));
+    if (el.comedyCarousel) renderCarousel(el.comedyCarousel, getFallbackCatalogForCategory('comedy'));
+    if (el.topRatedCarousel) renderCarousel(el.topRatedCarousel, getFallbackCatalogForCategory('toprated'));
 
     // 3. Showcase live sports immediately
     renderSportsSpotlight();
@@ -3491,6 +4818,7 @@
   async function init() {
     initAdShield();
     initPwaInstall();
+    initTmdbDebugBanner();
     setupEventListeners();
     updateAudioEnhancerUI();
     initMonetization();
@@ -6732,11 +8060,14 @@
     if (cat) {
       try {
         const { url, headers } = buildTmdbRequest(cat.endpoint);
-        let res = await fetch(url, { headers });
-        if (!res.ok) {
-          res = await fetch(`/api/tmdb?endpoint=${encodeURIComponent(cat.endpoint)}`);
+        let res;
+        try {
+          res = await fetch(url, { headers });
+        } catch (_) {
+          const direct = buildDirectTmdbFallbackRequest(cat.endpoint);
+          res = await fetch(direct.url, { headers: direct.headers });
         }
-        if (res.ok) {
+        if (res && res.ok) {
           const data = await res.json();
           const items = (data.results || []).filter(item => Boolean(item && item.poster_path)).map(item => mapTmdbItem(item, cat.defaultTag)).filter(Boolean);
           if (items.length) {
@@ -6753,11 +8084,11 @@
     }
 
     // 2. Curated showcase catalog fallback
-    if (DEFAULT_SHOWCASE_CATALOG[tabId]) {
-      const items = DEFAULT_SHOWCASE_CATALOG[tabId];
-      state.gridItems = items;
-      renderGridItems(items);
-      el.gridSubtitle.textContent = `Showing ${items.length} titles in ${title}`;
+    const fallbackItems = getFallbackCatalogForCategory(tabId);
+    if (fallbackItems && fallbackItems.length > 0) {
+      state.gridItems = fallbackItems;
+      renderGridItems(fallbackItems);
+      el.gridSubtitle.textContent = `Showing ${fallbackItems.length} titles in ${title}`;
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }

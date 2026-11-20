@@ -54,7 +54,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=20261120_v15" />
+  <link rel="stylesheet" href="/styles.css?v=20261120_v16" />
   <link rel="dns-prefetch" href="https://vidlink.pro">
   <link rel="preconnect" href="https://vidlink.pro" crossorigin>
   <link rel="dns-prefetch" href="https://embed.smashystream.com">
@@ -232,19 +232,18 @@
 
   <!-- Hero Feature Showcase -->
   <section class="hero-section" id="heroSection">
-    <div class="hero-backdrop" id="heroBackdrop"></div>
+    <div class="hero-backdrop" id="heroBackdrop" style="background-image: url('https://image.tmdb.org/t/p/original/yDHYTfA3R0jFYba16jBB1ef8oIt.jpg'); opacity: 1;"></div>
     <div class="hero-vignette"></div>
     <div class="hero-content">
       <div class="hero-meta-badges">
         <span class="badge badge-red" id="heroMediaType">MOVIE</span>
         <span class="badge badge-gold" id="heroRating">⭐ 8.7</span>
-        <span class="badge badge-outline" id="heroYear">2026</span>
+        <span class="badge badge-outline" id="heroYear">2024</span>
         <span class="badge badge-outline">4K UHD</span>
         <span class="badge badge-accent">ATMOS</span>
       </div>
-      <h1 class="hero-title" id="heroTitle">Featured Title</h1>
-      <p class="hero-synopsis" id="heroSynopsis">Explore popular movies, trending series, and international hits with
-        high-definition in-browser playback.</p>
+      <h1 class="hero-title" id="heroTitle">Deadpool & Wolverine</h1>
+      <p class="hero-synopsis" id="heroSynopsis">A listless Wade Wilson toils away in civilian life with his days as the morally flexible mercenary, Deadpool, behind him. But when his homeworld faces an existential threat, Wade must reluctantly suit-up again with an even more reluctant Wolverine.</p>
       <div class="hero-actions">
         <button class="btn btn-primary btn-lg" id="heroPlayBtn">
           <svg viewBox="0 0 24 24" class="btn-icon">
@@ -296,8 +295,15 @@
 
   <!-- Main Body Content -->
   <main class="main-container" id="mainContainer">
-    <!-- User Owner-Monetized Header Ad Banner (Rendered ONLY when site owner configures ad network) -->
-    <div id="userHeaderAdBanner" class="user-ad-banner hidden" aria-label="Sponsored Content"></div>
+    <!-- User Owner-Monetized Header Ad Banner (Google AdSense ca-pub-4512671475286537) -->
+    <div id="userHeaderAdBanner" class="user-ad-banner" aria-label="Sponsored Advertisement">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-4512671475286537"
+           data-ad-slot="auto"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+    </div>
 
     <!-- Carousel Rails View (Home) -->
     <div id="railsView" class="view-active">
@@ -578,7 +584,106 @@
         </div>
         <div class="rail-carousel-wrapper">
           <button class="rail-nav-btn rail-prev" data-target="trendingCarousel">‹</button>
-          <div class="rail-carousel" id="trendingCarousel"></div>
+          <div class="rail-carousel" id="trendingCarousel">
+            <div class="movie-card" data-id="1368337" data-provider="tmdb">
+              <div class="poster-wrap aspect-[2/3] relative rounded-xl">
+                <div class="poster-inner rounded-xl overflow-hidden relative w-full h-full">
+                  <img class="poster-img" src="https://image.tmdb.org/t/p/w500/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg" alt="The Odyssey" loading="lazy" />
+                  <span class="card-tag-badge bg-rose-600 text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full">Trending</span>
+                  <div class="card-play-overlay"><div class="card-play-icon"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div></div>
+                </div>
+                <div class="card-rating-badge -bottom-4 left-2.5 w-9 h-9 rounded-full bg-white text-slate-900 font-bold text-xs shadow-md border-emerald-500" style="border: 2.5px solid #10b981;" title="TMDB Rating: 8.0">8.0</div>
+              </div>
+              <div class="card-info pt-5">
+                <div class="card-title text-sm font-semibold text-white truncate" title="The Odyssey">The Odyssey</div>
+                <div class="card-year text-xs text-slate-400 mt-0.5">2026</div>
+              </div>
+            </div>
+            <div class="movie-card" data-id="533535" data-provider="tmdb">
+              <div class="poster-wrap aspect-[2/3] relative rounded-xl">
+                <div class="poster-inner rounded-xl overflow-hidden relative w-full h-full">
+                  <img class="poster-img" src="https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg" alt="Deadpool & Wolverine" loading="lazy" />
+                  <span class="card-tag-badge bg-rose-600 text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full">Trending</span>
+                  <div class="card-play-overlay"><div class="card-play-icon"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div></div>
+                </div>
+                <div class="card-rating-badge -bottom-4 left-2.5 w-9 h-9 rounded-full bg-white text-slate-900 font-bold text-xs shadow-md border-emerald-500" style="border: 2.5px solid #10b981;" title="TMDB Rating: 8.7">8.7</div>
+              </div>
+              <div class="card-info pt-5">
+                <div class="card-title text-sm font-semibold text-white truncate" title="Deadpool & Wolverine">Deadpool & Wolverine</div>
+                <div class="card-year text-xs text-slate-400 mt-0.5">2024</div>
+              </div>
+            </div>
+            <div class="movie-card" data-id="1300968" data-provider="tmdb">
+              <div class="poster-wrap aspect-[2/3] relative rounded-xl">
+                <div class="poster-inner rounded-xl overflow-hidden relative w-full h-full">
+                  <img class="poster-img" src="https://image.tmdb.org/t/p/w500/jNcZH8yplxttRlf0wwqfGGMKHxX.jpg" alt="The Hunger Games: Sunrise on the Reaping" loading="lazy" />
+                  <span class="card-tag-badge bg-rose-600 text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full">Trending</span>
+                  <div class="card-play-overlay"><div class="card-play-icon"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div></div>
+                </div>
+                <div class="card-rating-badge -bottom-4 left-2.5 w-9 h-9 rounded-full bg-white text-slate-900 font-bold text-xs shadow-md border-emerald-500" style="border: 2.5px solid #10b981;" title="TMDB Rating: 7.3">7.3</div>
+              </div>
+              <div class="card-info pt-5">
+                <div class="card-title text-sm font-semibold text-white truncate" title="The Hunger Games: Sunrise on the Reaping">The Hunger Games: Sunrise on the Reaping</div>
+                <div class="card-year text-xs text-slate-400 mt-0.5">2026</div>
+              </div>
+            </div>
+            <div class="movie-card" data-id="1003596" data-provider="tmdb">
+              <div class="poster-wrap aspect-[2/3] relative rounded-xl">
+                <div class="poster-inner rounded-xl overflow-hidden relative w-full h-full">
+                  <img class="poster-img" src="https://image.tmdb.org/t/p/w500/1zqWkLwC1zLBBBtIWzmkmWeMWnT.jpg" alt="Avengers: Doomsday" loading="lazy" />
+                  <span class="card-tag-badge bg-rose-600 text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full">Trending</span>
+                  <div class="card-play-overlay"><div class="card-play-icon"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div></div>
+                </div>
+                <div class="card-rating-badge -bottom-4 left-2.5 w-9 h-9 rounded-full bg-white text-slate-900 font-bold text-xs shadow-md border-emerald-500" style="border: 2.5px solid #10b981;" title="TMDB Rating: 8.5">8.5</div>
+              </div>
+              <div class="card-info pt-5">
+                <div class="card-title text-sm font-semibold text-white truncate" title="Avengers: Doomsday">Avengers: Doomsday</div>
+                <div class="card-year text-xs text-slate-400 mt-0.5">2026</div>
+              </div>
+            </div>
+            <div class="movie-card" data-id="84773" data-provider="tmdb">
+              <div class="poster-wrap aspect-[2/3] relative rounded-xl">
+                <div class="poster-inner rounded-xl overflow-hidden relative w-full h-full">
+                  <img class="poster-img" src="https://image.tmdb.org/t/p/w500/bMXWXKM9ydUmMTNvDnYo9QtCBRt.jpg" alt="The Lord of the Rings: The Rings of Power" loading="lazy" />
+                  <span class="card-tag-badge bg-rose-600 text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full">S2</span>
+                  <div class="card-play-overlay"><div class="card-play-icon"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div></div>
+                </div>
+                <div class="card-rating-badge -bottom-4 left-2.5 w-9 h-9 rounded-full bg-white text-slate-900 font-bold text-xs shadow-md border-emerald-500" style="border: 2.5px solid #10b981;" title="TMDB Rating: 7.2">7.2</div>
+              </div>
+              <div class="card-info pt-5">
+                <div class="card-title text-sm font-semibold text-white truncate" title="The Lord of the Rings: The Rings of Power">The Rings of Power</div>
+                <div class="card-year text-xs text-slate-400 mt-0.5">2024</div>
+              </div>
+            </div>
+            <div class="movie-card" data-id="1381071" data-provider="tmdb">
+              <div class="poster-wrap aspect-[2/3] relative rounded-xl">
+                <div class="poster-inner rounded-xl overflow-hidden relative w-full h-full">
+                  <img class="poster-img" src="https://image.tmdb.org/t/p/w500/hSmIJluOJmTWvJs4d7kHRxjc8s8.jpg" alt="Godzilla Minus Zero" loading="lazy" />
+                  <span class="card-tag-badge bg-rose-600 text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full">Trending</span>
+                  <div class="card-play-overlay"><div class="card-play-icon"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div></div>
+                </div>
+                <div class="card-rating-badge -bottom-4 left-2.5 w-9 h-9 rounded-full bg-white text-slate-900 font-bold text-xs shadow-md border-emerald-500" style="border: 2.5px solid #10b981;" title="TMDB Rating: 7.7">7.7</div>
+              </div>
+              <div class="card-info pt-5">
+                <div class="card-title text-sm font-semibold text-white truncate" title="Godzilla Minus Zero">Godzilla Minus Zero</div>
+                <div class="card-year text-xs text-slate-400 mt-0.5">2026</div>
+              </div>
+            </div>
+            <div class="movie-card" data-id="259909" data-provider="tmdb">
+              <div class="poster-wrap aspect-[2/3] relative rounded-xl">
+                <div class="poster-inner rounded-xl overflow-hidden relative w-full h-full">
+                  <img class="poster-img" src="https://image.tmdb.org/t/p/w500/o2Oyi3boT100bY5kCP4MBiTeetO.jpg" alt="Dexter: Resurrection" loading="lazy" />
+                  <span class="card-tag-badge bg-rose-600 text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full">S1</span>
+                  <div class="card-play-overlay"><div class="card-play-icon"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div></div>
+                </div>
+                <div class="card-rating-badge -bottom-4 left-2.5 w-9 h-9 rounded-full bg-white text-slate-900 font-bold text-xs shadow-md border-emerald-500" style="border: 2.5px solid #10b981;" title="TMDB Rating: 8.5">8.5</div>
+              </div>
+              <div class="card-info pt-5">
+                <div class="card-title text-sm font-semibold text-white truncate" title="Dexter: Resurrection">Dexter: Resurrection</div>
+                <div class="card-year text-xs text-slate-400 mt-0.5">2025</div>
+              </div>
+            </div>
+          </div>
           <button class="rail-nav-btn rail-next" data-target="trendingCarousel">›</button>
         </div>
       </section>
@@ -598,6 +703,16 @@
           <button class="rail-nav-btn rail-next" data-target="englishCarousel">›</button>
         </div>
       </section>
+
+      <!-- Mid-Rail In-Between Content Ad Banner (Google AdSense ca-pub-4512671475286537) -->
+      <div id="userMidRailAdBanner" class="user-ad-banner" aria-label="Sponsored Advertisement">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-4512671475286537"
+             data-ad-slot="auto"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+      </div>
 
       <!-- Latest Hindi Rail -->
       <section class="rail-section" id="hindiRailSection">
@@ -1126,8 +1241,15 @@
             </div>
           </div>
 
-          <!-- User Owner-Monetized Details Ad Banner (Rendered ONLY when site owner configures ad network) -->
-          <div id="userDetailsAdBanner" class="user-ad-banner hidden" aria-label="Sponsored Content"></div>
+          <!-- User Owner-Monetized Details Ad Banner (Google AdSense ca-pub-4512671475286537) -->
+          <div id="userDetailsAdBanner" class="user-ad-banner" aria-label="Sponsored Advertisement">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-4512671475286537"
+                 data-ad-slot="auto"
+                 data-ad-format="rectangle"
+                 data-full-width-responsive="true"></ins>
+          </div>
         </div>
 
         <!-- Audio Dubs / Languages selector -->
@@ -1761,8 +1883,15 @@
       <!-- Toast Notification Container -->
       <div class="toast-container" id="toastContainer"></div>
 
-      <!-- Google AdSense Footer Leaderboard Banner -->
-      <div id="userFooterAdBanner" class="user-ad-banner hidden" aria-label="Sponsored Content"></div>
+      <!-- Google AdSense Footer Leaderboard Banner (ca-pub-4512671475286537) -->
+      <div id="userFooterAdBanner" class="user-ad-banner" aria-label="Sponsored Advertisement">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-4512671475286537"
+             data-ad-slot="auto"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+      </div>
 
       <!-- Footer -->
       <footer class="footer">
@@ -2280,12 +2409,12 @@
   </div>
 </div>
 
-<script src="/app.js?v=20261120_v15"></script>
+<script src="/app.js?v=20261120_v16"></script>
 <!-- Progressive Web App (PWA) Service Worker Registration -->
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js?v=20261120_v15')
+      navigator.serviceWorker.register('/sw.js?v=20261120_v16')
         .then((reg) => console.log('MovieBox PWA ServiceWorker active:', reg.scope))
         .catch((err) => console.warn('PWA registration error:', err));
     });

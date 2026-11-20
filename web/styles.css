@@ -238,6 +238,7 @@ body {
   display: none;
   flex-direction: column;
   gap: 4px;
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
 }
 
@@ -372,6 +373,7 @@ body {
   max-height: 380px;
   overflow-y: auto;
   z-index: 1001;
+  -webkit-backdrop-filter: blur(24px);
   backdrop-filter: blur(24px);
 }
 
@@ -598,6 +600,7 @@ body {
 .btn-secondary {
   background: rgba(255, 255, 255, 0.14);
   color: #fff;
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
 }
 .btn-secondary:hover {
@@ -657,6 +660,7 @@ body {
   border-radius: var(--radius-pill);
   padding: 4px 6px 4px 18px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
 }
 
@@ -722,6 +726,7 @@ body {
   justify-content: center;
   cursor: pointer;
   transition: all var(--transition-fast);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
@@ -1369,6 +1374,7 @@ body {
   font-size: 13px;
   margin: 6px 0;
   width: 100%;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
@@ -1887,18 +1893,35 @@ body {
   box-shadow: 0 4px 14px var(--red-glow);
 }
 
-/* Owner-Monetized Ad Banners (Google AdSense) */
+/* Owner-Monetized Ad Banners (Google AdSense ca-pub-4512671475286537) */
 .user-ad-banner {
   width: 100%;
   max-width: 970px;
-  margin: 10px auto;
+  min-height: 90px;
+  margin: 18px auto;
+  padding: 6px;
   text-align: center;
   overflow: hidden;
   position: relative;
+  background: rgba(10, 18, 36, 0.45);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: opacity 0.3s ease;
+  box-sizing: border-box;
 }
 
-.user-ad-banner:empty,
+@media (max-width: 768px) {
+  .user-ad-banner {
+    min-height: 55px;
+    margin: 12px auto;
+    padding: 4px;
+    border-radius: 8px;
+  }
+}
+
 .user-ad-banner.hidden {
   display: none !important;
   height: 0 !important;
@@ -1909,8 +1932,16 @@ body {
 }
 
 .user-ad-banner ins.adsbygoogle {
-  display: block;
+  display: block !important;
+  width: 100% !important;
+  min-height: 90px !important;
   margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .user-ad-banner ins.adsbygoogle {
+    min-height: 50px !important;
+  }
 }
 
 /* ==========================================================================
@@ -2011,6 +2042,7 @@ body {
   background: rgba(10, 14, 26, 0.8);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   flex-wrap: wrap;
   gap: 14px;
@@ -3908,6 +3940,7 @@ body.player-in-fullscreen {
   padding: 6px 12px;
   border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   transition: background var(--transition-fast);
 }
@@ -4249,6 +4282,7 @@ body.player-in-fullscreen {
   gap: 4px;
   min-width: 140px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   z-index: 50;
 }
@@ -4566,6 +4600,7 @@ kbd {
   font-size: 13px;
   font-weight: 500;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+  -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   animation: toastIn 0.3s ease forwards;
 }
@@ -5769,6 +5804,7 @@ kbd {
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.75);
+  -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
 }
 
@@ -7486,6 +7522,7 @@ kbd {
     font-weight: 700 !important;
     border-radius: 8px !important;
     background: rgba(8, 14, 26, 0.88) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
     backdrop-filter: blur(8px) !important;
     border: 1px solid rgba(255, 255, 255, 0.18) !important;
     color: #fff !important;

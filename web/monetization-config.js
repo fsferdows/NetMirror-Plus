@@ -1,6 +1,6 @@
 /**
  * NetMirror Plus – Monetization & Revenue Configuration
- * Customize your affiliate links, donation URLs, crypto wallet addresses, VIP passcodes, and ad banners here!
+ * Google AdSense Publisher: ca-pub-4512671475286537
  *
  * POLICY:
  * Ads are shown ONLY when you configure and enable them here (when you get money).
@@ -10,22 +10,18 @@
  */
 window.NETMIRROR_MONETIZATION = {
   // 1. HIGH-PAYING STREAMING VPN AFFILIATE (NordVPN, Surfshark, CyberGhost, etc.)
-  // Kept off by default to guarantee 100% clean, ad-free mobile & desktop experience.
   showVpnBanners: false,
-  // Replace with your real affiliate link from CJ Affiliate, Impact, or NordVPN/Surfshark directly:
   affiliateVpnUrl: "https://nordvpn.com/special-deal/?coupon=save70",
   affiliateVpnBadge: "70% OFF + 3 MO FREE",
   affiliateVpnTitle: "Buffer-Free 4K Streaming VPN",
   affiliateVpnDesc: "Bypass ISP throttling, stream 4K movies with zero lag & unlock worldwide geo-restricted catalogs.",
 
   // 2. DONATION & SUPPORTER PLATFORMS (Ko-fi, Buy Me a Coffee, PayPal, Patreon)
-  // Replace these with your own profile usernames/links:
   buyMeACoffeeUrl: "https://buymeacoffee.com",
   kofiUrl: "https://ko-fi.com",
   paypalUrl: "https://paypal.me",
 
   // 3. CRYPTOCURRENCY WALLET ADDRESSES FOR TIPS & VIP ACCESS
-  // Users can copy your address with 1 click in the VIP modal:
   cryptoWallets: {
     usdt: "TXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx (USDT TRC-20)",
     btc: "bc1qxxxxxxxxxxxxxxxxxxxxxxxxxxxxx (Bitcoin)",
@@ -33,11 +29,10 @@ window.NETMIRROR_MONETIZATION = {
     sol: "So11111111111111111111111111111111111111112 (Solana)"
   },
 
-  // 4. VIP PASSCODES (Users can enter these to unlock VIP status)
-  // You can sell these passcodes on Gumroad, Discord, Telegram, or Ko-fi!
+  // 4. VIP PASSCODES (Users can enter these to unlock VIP ad-free status)
   vipPasscodes: ["VIP2026", "NETMIRRORVIP", "PREMIUM4K", "GOLDENPASS", "FSFERDOWS"],
 
-  // 5. BANNER ADVERTISING NETWORKS – GOOGLE ADSENSE ONLY
+  // 5. BANNER ADVERTISING NETWORKS – GOOGLE ADSENSE (ca-pub-4512671475286537)
   // Google AdSense is the only permitted monetization partner.
   // All unauthorized popups, popunders, and rogue redirects from video mirrors are blocked by AdShield.
   googleAdSense: {
@@ -46,17 +41,18 @@ window.NETMIRROR_MONETIZATION = {
   },
   adBanners: {
     enabled: true,
-    // Google AdSense Responsive Display Unit for Header
-    headerBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="auto" data-full-width-responsive="true"></ins>',
+    // Google AdSense Responsive Display Unit for Header (Top of Homepage)
+    headerBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>',
+    // Google AdSense Responsive Display Unit for Mid-Rail (In-Between Category Rails)
+    midRailBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>',
     // Google AdSense Responsive Display Unit for Movie/Show Details Modal
-    detailsBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="rectangle" data-full-width-responsive="true"></ins>',
-    // Google AdSense Footer Unit
-    footerBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="auto" data-full-width-responsive="true"></ins>'
+    detailsBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-slot="auto" data-ad-format="rectangle" data-full-width-responsive="true"></ins>',
+    // Google AdSense Responsive Unit for Cinema Watch Cockpit View
+    watchBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>',
+    // Google AdSense Footer Unit (Bottom of Homepage)
+    footerBannerHtml: '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>'
   },
 
   // 6. THE MOVIE DATABASE (TMDB) API KEY / BEARER TOKEN
-  // Enter your TMDB API Key v3 or Read Access Bearer Token here, or provide via VITE_TMDB_API_KEY / NEXT_PUBLIC_TMDB_API_KEY
   tmdbApiKey: (typeof window !== "undefined" && (window.VITE_TMDB_API_KEY || window.NEXT_PUBLIC_TMDB_API_KEY)) || ""
 };
-
-

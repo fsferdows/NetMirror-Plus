@@ -6,6 +6,19 @@
 (function () {
   'use strict';
 
+  // Safe Storage Helper to prevent fatal syntax crashes on malformed/corrupted localStorage
+  function safeGetStorageJson(key, defaultVal) {
+    try {
+      if (typeof window === 'undefined' || !window.localStorage) return defaultVal;
+      const raw = localStorage.getItem(key);
+      if (!raw || raw === 'undefined' || raw === 'null') return defaultVal;
+      const parsed = JSON.parse(raw);
+      return Array.isArray(defaultVal) ? (Array.isArray(parsed) ? parsed : defaultVal) : (parsed || defaultVal);
+    } catch (_) {
+      return defaultVal;
+    }
+  }
+
   // State Management
   const state = {
     heroItem: null,
@@ -51,13 +64,13 @@
     sportsActiveStatus: 'all',
     sportsSearchQuery: '',
     isSportsLoading: false,
-    history: JSON.parse(localStorage.getItem('netmirror_history') || '[]'),
-    favorites: JSON.parse(localStorage.getItem('netmirror_favorites') || '[]'),
-    audioProfile: localStorage.getItem('moviebox_audio_profile') || 'cinema',
-    audioBoost: parseFloat(localStorage.getItem('moviebox_audio_boost') || '1.5'),
-    audioLimiter: localStorage.getItem('moviebox_audio_limiter') !== 'false',
-    audioVoiceEq: localStorage.getItem('moviebox_audio_voice_eq') !== 'false',
-    isVip: localStorage.getItem('netmirror_is_vip') === 'true',
+    history: safeGetStorageJson('netmirror_history', []),
+    favorites: safeGetStorageJson('netmirror_favorites', []),
+    audioProfile: (typeof localStorage !== 'undefined' && localStorage.getItem('moviebox_audio_profile')) || 'cinema',
+    audioBoost: parseFloat((typeof localStorage !== 'undefined' && localStorage.getItem('moviebox_audio_boost')) || '1.5'),
+    audioLimiter: (typeof localStorage !== 'undefined' && localStorage.getItem('moviebox_audio_limiter')) !== 'false',
+    audioVoiceEq: (typeof localStorage !== 'undefined' && localStorage.getItem('moviebox_audio_voice_eq')) !== 'false',
+    isVip: (typeof localStorage !== 'undefined' && localStorage.getItem('netmirror_is_vip')) === 'true',
     isPlaying: false,
     controlsTimeout: null,
     nextEpCountdownInterval: null,
@@ -73,7 +86,9 @@
     languagesDropdownBtn: document.getElementById('languagesDropdownBtn'),
     languagesDropdownMenu: document.getElementById('languagesDropdownMenu'),
     userHeaderAdBanner: document.getElementById('userHeaderAdBanner'),
+    userMidRailAdBanner: document.getElementById('userMidRailAdBanner'),
     userDetailsAdBanner: document.getElementById('userDetailsAdBanner'),
+    userPlayerEpisodesAdBanner: document.getElementById('userPlayerEpisodesAdBanner'),
     userFooterAdBanner: document.getElementById('userFooterAdBanner'),
     searchInput: document.getElementById('searchInput'),
     searchWrapper: document.getElementById('searchWrapper'),
@@ -534,10 +549,12 @@
     if (el.btcAddrInput) el.btcAddrInput.value = wallets.btc || 'bc1... (Configure in monetization-config.js)';
     if (el.solAddrInput) el.solAddrInput.value = wallets.sol || 'So1... (Configure in monetization-config.js)';
 
-    // 4. Render Owner Monetized Banner Ads (Google AdSense)
+    // 4. Render Owner Monetized Banner Ads (Google AdSense ca-pub-4512671475286537)
     if (config.adBanners && config.adBanners.enabled && !state.isVip) {
       loadAdSenseUnit(el.userHeaderAdBanner, config.adBanners.headerBannerHtml);
+      loadAdSenseUnit(el.userMidRailAdBanner, config.adBanners.midRailBannerHtml);
       loadAdSenseUnit(el.userFooterAdBanner, config.adBanners.footerBannerHtml);
+      loadAdSenseUnit(el.userPlayerEpisodesAdBanner, config.adBanners.watchBannerHtml);
     } else {
       hideAllAdUnits();
     }
@@ -563,28 +580,46 @@
       container.style.display = 'none';
       return;
     }
-    const html = customHtml || config.adBanners.headerBannerHtml || '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-format="auto" data-full-width-responsive="true"></ins>';
+    const html = customHtml || config.adBanners.headerBannerHtml || '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4512671475286537" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>';
 
-    const existingIns = container.querySelector('ins.adsbygoogle');
-    if (!existingIns) {
+    let ins = container.querySelector('ins.adsbygoogle');
+    if (!ins) {
       container.innerHTML = html;
+      ins = container.querySelector('ins.adsbygoogle');
     }
     container.classList.remove('hidden');
+    container.style.display = 'flex';
 
-    try {
-      const ins = container.querySelector('ins.adsbygoogle');
-      if (ins && !ins.getAttribute('data-adsbygoogle-status')) {
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
+    const triggerPush = () => {
+      try {
+        if (ins && !ins.getAttribute('data-adsbygoogle-status')) {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        }
+      } catch (e) {
+        console.debug('[AdSense] Push notice:', e);
       }
-    } catch (e) {
-      console.debug('[AdSense] Push notice:', e);
-    }
+    };
+
+    triggerPush();
+    setTimeout(triggerPush, 400);
+    setTimeout(triggerPush, 1200);
+  }
+
+  function triggerAllAdSenseUnits() {
+    if (state.isVip) return;
+    document.querySelectorAll('.user-ad-banner ins.adsbygoogle:not([data-adsbygoogle-status])').forEach(ins => {
+      try {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      } catch (_) {}
+    });
   }
 
   function hideAllAdUnits() {
     [
       el.userHeaderAdBanner,
+      el.userMidRailAdBanner,
       el.userDetailsAdBanner,
+      el.userPlayerEpisodesAdBanner,
       el.userFooterAdBanner,
     ].forEach((b) => {
       if (b) {
@@ -4886,15 +4921,23 @@ const DEFAULT_SHOWCASE_CATALOG = {
 
   function applyDefaultShowcase() {
     // 1. Multi-slide Hero setup with verified high-definition sliding movies
-    state.heroSlides = HERO_MOVIE_SLIDES;
+    state.heroSlides = HERO_MOVIE_SLIDES || [];
     state.heroCurrentIndex = 0;
-    setHero(state.heroSlides[0]);
+    if (state.heroSlides && state.heroSlides.length > 0) {
+      setHero(state.heroSlides[0]);
+    }
     renderHeroIndicators();
     startHeroAutoRotate();
 
     // 2. Populate EVERY category section immediately so all sections have their movies listed on 0ms first paint
     TMDB_CATEGORIES.forEach(cat => {
-      const carousel = cat.carouselEl();
+      let carousel = null;
+      try {
+        carousel = cat.carouselEl ? cat.carouselEl() : null;
+      } catch (_) {}
+      if (!carousel) {
+        carousel = document.getElementById(cat.key + 'Carousel') || (cat.key === 'toprated' && document.getElementById('topRatedCarousel'));
+      }
       if (carousel) {
         const items = getFallbackCatalogForCategory(cat.key);
         if (items && items.length > 0) {
@@ -9672,12 +9715,27 @@ const DEFAULT_SHOWCASE_CATALOG = {
     }
   }
 
-  // Run on DOM ready
+  // 1. Instant 0ms hydration if DOM elements already parsed
+  try {
+    if (document.getElementById('trendingCarousel')) {
+      applyDefaultShowcase();
+    }
+  } catch (_) {}
+
+  // 2. Standard DOM ready execution
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }
+
+  // 3. Window load safety net and AdSense push trigger
+  window.addEventListener('load', () => {
+    try {
+      if (!state.heroItem) applyDefaultShowcase();
+      triggerAllAdSenseUnits();
+    } catch (_) {}
+  });
 
 })();
 

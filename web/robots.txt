@@ -1,6 +1,7 @@
 # ==============================================================================
 # moviehub.stream (NetMirror Plus) – Robots.txt
-# Optimized for Google, Bing, and AI Search Engines (ChatGPT, Perplexity, Claude)
+# Universally Optimized for Google, Bing, and AI Search Engines
+# (Google Gemini, ChatGPT, Perplexity, Claude, Apple Intelligence, Meta AI)
 # ==============================================================================
 
 User-agent: *
@@ -16,35 +17,112 @@ Allow: /apple-touch-icon.png
 Allow: /og-image.png
 Allow: /llms.txt
 Allow: /llms-full.txt
+Allow: /sitemap.xml
+Allow: /privacy.html
+Allow: /terms.html
+Allow: /dmca.html
 
-# Disallow internal API routes and video stream proxies
+# Internal stream proxies protection (crawl-budget optimization)
 Disallow: /api/proxy
 Disallow: /api/stream
 Disallow: /api/m3u8
 Disallow: /api/ts
 
-# AI Search Crawlers (ChatGPT, Perplexity, Claude, Google Gemini, Apple Intelligence)
+# ------------------------------------------------------------------------------
+# Google Search & Google Gemini AI Crawlers
+# ------------------------------------------------------------------------------
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Googlebot-Video
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Mediapartners-Google
+Allow: /
+
+User-agent: AdsBot-Google
+Allow: /
+
+# ------------------------------------------------------------------------------
+# OpenAI (ChatGPT, SearchGPT, GPT-4o, OAI-SearchBot)
+# ------------------------------------------------------------------------------
 User-agent: GPTBot
 Allow: /
 
 User-agent: ChatGPT-User
 Allow: /
 
+User-agent: OAI-SearchBot
+Allow: /
+
+# ------------------------------------------------------------------------------
+# Perplexity AI (PerplexityBot)
+# ------------------------------------------------------------------------------
 User-agent: PerplexityBot
 Allow: /
 
+# ------------------------------------------------------------------------------
+# Anthropic (Claude, ClaudeBot, Claude-Web)
+# ------------------------------------------------------------------------------
 User-agent: ClaudeBot
 Allow: /
 
 User-agent: anthropic-ai
 Allow: /
 
-User-agent: Google-Extended
+User-agent: Claude-Web
+Allow: /
+
+# ------------------------------------------------------------------------------
+# Microsoft Bing & Copilot
+# ------------------------------------------------------------------------------
+User-agent: bingbot
+Allow: /
+
+User-agent: BingPreview
+Allow: /
+
+User-agent: msnbot
+Allow: /
+
+# ------------------------------------------------------------------------------
+# Apple Intelligence (Applebot & Applebot-Extended)
+# ------------------------------------------------------------------------------
+User-agent: Applebot
 Allow: /
 
 User-agent: Applebot-Extended
 Allow: /
 
-# Sitemap Index
+# ------------------------------------------------------------------------------
+# Meta AI & Common Crawl Foundation Training Bots
+# ------------------------------------------------------------------------------
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: Meta-ExternalFetcher
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+# ------------------------------------------------------------------------------
+# Sitemaps & Knowledge Graph Ingestion
+# ------------------------------------------------------------------------------
 Sitemap: https://moviehub.stream/sitemap.xml
 Sitemap: https://www.moviehub.stream/sitemap.xml
